@@ -1,0 +1,22 @@
+{
+  "kind": "collectionType",
+  "collectionName": "calls",
+  "info": {
+    "singularName": "call",
+    "pluralName": "calls",
+    "displayName": "Call",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "callingNumber": {
+      "type": "string"
+    },
+    "callingTime": {
+      "type": "datetime"
+    }
+  }
+}
