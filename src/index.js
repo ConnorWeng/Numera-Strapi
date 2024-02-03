@@ -2,7 +2,6 @@
 
 const TaskQueue = require("./util/task-queue");
 const TickConsumer = require("./util/tick-consumer");
-const DeviceService = require("./api/device/services/device");
 const ProcessorPool = require("./util/processor-pool");
 
 module.exports = {

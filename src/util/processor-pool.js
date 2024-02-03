@@ -17,7 +17,9 @@ class ProcessorPool {
   }
 
   static async createNewProcessorPoolFromDB(strapi) {
-    const devices = await strapi.db.query("api::device.device").findMany();
+    const devices = await strapi.db.query("api::device.device").findMany({
+      pagination: { pageSize: 1000 },
+    });
     const processors = devices.map((device) => {
       if (device.operator === "TDS") {
         return new TDSProcessor(device);
