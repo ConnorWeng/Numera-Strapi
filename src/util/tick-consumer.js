@@ -7,7 +7,7 @@ class TickConsumer {
         }
 
         this.taskQueue = null;
-        this.processorSlots = [];
+        this.processorPool = null;
 
         TickConsumer.instance = this;
     }
@@ -16,22 +16,23 @@ class TickConsumer {
         this.taskQueue = taskQueue;
     }
 
-    addProcessor(processor) {
-        this.processorSlots.push(processor);
+    setProcessorPool(processorPool) {
+        this.processorPool = processorPool;
+    }
+
+    getProcessorPool() {
+        return this.processorPool;
     }
 
     consume() {
         const testTask = this.taskQueue.getTaskWithoutShift();
         if (testTask) {
-            for (let i = 0; i < this.processorSlots.length; i++) {
-                const processor = this.processorSlots[i];
-                if (processor.isAvailable() && processor.isMatch(testTask)) {
-                    const task = this.taskQueue.getTask();
-                    setTimeout(() => {
-                        processor.process(task);
-                    }, 1000);
-                    break;
-                }
+            const processor = this.processorPool.findAvaiableProcessor(testTask);
+            if (processor) {
+                const task = this.taskQueue.getTask();
+                setTimeout(() => {
+                    processor.process(task);
+                }, 1000);
             }
         }
     }
@@ -39,6 +40,9 @@ class TickConsumer {
     start() {
         if (!this.taskQueue) {
             throw new Error('Task queue is not set');
+        }
+        if (!this.processorPool) {
+            throw new Error('Processor pool is not set');
         }
         setInterval(() => {
             this.consume();

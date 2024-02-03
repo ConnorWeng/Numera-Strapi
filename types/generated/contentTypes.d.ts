@@ -811,12 +811,15 @@ export interface ApiDeviceDevice extends Schema.CollectionType {
     singularName: 'device';
     pluralName: 'devices';
     displayName: 'Device';
+    description: '';
   };
   options: {
     draftAndPublish: true;
   };
   attributes: {
     deviceUID: Attribute.UID;
+    type: Attribute.String;
+    operator: Attribute.String;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;

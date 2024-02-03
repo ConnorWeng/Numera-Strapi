@@ -1,6 +1,7 @@
 class Processor {
-    constructor() {
+    constructor(device) {
         this.available = true;
+        this.device = device;
     }
 
     isAvailable() {
