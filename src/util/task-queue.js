@@ -1,33 +1,33 @@
 class TaskQueue {
-    static instance;
+  static instance;
 
-    constructor() {
-        if (TaskQueue.instance) {
-            return TaskQueue.instance;
-        }
-
-        this.queue = [];
-        TaskQueue.instance = this;
+  constructor() {
+    if (TaskQueue.instance) {
+      return TaskQueue.instance;
     }
 
-    addTask(task) {
-        this.queue.push(task);
-    }
+    this.queue = [];
+    TaskQueue.instance = this;
+  }
 
-    getTask() {
-        return this.queue.shift();
-    }
+  addTask(task) {
+    this.queue.push(task);
+  }
 
-    getTaskWithoutShift() {
-        return this.queue.length > 0 ? this.queue[0] : null;
-    }
+  getTask() {
+    return this.queue.shift();
+  }
 
-    static getInstance() {
-        if (!TaskQueue.instance) {
-            TaskQueue.instance = new TaskQueue();
-        }
-        return TaskQueue.instance;
+  getTaskWithoutShift() {
+    return this.queue.length > 0 ? this.queue[0] : null;
+  }
+
+  static getInstance() {
+    if (!TaskQueue.instance) {
+      TaskQueue.instance = new TaskQueue();
     }
+    return TaskQueue.instance;
+  }
 }
 
 module.exports = TaskQueue;

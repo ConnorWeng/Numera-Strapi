@@ -1,8 +1,7 @@
-const Processor = require('./processor');
+const Processor = require("./processor");
 
 class TDSProcessor extends Processor {
-    process(task) {
-    }
+  process(task) {}
 }
 
 module.exports = TDSProcessor;

@@ -1,9 +1,9 @@
-'use strict';
+"use strict";
 
-const TaskQueue = require('./util/task-queue');
-const TickConsumer = require('./util/tick-consumer');
-const DeviceService = require('./api/device/services/device');
-const ProcessorPool = require('./util/processor-pool');
+const TaskQueue = require("./util/task-queue");
+const TickConsumer = require("./util/tick-consumer");
+const DeviceService = require("./api/device/services/device");
+const ProcessorPool = require("./util/processor-pool");
 
 module.exports = {
   /**
@@ -27,7 +27,8 @@ module.exports = {
     const globalTaskQueue = TaskQueue.getInstance();
     globalTickConsumer.setTaskQueue(globalTaskQueue);
 
-    const processorPool = await ProcessorPool.createNewProcessorPoolFromDB(strapi);
+    const processorPool =
+      await ProcessorPool.createNewProcessorPoolFromDB(strapi);
     globalTickConsumer.setProcessorPool(processorPool);
 
     globalTickConsumer.start();

@@ -1,20 +1,20 @@
 class Processor {
-    constructor(device) {
-        this.available = true;
-        this.device = device;
-    }
+  constructor(device) {
+    this.available = true;
+    this.device = device;
+  }
 
-    isAvailable() {
-        return this.available;
-    }
+  isAvailable() {
+    return this.available;
+  }
 
-    isMatch(task) {
-        return true;
-    }
+  isMatch(task) {
+    return true;
+  }
 
-    process(task) {
-        this.available = false;
-    }
+  process(task) {
+    this.available = false;
+  }
 }
 
 module.exports = Processor;

@@ -1,12 +1,12 @@
-'use strict';
+"use strict";
 
 /**
  * call controller
  */
 
-const { createCoreController } = require('@strapi/strapi').factories;
+const { createCoreController } = require("@strapi/strapi").factories;
 
-module.exports = createCoreController('api::call.call', ({ strapi }) => ({
+module.exports = createCoreController("api::call.call", ({ strapi }) => ({
   async create(ctx) {
     await this.validateQuery(ctx);
     const sanitizedQuery = await this.sanitizeQuery(ctx);
@@ -15,9 +15,8 @@ module.exports = createCoreController('api::call.call', ({ strapi }) => ({
 
     const sanitizedInputData = await this.sanitizeInput(data, ctx);
     const entity = {
-      result: 'success'
+      result: "success",
     };
     return entity;
   },
-})
-);
+}));

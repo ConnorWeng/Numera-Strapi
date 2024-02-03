@@ -1,8 +1,7 @@
-const Processor = require('./processor');
+const Processor = require("./processor");
 
 class GSMProcessor extends Processor {
-    process(task) {
-    }
+  process(task) {}
 }
 
 module.exports = GSMProcessor;

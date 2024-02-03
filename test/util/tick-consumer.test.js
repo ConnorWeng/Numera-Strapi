@@ -1,13 +1,13 @@
-const TickConsumer = require('../../src/util/tick-consumer');
+const TickConsumer = require("../../src/util/tick-consumer");
 
-describe('TickConsumer', () => {
+describe("TickConsumer", () => {
   let tickConsumer;
   let taskQueue;
 
   beforeEach(() => {
     taskQueue = {
       getTaskWithoutShift: jest.fn(),
-      getTask: jest.fn()
+      getTask: jest.fn(),
     };
     tickConsumer = TickConsumer.getInstance();
     tickConsumer.setTaskQueue(taskQueue);
@@ -17,12 +17,16 @@ describe('TickConsumer', () => {
     jest.clearAllMocks();
   });
 
-  test('should consume a task if available processor is found', () => {
+  test("should consume a task if available processor is found", () => {
     jest.useFakeTimers();
     const testTask = { id: 1 };
-    const processor = { isAvailable: jest.fn(() => true), isMatch: jest.fn(() => true), process: jest.fn() };
+    const processor = {
+      isAvailable: jest.fn(() => true),
+      isMatch: jest.fn(() => true),
+      process: jest.fn(),
+    };
     const processorPool = {
-      findAvaiableProcessor: jest.fn(() => processor)
+      findAvaiableProcessor: jest.fn(() => processor),
     };
     taskQueue.getTaskWithoutShift.mockReturnValue(testTask);
     taskQueue.getTask.mockReturnValue(testTask);
@@ -32,11 +36,15 @@ describe('TickConsumer', () => {
     expect(processor.process).toHaveBeenCalledWith(testTask);
   });
 
-  test('should not consume a task if no available processor is found', () => {
+  test("should not consume a task if no available processor is found", () => {
     const testTask = { id: 1 };
-    const processor = { isAvailable: jest.fn(() => false), isMatch: jest.fn(() => true), process: jest.fn() };
+    const processor = {
+      isAvailable: jest.fn(() => false),
+      isMatch: jest.fn(() => true),
+      process: jest.fn(),
+    };
     const processorPool = {
-      findAvaiableProcessor: jest.fn(() => processor)
+      findAvaiableProcessor: jest.fn(() => processor),
     };
     taskQueue.getTaskWithoutShift.mockReturnValue(testTask);
     tickConsumer.setProcessorPool(processorPool);
@@ -44,11 +52,15 @@ describe('TickConsumer', () => {
     expect(processor.process).not.toHaveBeenCalled();
   });
 
-  test('should not consume a task if no matching processor is found', () => {
+  test("should not consume a task if no matching processor is found", () => {
     const testTask = { id: 1 };
-    const processor = { isAvailable: jest.fn(() => true), isMatch: jest.fn(() => false), process: jest.fn() };
+    const processor = {
+      isAvailable: jest.fn(() => true),
+      isMatch: jest.fn(() => false),
+      process: jest.fn(),
+    };
     const processorPool = {
-      findAvaiableProcessor: jest.fn(() => processor)
+      findAvaiableProcessor: jest.fn(() => processor),
     };
     taskQueue.getTaskWithoutShift.mockReturnValue(testTask);
     tickConsumer.setProcessorPool(processorPool);
@@ -56,7 +68,7 @@ describe('TickConsumer', () => {
     expect(processor.process).not.toHaveBeenCalled();
   });
 
-  test('should start consuming tasks at regular intervals', () => {
+  test("should start consuming tasks at regular intervals", () => {
     jest.useFakeTimers();
     tickConsumer.consume = jest.fn();
     tickConsumer.start();
