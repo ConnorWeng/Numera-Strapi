@@ -11,6 +11,7 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
     await this.validateQuery(ctx);
     const sanitizedQuery = await this.sanitizeQuery(ctx);
 
+    // @ts-ignore
     const { data } = ctx.request.body || {};
 
     const sanitizedInputData = await this.sanitizeInput(data, ctx);
