@@ -20,6 +20,12 @@
     },
     "operator": {
       "type": "string"
+    },
+    "ipAddress": {
+      "type": "string"
+    },
+    "port": {
+      "type": "integer"
     }
   }
 }

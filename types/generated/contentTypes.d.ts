@@ -362,6 +362,87 @@ export interface AdminTransferTokenPermission extends Schema.CollectionType {
   };
 }
 
+export interface ApiCallCall extends Schema.CollectionType {
+  collectionName: "calls";
+  info: {
+    singularName: "call";
+    pluralName: "calls";
+    displayName: "Call";
+    description: "";
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    callingNumber: Attribute.String;
+    callingTime: Attribute.DateTime;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::call.call", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<"api::call.call", "oneToOne", "admin::user"> &
+      Attribute.Private;
+  };
+}
+
+export interface ApiDeviceDevice extends Schema.CollectionType {
+  collectionName: "devices";
+  info: {
+    singularName: "device";
+    pluralName: "devices";
+    displayName: "Device";
+    description: "";
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    uid: Attribute.UID;
+    type: Attribute.String;
+    operator: Attribute.String;
+    ipAddress: Attribute.String;
+    port: Attribute.Integer;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      "api::device.device",
+      "oneToOne",
+      "admin::user"
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      "api::device.device",
+      "oneToOne",
+      "admin::user"
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiImsiImsi extends Schema.CollectionType {
+  collectionName: "imsis";
+  info: {
+    singularName: "imsi";
+    pluralName: "imsis";
+    displayName: "IMSI";
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    IMSI: Attribute.String;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::imsi.imsi", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<"api::imsi.imsi", "oneToOne", "admin::user"> &
+      Attribute.Private;
+  };
+}
+
 export interface PluginUploadFile extends Schema.CollectionType {
   collectionName: "files";
   info: {
@@ -735,7 +816,6 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
   };
   options: {
     draftAndPublish: false;
-    timestamps: true;
   };
   attributes: {
     username: Attribute.String &
@@ -764,6 +844,8 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
       "manyToOne",
       "plugin::users-permissions.role"
     >;
+    membershipExpirationDate: Attribute.DateTime;
+    remainingAPICalls: Attribute.BigInteger;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
@@ -777,85 +859,6 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
       "oneToOne",
       "admin::user"
     > &
-      Attribute.Private;
-  };
-}
-
-export interface ApiCallCall extends Schema.CollectionType {
-  collectionName: "calls";
-  info: {
-    singularName: "call";
-    pluralName: "calls";
-    displayName: "Call";
-    description: "";
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    callingNumber: Attribute.String;
-    callingTime: Attribute.DateTime;
-    createdAt: Attribute.DateTime;
-    updatedAt: Attribute.DateTime;
-    publishedAt: Attribute.DateTime;
-    createdBy: Attribute.Relation<"api::call.call", "oneToOne", "admin::user"> &
-      Attribute.Private;
-    updatedBy: Attribute.Relation<"api::call.call", "oneToOne", "admin::user"> &
-      Attribute.Private;
-  };
-}
-
-export interface ApiDeviceDevice extends Schema.CollectionType {
-  collectionName: "devices";
-  info: {
-    singularName: "device";
-    pluralName: "devices";
-    displayName: "Device";
-    description: "";
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    uid: Attribute.UID;
-    type: Attribute.String;
-    operator: Attribute.String;
-    createdAt: Attribute.DateTime;
-    updatedAt: Attribute.DateTime;
-    publishedAt: Attribute.DateTime;
-    createdBy: Attribute.Relation<
-      "api::device.device",
-      "oneToOne",
-      "admin::user"
-    > &
-      Attribute.Private;
-    updatedBy: Attribute.Relation<
-      "api::device.device",
-      "oneToOne",
-      "admin::user"
-    > &
-      Attribute.Private;
-  };
-}
-
-export interface ApiImsiImsi extends Schema.CollectionType {
-  collectionName: "imsis";
-  info: {
-    singularName: "imsi";
-    pluralName: "imsis";
-    displayName: "IMSI";
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    IMSI: Attribute.String;
-    createdAt: Attribute.DateTime;
-    updatedAt: Attribute.DateTime;
-    publishedAt: Attribute.DateTime;
-    createdBy: Attribute.Relation<"api::imsi.imsi", "oneToOne", "admin::user"> &
-      Attribute.Private;
-    updatedBy: Attribute.Relation<"api::imsi.imsi", "oneToOne", "admin::user"> &
       Attribute.Private;
   };
 }
@@ -870,6 +873,9 @@ declare module "@strapi/types" {
       "admin::api-token-permission": AdminApiTokenPermission;
       "admin::transfer-token": AdminTransferToken;
       "admin::transfer-token-permission": AdminTransferTokenPermission;
+      "api::call.call": ApiCallCall;
+      "api::device.device": ApiDeviceDevice;
+      "api::imsi.imsi": ApiImsiImsi;
       "plugin::upload.file": PluginUploadFile;
       "plugin::upload.folder": PluginUploadFolder;
       "plugin::content-releases.release": PluginContentReleasesRelease;
@@ -878,9 +884,6 @@ declare module "@strapi/types" {
       "plugin::users-permissions.permission": PluginUsersPermissionsPermission;
       "plugin::users-permissions.role": PluginUsersPermissionsRole;
       "plugin::users-permissions.user": PluginUsersPermissionsUser;
-      "api::call.call": ApiCallCall;
-      "api::device.device": ApiDeviceDevice;
-      "api::imsi.imsi": ApiImsiImsi;
     }
   }
 }
