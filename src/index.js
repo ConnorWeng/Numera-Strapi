@@ -3,6 +3,7 @@
 const TaskQueue = require("./util/task-queue");
 const TickConsumer = require("./util/tick-consumer");
 const ProcessorPool = require("./util/processor-pool");
+const UDPServer = require("./udp/server");
 
 module.exports = {
   /**
@@ -11,7 +12,9 @@ module.exports = {
    *
    * This gives you an opportunity to extend code.
    */
-  register(/*{ strapi }*/) {},
+  register(/*{ strapi }*/) {
+    new UDPServer(6000).start();
+  },
 
   /**
    * An asynchronous bootstrap function that runs before
