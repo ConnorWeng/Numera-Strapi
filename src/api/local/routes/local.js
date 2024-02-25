@@ -13,5 +13,10 @@ module.exports = {
       path: "/local/devices",
       handler: "local.devices",
     },
+    {
+      method: "POST",
+      path: "/local/call",
+      handler: "local.call",
+    },
   ],
 };
