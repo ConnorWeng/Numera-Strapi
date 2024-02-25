@@ -8,9 +8,21 @@ const MsgType = {
 };
 
 class UDPServer {
+  static instance;
+
   constructor(port) {
+    if (UDPServer.instance) {
+      return UDPServer.instance;
+    }
+
     this.port = port;
     this.server = dgram.createSocket("udp4");
+    this.memoryStore = {
+      heartbeat: null,
+      call: null,
+    };
+
+    UDPServer.instance = this;
   }
 
   start() {
@@ -37,33 +49,43 @@ class UDPServer {
   handleMessage(msg, rinfo) {
     const msgHeader = this.decodeHeader(msg);
     strapi.log.info(
-      `server got ${msg.byteLength} bytes from ${rinfo.address}:${rinfo.port}, message header:\n`
-      + `unCode: 0x${msgHeader.unCode.toString(16)}\n`
-      + `unBodyLen: ${msgHeader.unBodyLen}\n`
-      + `msgType: 0x${msgHeader.msgType.toString(16)}`
+      `server got ${msg.byteLength} bytes from ${rinfo.address}:${rinfo.port}, message header:\n` +
+        `unCode: 0x${msgHeader.unCode.toString(16)}\n` +
+        `unBodyLen: ${msgHeader.unBodyLen}\n` +
+        `msgType: 0x${msgHeader.msgType.toString(16)}`,
     );
     if (msgHeader.msgType === MsgType.MSG_SS_UE_INFO) {
       const heartbeat = this.decodeHeartbeat(msg.subarray(MsgHeaderLength));
       strapi.log.info(
-        `server got heartbeat:\n`
-        + `IMSI: ${heartbeat.IMSI}\n`
-        + `boardSN: ${heartbeat.boardSN}\n`
-        + `mobStates: ${heartbeat.mobStates}\n`
-        + `selArfcns: ${heartbeat.selArfcns}\n`
-        + `selLacs: ${heartbeat.selLacs}\n`
-        + `selIds: ${heartbeat.selIds}\n`
-        + `rlaCDbms: ${heartbeat.rlaCDbms}`
+        `server got heartbeat:\n` +
+          `IMSI: ${heartbeat.IMSI}\n` +
+          `boardSN: ${heartbeat.boardSN}\n` +
+          `mobStates: ${heartbeat.mobStates}\n` +
+          `selArfcns: ${heartbeat.selArfcns}\n` +
+          `selLacs: ${heartbeat.selLacs}\n` +
+          `selIds: ${heartbeat.selIds}\n` +
+          `rlaCDbms: ${heartbeat.rlaCDbms}`,
       );
-      // TODO: report to cloud server use device api
+      this.saveHeartbeat(heartbeat);
     } else if (msgHeader.msgType === MsgType.MSG_SS_UE_CALL) {
       const call = this.decodeCall(msg.subarray(MsgHeaderLength));
       strapi.log.info(
-        `server got call data:\n`
-        + `IMSI: ${call.IMSI}\n`
-        + `boardSN: ${call.boardSN}\n`
-        + `callData: ${call.callData}`
+        `server got call data:\n` +
+          `IMSI: ${call.IMSI}\n` +
+          `boardSN: ${call.boardSN}\n` +
+          `callData: ${call.callData}`,
       );
     }
+  }
+
+  saveHeartbeat(heartbeat) {
+    this.memoryStore.heartbeat = Object.assign(
+      {
+        lastUpdatedAt: new Date().getTime(),
+      },
+      heartbeat,
+    );
+    // TODO: maybe report to cloud server use device api later
   }
 
   decodeHeader(buffer) {
@@ -71,7 +93,7 @@ class UDPServer {
       .endianness("big")
       .uint8("unCode")
       .uint8("unBodyLen")
-      .uint8("msgType")
+      .uint8("msgType");
     return parser.parse(buffer);
   }
 
@@ -110,6 +132,17 @@ class UDPServer {
       .string("boardSN", { length: 20, encoding: "utf8" })
       .string("callData", { length: 20, encoding: "utf8" });
     return parser.parse(buffer);
+  }
+
+  getMemoryStore() {
+    return this.memoryStore;
+  }
+
+  static getInstance(port) {
+    if (!UDPServer.instance) {
+      UDPServer.instance = new UDPServer(port);
+    }
+    return UDPServer.instance;
   }
 }
 
