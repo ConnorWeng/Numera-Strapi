@@ -3,7 +3,18 @@ const MsgType = {
   MSG_SS_UE_CALL: 0xb1,
 };
 
-export function makeCallMessage(IMSI) {}
+function makeCallMessage(IMSI) {
+  let tempBuffer = Buffer.from(IMSI, "utf8");
+  let temHex = tempBuffer.toString("hex");
+  let hexString = `e539b1${temHex}0030313233343536373839303132333435363738003133363336363039393635003030303030303030ea`;
+  let buffer = Buffer.from(hexString, "hex");
+  return buffer;
+}
+
+module.exports = {
+  makeCallMessage,
+  MsgType,
+};
 
 /* decodeHeader(buffer) {
   const parser = new Parser()
