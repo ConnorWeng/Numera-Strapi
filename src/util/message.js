@@ -3,12 +3,39 @@ const MsgType = {
   MSG_SS_UE_CALL: 0xb1,
 };
 
+const UnCode = 0xe5;
+const EndByte = 0xea;
+
+function makeMessageHeader(msgType, bodyLength) {
+  const data = new DataView(new ArrayBuffer(3));
+  data.setUint8(0, UnCode);
+  data.setUint8(1, bodyLength);
+  data.setUint8(2, msgType);
+  return Buffer.from(data.buffer);
+}
+
 function makeCallMessage(IMSI) {
-  let tempBuffer = Buffer.from(IMSI, "utf8");
-  let temHex = tempBuffer.toString("hex");
-  let hexString = `e539b1${temHex}0030313233343536373839303132333435363738003133363336363039393635003030303030303030ea`;
-  let buffer = Buffer.from(hexString, "hex");
+  const bodyLength = 57;
+  const headerBuffer = makeMessageHeader(MsgType.MSG_SS_UE_CALL, bodyLength);
+  const bodyData = new DataView(new ArrayBuffer(bodyLength));
+  const boardSN = "0123456789012345678";
+  const mobileNo = "13636609965";
+  let lastOffset = setString(bodyData, 0, IMSI);
+  lastOffset = setString(bodyData, lastOffset + 2, boardSN);
+  lastOffset = setString(bodyData, lastOffset + 2, mobileNo);
+  lastOffset = setString(bodyData, lastOffset + 2, "00000000");
+  bodyData.setUint8(lastOffset + 1, EndByte);
+  const buffer = Buffer.concat([headerBuffer, Buffer.from(bodyData.buffer)]);
   return buffer;
+}
+
+function setString(dataview, offset, str) {
+  let lastOffset = offset
+  for (let i = 0; i < str.length; i++) {
+      lastOffset = offset + i;
+      dataview.setUint8(lastOffset, str.charCodeAt(i));
+  }
+  return lastOffset;
 }
 
 module.exports = {
