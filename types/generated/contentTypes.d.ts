@@ -893,6 +893,36 @@ export interface ApiLocalLocal extends Schema.SingleType {
   };
 }
 
+export interface ApiTranslateTranslate extends Schema.CollectionType {
+  collectionName: 'translates';
+  info: {
+    singularName: 'translate';
+    pluralName: 'translates';
+    displayName: 'Translate';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    IMSI: Attribute.String;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::translate.translate',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::translate.translate',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
 declare module '@strapi/types' {
   export module Shared {
     export interface ContentTypes {
@@ -915,6 +945,7 @@ declare module '@strapi/types' {
       'api::device.device': ApiDeviceDevice;
       'api::imsi.imsi': ApiImsiImsi;
       'api::local.local': ApiLocalLocal;
+      'api::translate.translate': ApiTranslateTranslate;
     }
   }
 }
