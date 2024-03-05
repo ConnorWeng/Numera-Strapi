@@ -30,10 +30,10 @@ function makeCallMessage(IMSI) {
 }
 
 function setString(dataview, offset, str) {
-  let lastOffset = offset
+  let lastOffset = offset;
   for (let i = 0; i < str.length; i++) {
-      lastOffset = offset + i;
-      dataview.setUint8(lastOffset, str.charCodeAt(i));
+    lastOffset = offset + i;
+    dataview.setUint8(lastOffset, str.charCodeAt(i));
   }
   return lastOffset;
 }

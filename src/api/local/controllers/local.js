@@ -30,8 +30,26 @@ module.exports = createCoreController("api::local.local", ({ strapi }) => ({
     // @ts-ignore
     const IMSI = data.IMSI;
     console.log(IMSI);
+
+    const currentTime = new Date().getTime();
     UDPClient.getInstance().send(makeCallMessage(IMSI), 9000, "localhost");
     const entity = {};
+
+    // FIXME:
+    const memstore = UDPServer.getInstance().getMemoryStore();
+    let times = 0;
+
+    while (true) {
+      if (memstore.call && memstore.call.callingTime > currentTime) {
+        entity.callingNumber = memstore.call.callingNumber;
+        break;
+      }
+      if (times++ > 10) {
+        break;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+
     const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
     return this.transformResponse(sanitizedEntity);
   },
