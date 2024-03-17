@@ -16,7 +16,7 @@ module.exports = {
   deploy: {
     production: {
       user: "root",
-      host: ["106.14.190.250"],
+      host: ["106.14.190.250", "10.168.1.102"],
       ref: "origin/main",
       repo: "git@github.com:ConnorWeng/Numera-Strapi.git",
       path: "/root/production/Numera-Strapi",

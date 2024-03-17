@@ -822,6 +822,7 @@ export interface ApiDeviceDevice extends Schema.CollectionType {
     operator: Attribute.String;
     ipAddress: Attribute.String;
     port: Attribute.Integer;
+    apiToken: Attribute.String;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;

@@ -23,6 +23,9 @@
     },
     "port": {
       "type": "integer"
+    },
+    "apiToken": {
+      "type": "string"
     }
   }
 }
