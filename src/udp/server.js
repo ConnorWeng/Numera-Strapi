@@ -46,7 +46,7 @@ class UDPServer {
     this.server.bind(this.port);
     strapi.log.info(`Start UDP server on port ${this.port}`);
 
-    setTimeout(this.reportThisDeviceToCloudServer.bind(this), 1000 * 5);
+    /* setTimeout(this.reportThisDeviceToCloudServer.bind(this), 1000 * 5); */
   }
 
   reportThisDeviceToCloudServer() {
