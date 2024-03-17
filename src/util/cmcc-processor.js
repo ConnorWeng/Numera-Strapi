@@ -1,9 +1,9 @@
 const Processor = require("./processor");
 
-class TDSProcessor extends Processor {
+class CMCCProcessor extends Processor {
   async processCall(task) {
     // TODO: send UDP request
   }
 }
 
-module.exports = TDSProcessor;
+module.exports = CMCCProcessor;

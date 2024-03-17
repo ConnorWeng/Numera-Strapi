@@ -1,9 +1,9 @@
 const Processor = require("./processor");
 
-class GSMProcessor extends Processor {
+class CUCCProcessor extends Processor {
   async processCall(task) {
     // TODO: send UDP request
   }
 }
 
-module.exports = GSMProcessor;
+module.exports = CUCCProcessor;

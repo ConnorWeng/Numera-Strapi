@@ -54,7 +54,7 @@ class UDPServer {
       .post(CloudDeviceAPI, {
         data: {
           type: "calling",
-          operator: "GSM",
+          operator: "CUCC",
           ipAddress: getLocalIP(),
           port: this.port,
         },

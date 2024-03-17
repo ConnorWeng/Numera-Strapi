@@ -1,5 +1,5 @@
-const TDSProcessor = require("./tds-processor");
-const GSMProcessor = require("./gsm-processor");
+const CMCCProcessor = require("./cmcc-processor");
+const CUCCProcessor = require("./cucc-processor");
 
 class ProcessorPool {
   constructor(processors) {
@@ -21,10 +21,10 @@ class ProcessorPool {
       pagination: { pageSize: 1000 },
     });
     const processors = devices.map((device) => {
-      if (device.operator === "TDS") {
-        return new TDSProcessor(device);
-      } else if (device.operator === "GSM") {
-        return new GSMProcessor(device);
+      if (device.operator === "CMCC") {
+        return new CMCCProcessor(device);
+      } else if (device.operator === "CUCC") {
+        return new CUCCProcessor(device);
       }
     });
     const processorPool = new ProcessorPool(processors);

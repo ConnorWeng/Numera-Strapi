@@ -15,7 +15,7 @@ module.exports = createCoreController("api::imsi.imsi", ({ strapi }) => ({
     const { data } = ctx.request?.body || {};
     TaskQueue.getInstance().addTask({
       ...data,
-      operator: "GSM",
+      operator: "CUCC",
     });
     console.log(data);
   },
