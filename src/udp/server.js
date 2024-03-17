@@ -1,11 +1,13 @@
 const dgram = require("dgram");
 const Parser = require("binary-parser").Parser;
+const axios = require("axios");
 
 const MsgHeaderLength = 3;
 const MsgType = {
   MSG_SS_UE_INFO: 0xb3,
   MSG_SS_UE_CALL: 0xb1,
 };
+const CloudDeviceAPI = `http://${process.env.CLOUD_HOST}:${process.env.PORT}/api/devices`;
 
 class UDPServer {
   static instance;
@@ -21,6 +23,9 @@ class UDPServer {
       heartbeat: null,
       call: null,
     };
+    this.axiosInstance = axios.create();
+    this.axiosInstance.defaults.headers.common["Authorization"] =
+      `Bearer ${process.env.CLOUD_API_TOKEN}`;
 
     UDPServer.instance = this;
   }
@@ -40,6 +45,26 @@ class UDPServer {
 
     this.server.bind(this.port);
     strapi.log.info(`Start UDP server on port ${this.port}`);
+
+    setTimeout(this.reportThisDeviceToCloudServer.bind(this), 1000 * 5);
+  }
+
+  reportThisDeviceToCloudServer() {
+    this.axiosInstance
+      .post(CloudDeviceAPI, {
+        data: {
+          type: "calling",
+          operator: "GSM",
+          ipAddress: getLocalIP(),
+          port: this.port,
+        },
+      })
+      .then((res) => {
+        strapi.log.info(`Report device to cloud server success: ${res.status}`);
+      })
+      .catch((err) => {
+        strapi.log.error(`Report device to cloud server failed: ${err}`);
+      });
   }
 
   close() {
@@ -144,6 +169,24 @@ class UDPServer {
     }
     return UDPServer.instance;
   }
+}
+
+const os = require("os");
+
+function getLocalIP() {
+  const interfaces = os.networkInterfaces();
+
+  for (const name of Object.keys(interfaces)) {
+    for (const intf of interfaces[name]) {
+      const { address, family, internal } = intf;
+
+      if (family === "IPv4" && !internal) {
+        return address;
+      }
+    }
+  }
+
+  return null;
 }
 
 module.exports = UDPServer;

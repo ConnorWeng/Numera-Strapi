@@ -16,6 +16,7 @@
     "@strapi/plugin-i18n": "4.19.0",
     "@strapi/plugin-users-permissions": "4.19.0",
     "@strapi/strapi": "4.19.0",
+    "axios": "^1.6.8",
     "better-sqlite3": "8.6.0",
     "binary-parser": "^2.2.1",
     "react": "^18.0.0",
