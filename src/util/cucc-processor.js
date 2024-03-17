@@ -1,9 +1,5 @@
 const Processor = require("./processor");
 
-class CUCCProcessor extends Processor {
-  async processCall(task) {
-    // TODO: send UDP request
-  }
-}
+class CUCCProcessor extends Processor {}
 
 module.exports = CUCCProcessor;
