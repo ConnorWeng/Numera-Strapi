@@ -1,26 +1,27 @@
 module.exports = {
   apps: [
     {
-      name: 'Numera-Strapi',
-      script: 'yarn',
-      args: 'start',
+      name: "Numera-Strapi",
+      script: "yarn",
+      args: "start",
       env: {
-        NODE_ENV: 'production',
+        NODE_ENV: "production",
       },
       env_production: {
-        NODE_ENV: 'production',
+        NODE_ENV: "production",
       },
     },
   ],
 
-  deploy : {
-    production : {
-       "user" : "root",
-       "host" : ["106.14.190.250"],
-       "ref"  : "origin/main",
-       "repo" : "git@github.com:ConnorWeng/Numera-Strapi.git",
-       "path" : "/root/production/Numera-Strapi",
-       "post-deploy" : "yarn && NODE_ENV=production yarn build && pm2 startOrRestart ecosystem.config.js --env production"
-    }
-  }
+  deploy: {
+    production: {
+      user: "root",
+      host: ["106.14.190.250"],
+      ref: "origin/main",
+      repo: "git@github.com:ConnorWeng/Numera-Strapi.git",
+      path: "/root/production/Numera-Strapi",
+      "post-deploy":
+        "yarn && NODE_ENV=production yarn build && pm2 startOrRestart ecosystem.config.js --env production",
+    },
+  },
 };

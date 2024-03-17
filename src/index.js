@@ -12,8 +12,10 @@ module.exports = {
    *
    * This gives you an opportunity to extend code.
    */
-  register(/*{ strapi }*/) {
-    new UDPServer(6000).start();
+  register({ strapi }) {
+    if (process.env.IS_DEVICE === "true") {
+      new UDPServer(6000).start();
+    }
   },
 
   /**
