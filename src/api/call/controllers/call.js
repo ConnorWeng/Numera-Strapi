@@ -1,6 +1,7 @@
 "use strict";
 
-const UDPServer = require("../../../udp/server");
+const strapiUtils = require("@strapi/utils");
+const TaskQueue = require("../../../util/task-queue");
 
 /**
  * call controller
@@ -16,20 +17,20 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
     // @ts-ignore
     const { data } = ctx.request.body || {};
 
-    const sanitizedInputData = await this.sanitizeInput(data, ctx);
-
     // FIXME:
-    const memstore = UDPServer.getInstance().getMemoryStore();
+    /* const memstore = UDPServer.getInstance().getMemoryStore();
     memstore.call = {
       callingNumber: data.callingNumber,
       callingTime: data.callingTime,
-    };
+    }; */
+    const task = TaskQueue.getInstance().findClosestTask();
+    if (!task) {
+      throw new strapiUtils.errors.NotFoundError("No task found");
+    }
 
-    const entity = {
-      callingNumber: memstore.call.callingNumber,
-      callingTime: memstore.call.callingTime,
-      result: "success",
-    };
-    return entity;
+    task.setCallingNumber(data.callingNumber);
+
+    const sanitizedEntity = await this.sanitizeOutput({ ...task }, ctx);
+    return this.transformResponse(sanitizedEntity);
   },
 }));

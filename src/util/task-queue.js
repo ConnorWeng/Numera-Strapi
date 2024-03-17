@@ -1,3 +1,5 @@
+const TASK_TIMEOUT = 10;
+
 class TaskQueue {
   static instance;
 
@@ -15,11 +17,50 @@ class TaskQueue {
   }
 
   getTask() {
-    return this.queue.shift();
+    for (let i = 0; i < this.queue.length; i++) {
+      if (!this.queue[i].isTaken()) {
+        return this.queue[i];
+      }
+    }
+    return null;
   }
 
-  getTaskWithoutShift() {
-    return this.queue.length > 0 ? this.queue[0] : null;
+  removeTask(task) {
+    const index = this.queue.findIndex((t) => t.createTime === task.createTime);
+    if (index > -1) {
+      this.queue.splice(index, 1);
+    }
+  }
+
+  findClosestTask() {
+    const findArray = this.queue.filter((task) => {
+      if (
+        !task.isDone() &&
+        new Date().getTime() - task.getCreateTime() < 20000
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+    if (findArray.length > 0) {
+      return findArray[0];
+    } else {
+      return null;
+    }
+  }
+
+  async waitUntilTaskDone(task) {
+    return new Promise((resolve) => {
+      let times = 0;
+      const interval = setInterval(() => {
+        times += 1;
+        if (task.isDone() || times > TASK_TIMEOUT) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, 1000);
+    });
   }
 
   static getInstance() {

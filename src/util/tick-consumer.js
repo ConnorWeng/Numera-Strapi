@@ -25,11 +25,11 @@ class TickConsumer {
   }
 
   consume() {
-    const testTask = this.taskQueue.getTaskWithoutShift();
-    if (testTask) {
-      const processor = this.processorPool.findAvaiableProcessor(testTask);
+    const task = this.taskQueue.getTask();
+    if (task) {
+      const processor = this.processorPool.findAvaiableProcessor(task);
       if (processor) {
-        const task = this.taskQueue.getTask();
+        task.take();
         setTimeout(() => {
           processor.process(task);
         }, 1000);
