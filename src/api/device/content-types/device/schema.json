@@ -25,7 +25,7 @@
       "type": "integer"
     },
     "apiToken": {
-      "type": "string"
+      "type": "text"
     }
   }
 }
