@@ -4,6 +4,9 @@ module.exports = {
       name: 'Numera-Strapi',
       script: 'yarn',
       args: 'start',
+      env: {
+        NODE_ENV: 'production',
+      },
       env_production: {
         NODE_ENV: 'production',
       },
@@ -17,7 +20,7 @@ module.exports = {
        "ref"  : "origin/main",
        "repo" : "git@github.com:ConnorWeng/Numera-Strapi.git",
        "path" : "/root/production/Numera-Strapi",
-       "post-deploy" : "yarn && yarn build && pm2 startOrRestart ecosystem.config.js --env production"
+       "post-deploy" : "yarn && NODE_ENV=production yarn build && pm2 startOrRestart ecosystem.config.js --env production"
     }
   }
 };
