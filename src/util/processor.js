@@ -41,7 +41,7 @@ class Processor {
     );
     this.axiosInstance
       .post(
-        `http://${this.device.ipAddress}:${this.device.port}/api/local/call`,
+        `http://${this.device.ipAddress}:${this.device.port}${this.device.apiPath}/api/local/call`,
         {
           data: {
             IMSI: task.IMSI,
