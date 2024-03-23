@@ -1,4 +1,4 @@
-const TASK_TIMEOUT = 10;
+const TASK_TIMEOUT = 20;
 const INVALID_TASK_TIME = 4;
 
 class TaskQueue {
