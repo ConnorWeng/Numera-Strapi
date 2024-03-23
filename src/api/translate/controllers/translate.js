@@ -10,6 +10,7 @@ const TranslateTask = require("../../../util/task");
  */
 
 const { createCoreController } = require("@strapi/strapi").factories;
+const IMSI_REGEX = /^4600[0,1,2,4,6,7,9][0-9]{10,11}$/;
 
 module.exports = createCoreController(
   "api::translate.translate",
@@ -26,6 +27,11 @@ module.exports = createCoreController(
       }
       // @ts-ignore
       const IMSI = data.IMSI;
+      if (!IMSI_REGEX.test(IMSI)) {
+        throw new strapiUtils.errors.ValidationError(
+          'Invalid IMSI. IMSI should be a 14 or 15 digit number.',
+        );
+      }
 
       const globalTaskQueue = TaskQueue.getInstance();
       const task = new TranslateTask(IMSI);

@@ -27,7 +27,6 @@ class ProcessorPool {
         return new CUCCProcessor(device);
       }
     });
-    console.log(processors);
     const processorPool = new ProcessorPool(processors);
     return processorPool;
   }

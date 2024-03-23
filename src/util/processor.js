@@ -14,7 +14,7 @@ class Processor {
   }
 
   isMatch(task) {
-    return true;
+    return task.getOperator() === this.device.operator;
   }
 
   async process(task) {
