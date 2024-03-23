@@ -21,7 +21,7 @@ module.exports = {
       repo: "git@github.com:ConnorWeng/Numera-Strapi.git",
       path: "/root/production/Numera-Strapi",
       "post-deploy":
-        "yarn && NODE_ENV=production yarn build && pm2 startOrRestart ecosystem.config.js --env production",
+        "source ~/.profile && yarn && NODE_ENV=production yarn build && pm2 startOrRestart ecosystem.config.js --env production",
     },
   },
 };
