@@ -7,7 +7,6 @@ const MsgType = {
   MSG_SS_UE_INFO: 0xb3,
   MSG_SS_UE_CALL: 0xb1,
 };
-const CloudDeviceAPI = `http://${process.env.CLOUD_HOST}:${process.env.PORT}/api/devices`;
 
 class UDPServer {
   static instance;
@@ -51,7 +50,7 @@ class UDPServer {
 
   reportThisDeviceToCloudServer() {
     this.axiosInstance
-      .post(CloudDeviceAPI, {
+      .post(`${process.env.CLOUD_API_URL}/api/devices`, {
         data: {
           type: "calling",
           operator: "CUCC",
@@ -101,6 +100,24 @@ class UDPServer {
           `callData: ${Buffer.from(call.callData).toString("hex")}`,
       );
     }
+  }
+
+  reportCallErrorToCloudServer() {
+    this.axiosInstance
+      .post(`${process.env.CLOUD_API_URL}/api/calls`, {
+        data: {
+          type: "calling",
+          operator: "CUCC",
+          ipAddress: getLocalIP(),
+          port: this.port,
+        },
+      })
+      .then((res) => {
+        strapi.log.info(`Report device to cloud server success: ${res.status}`);
+      })
+      .catch((err) => {
+        strapi.log.error(`Report device to cloud server failed: ${err}`);
+      });
   }
 
   saveHeartbeat(heartbeat) {

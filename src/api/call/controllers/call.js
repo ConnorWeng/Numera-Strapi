@@ -17,18 +17,16 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
     // @ts-ignore
     const { data } = ctx.request.body || {};
 
-    // FIXME:
-    /* const memstore = UDPServer.getInstance().getMemoryStore();
-    memstore.call = {
-      callingNumber: data.callingNumber,
-      callingTime: data.callingTime,
-    }; */
     const task = TaskQueue.getInstance().findClosestTask();
     if (!task) {
       throw new strapiUtils.errors.NotFoundError("No task found");
     }
 
-    task.setCallingNumber(data.callingNumber);
+    if (data.error) {
+      task.setError(data.error);
+    } else {
+      task.setCallingNumber(data.callingNumber);
+    }
 
     const sanitizedEntity = await this.sanitizeOutput({ ...task }, ctx);
     return this.transformResponse(sanitizedEntity);

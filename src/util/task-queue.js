@@ -1,4 +1,5 @@
 const TASK_TIMEOUT = 10;
+const INVALID_TASK_TIME = 4;
 
 class TaskQueue {
   static instance;
@@ -36,7 +37,8 @@ class TaskQueue {
     const findArray = this.queue.filter((task) => {
       if (
         !task.isDone() &&
-        new Date().getTime() - task.getCreateTime() < 20000
+        new Date().getTime() - task.getCreateTime() < TASK_TIMEOUT * 1000 &&
+        new Date().getTime() - task.getCreateTime() > INVALID_TASK_TIME * 1000
       ) {
         return true;
       } else {

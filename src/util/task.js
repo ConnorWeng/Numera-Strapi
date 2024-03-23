@@ -3,6 +3,7 @@ class TranslateTask {
     this.IMSI = IMSI;
     this.createTime = new Date().getTime();
     this.callingNumber = null;
+    this.error = null;
     this.taken = false;
   }
 
@@ -32,6 +33,10 @@ class TranslateTask {
     this.callingNumber = callingNumber;
   }
 
+  setError(error) {
+    this.error = error;
+  }
+
   take() {
     this.taken = true;
   }
@@ -41,7 +46,7 @@ class TranslateTask {
   }
 
   isDone() {
-    return this.callingNumber !== null;
+    return this.callingNumber !== null || this.error !== null;
   }
 }
 
