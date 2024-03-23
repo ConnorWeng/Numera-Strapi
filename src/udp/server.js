@@ -98,7 +98,7 @@ class UDPServer {
         `server got call data:\n` +
           `IMSI: ${call.IMSI}\n` +
           `boardSN: ${call.boardSN}\n` +
-          `callData: ${call.callData}`,
+          `callData: ${Buffer.from(call.callData).toString("hex")}`,
       );
     }
   }
