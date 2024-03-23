@@ -37,7 +37,7 @@ class Processor {
 
   async processCall(task) {
     strapi.log.info(
-      `Starting call device http://${this.device.ipAddress}:${this.device.port}/api/local/call with IMSI ${task.IMSI}`,
+      `Starting call device http://${this.device.ipAddress}:${this.device.port}${this.device.apiPath}/api/local/call with IMSI ${task.IMSI}`,
     );
     this.axiosInstance
       .post(

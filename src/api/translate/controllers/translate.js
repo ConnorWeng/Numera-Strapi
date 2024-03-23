@@ -29,7 +29,7 @@ module.exports = createCoreController(
       const IMSI = data.IMSI;
       if (!IMSI_REGEX.test(IMSI)) {
         throw new strapiUtils.errors.ValidationError(
-          'Invalid IMSI. IMSI should be a 14 or 15 digit number.',
+          "Invalid IMSI. IMSI should be a 14 or 15 digit number.",
         );
       }
 

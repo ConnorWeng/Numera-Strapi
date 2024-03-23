@@ -26,6 +26,9 @@
     },
     "apiToken": {
       "type": "text"
+    },
+    "apiPath": {
+      "type": "string"
     }
   }
 }
