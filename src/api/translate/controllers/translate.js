@@ -39,8 +39,7 @@ module.exports = createCoreController(
       await globalTaskQueue.waitUntilTaskDone(task);
       globalTaskQueue.removeTask(task);
 
-      const sanitizedEntity = await this.sanitizeOutput({ ...task }, ctx);
-      return this.transformResponse(sanitizedEntity);
+      return task;
     },
   }),
 );
