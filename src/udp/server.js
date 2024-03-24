@@ -102,21 +102,16 @@ class UDPServer {
     }
   }
 
-  reportCallErrorToCloudServer() {
+  reportCallErrorToCloudServer(error) {
     this.axiosInstance
       .post(`${process.env.CLOUD_API_URL}/api/calls`, {
-        data: {
-          type: "calling",
-          operator: "CUCC",
-          ipAddress: getLocalIP(),
-          port: this.port,
-        },
+        data: error,
       })
       .then((res) => {
-        strapi.log.info(`Report device to cloud server success: ${res.status}`);
+        strapi.log.info(`Report error to cloud server success: ${res.status}`);
       })
       .catch((err) => {
-        strapi.log.error(`Report device to cloud server failed: ${err}`);
+        strapi.log.error(`Report error to cloud server failed: ${err}`);
       });
   }
 
