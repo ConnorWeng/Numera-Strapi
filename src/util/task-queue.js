@@ -1,3 +1,5 @@
+const { TIMEOUT } = require("./error-codes");
+
 const TASK_TIMEOUT = 20;
 const INVALID_TASK_TIME = 4;
 
@@ -57,7 +59,10 @@ class TaskQueue {
       let times = 0;
       const interval = setInterval(() => {
         times += 1;
-        if (task.isDone() || times > TASK_TIMEOUT) {
+        if (times > TASK_TIMEOUT) {
+          task.setError(TIMEOUT);
+        }
+        if (task.isDone()) {
           clearInterval(interval);
           resolve();
         }
