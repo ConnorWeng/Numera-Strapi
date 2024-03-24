@@ -65,11 +65,11 @@
       "inversedBy": "users",
       "configurable": false
     },
-    "membershipExpirationDate": {
-      "type": "datetime"
-    },
-    "remainingAPICalls": {
-      "type": "biginteger"
+    "subscriptions": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::subscription.subscription",
+      "mappedBy": "user"
     }
   }
 }
