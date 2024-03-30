@@ -100,11 +100,11 @@ class UDPServer {
           `boardSN: ${call.boardSN}\n` +
           `callData: ${callDataHex}`,
       );
-      if (msgHeader.unBodyLen === 40 && callDataHex.startsWith("efbf")) {
+      if (msgHeader.unBodyLen === 40 && callDataHex.startsWith("ef")) {
         this.reportCallErrorToCloudServer({
           error: {
             errorCode: 191,
-            errorMessage: "空号",
+            errorMessage: callDataHex,
           },
         });
       }
