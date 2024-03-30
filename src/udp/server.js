@@ -93,12 +93,21 @@ class UDPServer {
       this.saveHeartbeat(heartbeat);
     } else if (msgHeader.msgType === MsgType.MSG_SS_UE_CALL) {
       const call = this.decodeCall(msg.subarray(MsgHeaderLength));
+      const callDataHex = Buffer.from(call.callData).toString("hex");
       strapi.log.info(
         `server got call data:\n` +
           `IMSI: ${call.IMSI}\n` +
           `boardSN: ${call.boardSN}\n` +
-          `callData: ${Buffer.from(call.callData).toString("hex")}`,
+          `callData: ${callDataHex}`,
       );
+      if (msgHeader.unBodyLen === 40 && callDataHex.startsWith("efbf")) {
+        this.reportCallErrorToCloudServer({
+          error: {
+            errorCode: 191,
+            errorMessage: "空号",
+          },
+        });
+      }
     }
   }
 
