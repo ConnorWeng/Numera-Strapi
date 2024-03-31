@@ -118,7 +118,7 @@ class UDPServer {
   }
 
   reportCallErrorToCloudServer(error) {
-    strapi.log.info(`Report error to cloud server: ${error}`);
+    strapi.log.info(`Report error to cloud server: ${JSON.stringify(error)}`);
     this.axiosInstance
       .post(`${process.env.CLOUD_API_URL}/api/calls`, {
         data: error,
