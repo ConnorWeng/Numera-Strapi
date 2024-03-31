@@ -37,6 +37,10 @@ class TranslateTask {
     this.error = error;
   }
 
+  getError() {
+    return this.error;
+  }
+
   take() {
     this.taken = true;
   }

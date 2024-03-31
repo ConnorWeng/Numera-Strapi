@@ -39,6 +39,14 @@ module.exports = createCoreController(
       await globalTaskQueue.waitUntilTaskDone(task);
       globalTaskQueue.removeTask(task);
 
+      if (task.getError() && task.getError().errorMessage === "未知错误") {
+        const retryTask = new TranslateTask(IMSI);
+        globalTaskQueue.addTask(retryTask);
+        await globalTaskQueue.waitUntilTaskDone(retryTask);
+        globalTaskQueue.removeTask(retryTask);
+        return retryTask;
+      }
+
       return task;
     },
   }),
