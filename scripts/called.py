@@ -28,7 +28,7 @@ def report_call(callingNumber):
         return None
 
 phoneRegex = r"[\d]{11}"
-ser = serial.Serial("/dev/ttyUSB2", baudrate=9600, timeout=2)
+ser = serial.Serial("/dev/ttyUSB2", baudrate=115200, timeout=1)
 sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
 
 time.sleep(5)
@@ -44,6 +44,7 @@ while True:
                 print(find[0])
                 report_call(find[0])
                 ser.write(b"AT+CHUP\r")
-        time.sleep(0.5)
+                time.sleep(1)
+        time.sleep(1)
     except serial.serialutil.SerialException:
-        time.sleep(0.5)
+        time.sleep(1)
