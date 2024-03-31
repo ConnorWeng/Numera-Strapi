@@ -105,12 +105,12 @@ class UDPServer {
           `boardSN: ${call.boardSN}\n` +
           `callData: ${call.callData}`,
       );
-      if (msgHeader.unBodyLen === 40 && call.callData[0] === 0xef) {
+      if (msgHeader.unBodyLen === 40 && call.callData[0] === 0xff) {
         this.reportCallErrorToCloudServer({
           error: {
-            errorCode: call.callData[3],
+            errorCode: call.callData[1],
             errorMessage:
-              CauseMessage[`Cause${call.callData[3]}`] || "未知错误",
+              CauseMessage[`Cause${call.callData[1]}`] || "未知错误",
           },
         });
       }
@@ -118,6 +118,7 @@ class UDPServer {
   }
 
   reportCallErrorToCloudServer(error) {
+    strapi.log.info(`Report error to cloud server: ${error}`);
     this.axiosInstance
       .post(`${process.env.CLOUD_API_URL}/api/calls`, {
         data: error,
@@ -184,7 +185,7 @@ class UDPServer {
       .string("boardSN", { length: 20, encoding: "utf8" })
       .array("callData", {
         type: "uint8",
-        length: 6,
+        length: 4,
       });
     return parser.parse(buffer);
   }
