@@ -107,14 +107,24 @@ class UDPServer {
           `boardSN: ${call.boardSN}\n` +
           `callData: ${call.callData}`,
       );
-      if (msgHeader.unBodyLen === 40 && call.callData[0] === 0xff) {
-        this.reportCallErrorToCloudServer({
-          error: {
-            errorCode: call.callData[1],
-            errorMessage:
-              CauseMessage[`Cause${call.callData[1]}`] || "未知错误",
-          },
-        });
+      if (msgHeader.unBodyLen === 40) {
+        if (call.callData[0] === 0xff) {
+          this.reportCallErrorToCloudServer({
+            error: {
+              errorCode: call.callData[1],
+              errorMessage:
+                CauseMessage[`Cause${call.callData[1]}`] || "未知错误",
+            },
+          });
+        }
+        if (call.callData[0] === 0x04 && call.callData[1] === 0x00) {
+          this.reportCallErrorToCloudServer({
+            error: {
+              errorCode: "AUTHENTICATION REJECT",
+              errorMessage: "AUTHENTICATION REJECT",
+            },
+          });
+        }
       }
     }
   }
