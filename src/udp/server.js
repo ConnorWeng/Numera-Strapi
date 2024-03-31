@@ -80,7 +80,7 @@ class UDPServer {
 
   handleMessage(msg, rinfo) {
     const msgHeader = this.decodeHeader(msg);
-    strapi.log.info(
+    strapi.log.verbose(
       `server got ${msg.byteLength} bytes from ${rinfo.address}:${rinfo.port}, message header:\n` +
         `unCode: 0x${msgHeader.unCode.toString(16)}\n` +
         `unBodyLen: ${msgHeader.unBodyLen}\n` +
@@ -88,7 +88,7 @@ class UDPServer {
     );
     if (msgHeader.msgType === MsgType.MSG_SS_UE_INFO) {
       const heartbeat = this.decodeHeartbeat(msg.subarray(MsgHeaderLength));
-      strapi.log.info(
+      strapi.log.verbose(
         `server got heartbeat:\n` +
           `IMSI: ${heartbeat.IMSI}\n` +
           `boardSN: ${heartbeat.boardSN}\n` +
