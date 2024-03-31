@@ -121,7 +121,7 @@ class UDPServer {
           this.reportCallErrorToCloudServer({
             error: {
               errorCode: "AUTHENTICATION REJECT",
-              errorMessage: "AUTHENTICATION REJECT",
+              errorMessage: "未知错误",
             },
           });
         }
