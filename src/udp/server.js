@@ -184,7 +184,7 @@ class UDPServer {
       .string("boardSN", { length: 20, encoding: "utf8" })
       .array("callData", {
         type: "uint8",
-        length: 8,
+        length: 6,
       });
     return parser.parse(buffer);
   }
