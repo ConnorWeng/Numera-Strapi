@@ -7,6 +7,12 @@ const MsgType = {
   MSG_SS_UE_INFO: 0xb3,
   MSG_SS_UE_CALL: 0xb1,
 };
+const CauseMessage = {
+  Cause1: "空号",
+  Cause8: "物联网卡",
+  Cause31: "物联网卡",
+  Cause57: "流量卡",
+};
 
 class UDPServer {
   static instance;
@@ -93,18 +99,18 @@ class UDPServer {
       this.saveHeartbeat(heartbeat);
     } else if (msgHeader.msgType === MsgType.MSG_SS_UE_CALL) {
       const call = this.decodeCall(msg.subarray(MsgHeaderLength));
-      const callDataHex = Buffer.from(call.callData).toString("hex");
       strapi.log.info(
         `server got call data:\n` +
           `IMSI: ${call.IMSI}\n` +
           `boardSN: ${call.boardSN}\n` +
-          `callData: ${callDataHex}`,
+          `callData: ${call.callData}`,
       );
-      if (msgHeader.unBodyLen === 40 && callDataHex.startsWith("ef")) {
+      if (msgHeader.unBodyLen === 40 && call.callData[0] === 0xef) {
         this.reportCallErrorToCloudServer({
           error: {
-            errorCode: 191,
-            errorMessage: callDataHex,
+            errorCode: call.callData[3],
+            errorMessage:
+              CauseMessage[`Cause${call.callData[3]}`] || "未知错误",
           },
         });
       }
@@ -176,7 +182,10 @@ class UDPServer {
       .endianness("big")
       .string("IMSI", { length: 16, encoding: "utf8" })
       .string("boardSN", { length: 20, encoding: "utf8" })
-      .string("callData", { length: 20, encoding: "utf8" });
+      .array("callData", {
+        type: "uint8",
+        length: 8,
+      });
     return parser.parse(buffer);
   }
 
