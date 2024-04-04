@@ -21,7 +21,7 @@ const RetryableCause = {
   Cause4: "AUTHENTICATION REJECT",
   Cause5: "LOCATION REJECT",
   Cause6: "ASSIGNMENT FAILURE",
-  Cause8: "NO RESPONSE",
+  //Cause8: "NO RESPONSE",
   //Cause10: "3126",
 };
 const RetriedTasks = [];
