@@ -8,6 +8,14 @@ class Task {
     this.logs = [];
   }
 
+  getIMSI() {
+    return this.IMSI;
+  }
+
+  getCreatedAt() {
+    return this.createdAt;
+  }
+
   appendLog(log) {
     this.logs.push(log);
   }
@@ -30,7 +38,7 @@ class MemTaskManager {
     this.tasks = [];
     setInterval(() => {
       const expiredTasks = this.tasks.filter(
-        (task) => new Date().getTime() - task.createdAt > INVALID_TASK_TIME,
+        (task) => new Date().getTime() - task.getCreateAt() > INVALID_TASK_TIME,
       );
       for (const expiredTask of expiredTasks) {
         this.removeTask(expiredTask);
@@ -55,13 +63,10 @@ class MemTaskManager {
   }
 
   getTask(IMSI) {
-    strapi.log.info(
-      `find ${IMSI} with time: ${new Date().getTime()} in ${JSON.stringify(this.tasks)}`,
-    );
     return this.tasks.find(
       (task) =>
-        task.IMSI === IMSI &&
-        new Date().getTime() - task.createAt < INVALID_TASK_TIME,
+        task.getIMSI() === IMSI &&
+        new Date().getTime() - task.getCreateAt() < INVALID_TASK_TIME,
     );
   }
 }
