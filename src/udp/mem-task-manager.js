@@ -55,7 +55,9 @@ class MemTaskManager {
   }
 
   getTask(IMSI) {
-    strapi.log.info(JSON.stringify(this.tasks));
+    strapi.log.info(
+      `find ${IMSI} with time: ${new Date().getTime()} in ${JSON.stringify(this.tasks)}`,
+    );
     return this.tasks.find(
       (task) =>
         task.IMSI === IMSI &&
