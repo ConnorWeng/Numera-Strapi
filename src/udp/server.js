@@ -177,6 +177,7 @@ class UDPServer {
       );
       if (msgHeader.unBodyLen === 40) {
         let task = taskManager.getTask(call.IMSI);
+        strapi.log.info(`Task: ${JSON.stringify(task)}`);
         if (!task) {
           task = new Task(call.IMSI);
           taskManager.addTask(task);
