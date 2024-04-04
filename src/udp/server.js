@@ -1,6 +1,8 @@
 const dgram = require("dgram");
 const Parser = require("binary-parser").Parser;
 const axios = require("axios");
+const UDPClient = require("./client");
+const { makeCallMessage } = require("../util/message");
 
 const MsgHeaderLength = 3;
 const MsgType = {
@@ -15,6 +17,14 @@ const CauseMessage = {
   Cause38: "不支持的新卡",
   Cause57: "物联网卡或流量卡",
 };
+const RetryableCause = {
+  Cause4: "AUTHENTICATION REJECT",
+  Cause5: "LOCATION REJECT",
+  Cause6: "ASSIGNMENT FAILURE",
+  Cause8: "NO RESPONSE",
+  Cause10: "3126",
+};
+const RetriedTasks = [];
 
 class UDPServer {
   static instance;
@@ -108,23 +118,41 @@ class UDPServer {
           `callData: ${call.callData}`,
       );
       if (msgHeader.unBodyLen === 40) {
-        if (call.callData[0] === 0xff) {
-          this.reportCallErrorToCloudServer({
-            error: {
-              errorCode: call.callData[1],
-              errorMessage:
-                CauseMessage[`Cause${call.callData[1]}`] || "未知错误",
-            },
-          });
+        if (call.callData[0] === 0xfe || call.callData[0] === 0xff) {
+          if (CauseMessage[`Cause${call.callData[1]}`]) {
+            this.reportCallErrorToCloudServer({
+              error: {
+                errorCode: call.callData[1],
+                errorMessage: CauseMessage[`Cause${call.callData[1]}`],
+              },
+            });
+          } else {
+            strapi.log.info(`Unknown cause code: ${call.callData[1]}`);
+          }
         }
-        if (call.callData[0] === 0x04 && call.callData[1] === 0x00) {
-          this.reportCallErrorToCloudServer({
-            error: {
-              errorCode: "AUTHENTICATION REJECT",
-              errorMessage: "未知错误",
-            },
-          });
+        if (RetryableCause[`Cause${call.callData[0]}`]) {
+          const findIndex = RetriedTasks.findIndex(
+            (IMSI) => IMSI === call.IMSI,
+          );
+          if (findIndex > -1) {
+            RetriedTasks.splice(findIndex, 1);
+            this.reportCallErrorToCloudServer({
+              error: {
+                errorCode: call.callData[0],
+                errorMessage: RetryableCause[`Cause${call.callData[0]}`],
+              },
+            });
+          } else {
+            strapi.log.info(`Retry call to IMSI: ${call.IMSI}`);
+            RetriedTasks.push(call.IMSI);
+            UDPClient.getInstance().send(
+              makeCallMessage(call.IMSI),
+              9000,
+              "localhost",
+            );
+          }
         }
+        // 正常情况什么都不需要操作，等被叫上送号码给云端
       }
     }
   }
