@@ -98,7 +98,7 @@ class UDPServer {
     );
     if (msgHeader.msgType === MsgType.MSG_SS_UE_INFO) {
       const heartbeat = this.decodeHeartbeat(msg.subarray(MsgHeaderLength));
-      strapi.log.verbose(
+      /* strapi.log.verbose(
         `server got heartbeat:\n` +
           `IMSI: ${heartbeat.IMSI}\n` +
           `boardSN: ${heartbeat.boardSN}\n` +
@@ -107,7 +107,7 @@ class UDPServer {
           `selLacs: ${heartbeat.selLacs}\n` +
           `selIds: ${heartbeat.selIds}\n` +
           `rlaCDbms: ${heartbeat.rlaCDbms}`,
-      );
+      ); */
       this.saveHeartbeat(heartbeat);
     } else if (msgHeader.msgType === MsgType.MSG_SS_UE_CALL) {
       const call = this.decodeCall(msg.subarray(MsgHeaderLength));
