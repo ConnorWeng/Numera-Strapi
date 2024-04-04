@@ -3,6 +3,7 @@ const Parser = require("binary-parser").Parser;
 const axios = require("axios");
 const UDPClient = require("./client");
 const { makeCallMessage } = require("../util/message");
+const { Task, MemTaskManager } = require("./mem-task-manager");
 
 const MsgHeaderLength = 3;
 const MsgType = {
@@ -10,21 +11,74 @@ const MsgType = {
   MSG_SS_UE_CALL: 0xb1,
 };
 const CauseMessage = {
-  Cause1: "空号",
-  Cause8: "物联网卡或流量卡",
-  Cause21: "物联网卡或流量卡",
-  //Cause31: "物联网卡或流量卡",
-  Cause38: "不支持的新卡",
-  Cause57: "物联网卡或流量卡",
+  xfe_x01: "空号",
+  xfe_x08: "物联网卡或流量卡",
+  xfe_x15: "物联网卡或流量卡",
+  xfe_x1f: "可忽略错误",
+  xfe_x26: "不支持的新卡",
+  xfe_x39: "物联网卡或流量卡",
+  xff_x01: "空号",
+  xff_x08: "物联网卡或流量卡",
+  xff_x15: "物联网卡或流量卡",
+  xff_x1f: "可忽略错误",
+  xff_x26: "不支持的新卡",
+  xff_x39: "物联网卡或流量卡",
+  x04_x00: "AUTHENTICATION REJECT",
+  x05_x00: "LOCATION REJECT",
+  x06_x00: "ASSIGNMENT FAILURE",
+  x0a_x00: "3126",
+  x08_x00: "SUCCESS",
+  x09_x00: "SUCCESS",
 };
-const RetryableCause = {
-  Cause4: "AUTHENTICATION REJECT",
-  Cause5: "LOCATION REJECT",
-  Cause6: "ASSIGNMENT FAILURE",
-  //Cause8: "NO RESPONSE",
-  Cause10: "3126",
-};
-const RetriedTasks = [];
+
+const taskManager = new MemTaskManager();
+
+function hex(number) {
+  return number.toString(16).padStart(2, "0");
+}
+
+function getCausePolicy(callData) {
+  if (callData[0] === 0xfe || callData[0] === 0xff) {
+    if (callData[1] in [0x01, 0x08, 0x15, 0x26, 0x39]) {
+      return {
+        policy: "REJECT",
+        cause: callData[1],
+        message: CauseMessage[`x${hex(callData[0])}_x${hex(callData[1])}`],
+      };
+    } else if (callData[1] === 0x1f) {
+      return {
+        policy: "SUCCESS",
+        cause: callData[1],
+        message: CauseMessage[`x${hex(callData[0])}_x${hex(callData[1])}`],
+      };
+    } else {
+      return {
+        policy: "RETRY",
+        cause: callData[1],
+        message: "UNKNOWN CAUSE",
+      };
+    }
+  }
+  if (callData[0] in [0x04, 0x05, 0x06, 0x0a] && callData[1] === 0x00) {
+    return {
+      policy: "RETRY",
+      cause: callData[0],
+      message: CauseMessage[`x${hex(callData[0])}_x${hex(callData[1])}`],
+    };
+  }
+  if (callData[0] in [0x08, 0x09] && callData[1] === 0x00) {
+    return {
+      policy: "SUCCESS",
+      cause: callData[0],
+      message: CauseMessage[`x${hex(callData[0])}_x${hex(callData[1])}`],
+    };
+  }
+  return {
+    policy: "CONTINUE",
+    cause: -1,
+    message: "UNKNOWN CAUSE",
+  };
+}
 
 class UDPServer {
   static instance;
@@ -118,41 +172,46 @@ class UDPServer {
           `callData: ${call.callData}`,
       );
       if (msgHeader.unBodyLen === 40) {
-        if (call.callData[0] === 0xfe || call.callData[0] === 0xff) {
-          if (CauseMessage[`Cause${call.callData[1]}`]) {
-            this.reportCallErrorToCloudServer({
-              error: {
-                errorCode: call.callData[1],
-                errorMessage: CauseMessage[`Cause${call.callData[1]}`],
-              },
-            });
-          } else {
-            strapi.log.info(`Unknown cause code: ${call.callData[1]}`);
-          }
+        let task = taskManager.getTask(call.IMSI);
+        if (!task) {
+          task = new Task(call.IMSI);
+          taskManager.addTask(task);
         }
-        if (RetryableCause[`Cause${call.callData[0]}`]) {
-          const findIndex = RetriedTasks.findIndex(
-            (IMSI) => IMSI === call.IMSI,
-          );
-          if (findIndex > -1) {
-            RetriedTasks.splice(findIndex, 1);
-            this.reportCallErrorToCloudServer({
-              error: {
-                errorCode: call.callData[0],
-                errorMessage: RetryableCause[`Cause${call.callData[0]}`],
-              },
-            });
-          } else {
+        task.appendLog(`Call data: ${call.callData}`);
+
+        const policy = getCausePolicy(call.callData);
+        if (policy.policy === "REJECT") {
+          taskManager.removeTask(task);
+          this.reportCallErrorToCloudServer({
+            error: {
+              errorCode: policy.cause,
+              errorMessage: policy.message + ":\n" + task.getLog(),
+            },
+          });
+        } else if (policy.policy === "RETRY") {
+          if (task.getRetriedTimes() < 1) {
+            task.increaseRetry();
             strapi.log.info(`Retry call to IMSI: ${call.IMSI}`);
-            RetriedTasks.push(call.IMSI);
             UDPClient.getInstance().send(
               makeCallMessage(call.IMSI),
               9000,
               "localhost",
             );
+          } else {
+            taskManager.removeTask(task);
+            this.reportCallErrorToCloudServer({
+              error: {
+                errorCode: policy.cause,
+                errorMessage: policy.message + ":\n" + task.getLog(),
+              },
+            });
           }
+        } else if (policy.policy === "SUCCESS") {
+          strapi.log.info(`Call success to IMSI: ${call.IMSI}`);
+          taskManager.removeTask(task);
+        } else if (policy.policy === "CONTINUE") {
+          // Do nothing
         }
-        // 正常情况什么都不需要操作，等被叫上送号码给云端
       }
     }
   }
