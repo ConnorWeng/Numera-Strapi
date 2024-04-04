@@ -1,4 +1,8 @@
+const UDPClient = require("./client");
+const { makeCallMessage } = require("../util/message");
+
 const INVALID_TASK_TIME = 60 * 1000;
+const UNTOUCHED_TASK_TIME = 5 * 1000;
 
 function findLastMatch(array, predicate) {
   return array.reduce((acc, item, index) => {
@@ -12,6 +16,7 @@ class Task {
     this.createdAt = new Date().getTime();
     this.retriedTimes = 0;
     this.logs = [];
+    this.touched = false;
   }
 
   getIMSI() {
@@ -34,8 +39,16 @@ class Task {
     return this.retriedTimes;
   }
 
+  getTouched() {
+    return this.touched;
+  }
+
   increaseRetry() {
     this.retriedTimes++;
+  }
+
+  setTouched() {
+    this.touched = true;
   }
 }
 
@@ -59,6 +72,23 @@ class MemTaskManager {
       if (expiredTasks.length > 0) {
         strapi.log.info(
           `Expired ${expiredTasks.length} tasks, now ${this.tasks.length} tasks remain`,
+        );
+      }
+
+      const notTouchedTasks = this.tasks.filter(
+        (task) =>
+          !task.getTouched() &&
+          new Date().getTime() - task.getCreatedAt() > UNTOUCHED_TASK_TIME,
+      );
+      for (const notTouchedTask of notTouchedTasks) {
+        notTouchedTask.setTouched();
+        strapi.log.info(
+          `Task ${JSON.stringify(notTouchedTask)} untouched for ${UNTOUCHED_TASK_TIME / 1000}s, retrying...`,
+        );
+        UDPClient.getInstance().send(
+          makeCallMessage(notTouchedTask.getIMSI()),
+          9000,
+          "localhost",
         );
       }
     }, 1000);

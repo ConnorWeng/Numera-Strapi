@@ -187,6 +187,7 @@ class UDPServer {
         let task = taskManager.getTask(call.IMSI);
         strapi.log.info(`Doing task: ${JSON.stringify(task)}`);
 
+        task.setTouched();
         task.appendLog(`Call data: ${call.callData}`);
 
         const policy = getCausePolicy(call.callData);
