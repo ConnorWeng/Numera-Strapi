@@ -193,8 +193,10 @@ class UDPServer {
   decodeHeartbeat(buffer) {
     const parser = new Parser()
       .endianness("big")
-      .string("IMSI", { length: 16, encoding: "utf8" })
-      .string("boardSN", { length: 20, encoding: "utf8" })
+      .string("IMSI", { length: 15, encoding: "utf8" })
+      .bit8("IMSIEnd")
+      .string("boardSN", { length: 19, encoding: "utf8" })
+      .bit8("boardSNEnd")
       .array("mobStates", {
         type: "uint8",
         length: 4,
@@ -221,8 +223,10 @@ class UDPServer {
   decodeCall(buffer) {
     const parser = new Parser()
       .endianness("big")
-      .string("IMSI", { length: 16, encoding: "utf8" })
-      .string("boardSN", { length: 20, encoding: "utf8" })
+      .string("IMSI", { length: 15, encoding: "utf8" })
+      .bit8("IMSIEnd")
+      .string("boardSN", { length: 19, encoding: "utf8" })
+      .bit8("boardSNEnd")
       .array("callData", {
         type: "uint8",
         length: 4,
