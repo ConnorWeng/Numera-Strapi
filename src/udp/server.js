@@ -195,7 +195,6 @@ class UDPServer {
         );
 
         if (policy.policy === "REJECT") {
-          taskManager.removeTask(task);
           this.reportCallErrorToCloudServer({
             error: {
               errorCode: policy.cause,
@@ -212,7 +211,6 @@ class UDPServer {
               "localhost",
             );
           } else {
-            taskManager.removeTask(task);
             this.reportCallErrorToCloudServer({
               error: {
                 errorCode: policy.cause,
@@ -222,7 +220,6 @@ class UDPServer {
           }
         } else if (policy.policy === "SUCCESS") {
           strapi.log.info(`Call success to IMSI: ${call.IMSI}`);
-          taskManager.removeTask(task);
         } else if (policy.policy === "CONTINUE") {
           // Do nothing
         }
