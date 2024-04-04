@@ -38,7 +38,8 @@ class MemTaskManager {
     this.tasks = [];
     setInterval(() => {
       const expiredTasks = this.tasks.filter(
-        (task) => new Date().getTime() - task.getCreatedAt() > INVALID_TASK_TIME,
+        (task) =>
+          new Date().getTime() - task.getCreatedAt() > INVALID_TASK_TIME,
       );
       for (const expiredTask of expiredTasks) {
         this.removeTask(expiredTask);

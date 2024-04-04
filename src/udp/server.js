@@ -28,6 +28,7 @@ const CauseMessage = {
   x05_x00: "LOCATION REJECT",
   x06_x00: "ASSIGNMENT FAILURE",
   x0a_x00: "3126",
+  x31_x33: "NO RESPONSE",
   x08_x00: "SUCCESS",
   x09_x00: "SUCCESS",
 };
@@ -64,6 +65,13 @@ function getCausePolicy(callData) {
     [0x03, 0x04, 0x05, 0x06, 0x0a].includes(callData[0]) &&
     callData[1] === 0x00
   ) {
+    return {
+      policy: "RETRY",
+      cause: callData[0],
+      message: CauseMessage[`x${hex(callData[0])}_x${hex(callData[1])}`],
+    };
+  }
+  if (callData[0] === 0x31 && callData[1] === 0x33) {
     return {
       policy: "RETRY",
       cause: callData[0],
@@ -175,7 +183,7 @@ class UDPServer {
           `boardSN: ${call.boardSN}\n` +
           `callData: ${call.callData}`,
       );
-      if (msgHeader.unBodyLen === 40) {
+      if (msgHeader.unBodyLen === 40 || msgHeader.unBodyLen === 57) {
         let task = taskManager.getTask(call.IMSI);
         strapi.log.info(`Task: ${JSON.stringify(task)}`);
         if (!task) {
