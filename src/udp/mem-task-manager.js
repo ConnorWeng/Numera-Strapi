@@ -35,9 +35,11 @@ class MemTaskManager {
       for (const expiredTask of expiredTasks) {
         this.removeTask(expiredTask);
       }
-      strapi.log.info(
-        `Expired ${expiredTasks.length} tasks, now ${this.tasks.length} tasks remain`,
-      );
+      if (expiredTasks.length > 0) {
+        strapi.log.info(
+          `Expired ${expiredTasks.length} tasks, now ${this.tasks.length} tasks remain`,
+        );
+      }
     }, 1000);
   }
 
