@@ -13,7 +13,7 @@ const CauseMessage = {
   Cause1: "空号",
   Cause8: "物联网卡或流量卡",
   Cause21: "物联网卡或流量卡",
-  Cause31: "物联网卡或流量卡",
+  //Cause31: "物联网卡或流量卡",
   Cause38: "不支持的新卡",
   Cause57: "物联网卡或流量卡",
 };
