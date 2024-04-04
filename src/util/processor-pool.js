@@ -11,9 +11,19 @@ class ProcessorPool {
   }
 
   findAvaiableProcessor(task) {
-    return this.processors.find(
+    const availableProcessor = this.processors.find(
       (processor) => processor.isAvailable() && processor.isMatch(task),
     );
+    const unavailableProcessor = this.processors.find(
+      (processor) => !processor.isAvailable(),
+    );
+
+    // Make sure only one processor is running globally
+    if (availableProcessor && !unavailableProcessor) {
+      return availableProcessor;
+    } else {
+      return null;
+    }
   }
 
   static async createNewProcessorPoolFromDB(strapi) {
