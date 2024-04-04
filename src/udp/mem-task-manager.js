@@ -2,7 +2,7 @@ const UDPClient = require("./client");
 const { makeCallMessage } = require("../util/message");
 
 const INVALID_TASK_TIME = 60 * 1000;
-const UNTOUCHED_TASK_TIME = 5 * 1000;
+const UNTOUCHED_TASK_TIME = 10 * 1000;
 
 function findLastMatch(array, predicate) {
   return array.reduce((acc, item, index) => {
@@ -81,10 +81,10 @@ class MemTaskManager {
           new Date().getTime() - task.getCreatedAt() > UNTOUCHED_TASK_TIME,
       );
       for (const notTouchedTask of notTouchedTasks) {
-        notTouchedTask.setTouched();
         strapi.log.info(
           `Task ${JSON.stringify(notTouchedTask)} untouched for ${UNTOUCHED_TASK_TIME / 1000}s, retrying...`,
         );
+        notTouchedTask.setTouched();
         UDPClient.getInstance().send(
           makeCallMessage(notTouchedTask.getIMSI()),
           9000,
