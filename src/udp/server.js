@@ -198,7 +198,7 @@ class UDPServer {
             },
           });
         } else if (policy.policy === "RETRY") {
-          if (task.getRetriedTimes() < 1) {
+          if (task.getRetriedTimes() < 2) {
             task.increaseRetry();
             strapi.log.info(`Retry call to IMSI: ${call.IMSI}`);
             UDPClient.getInstance().send(
