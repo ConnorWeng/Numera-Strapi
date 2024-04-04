@@ -23,6 +23,7 @@ const CauseMessage = {
   xff_x1f: "可忽略错误",
   xff_x26: "不支持的新卡",
   xff_x39: "物联网卡或流量卡",
+  x03_x00: "RELEASE",
   x04_x00: "AUTHENTICATION REJECT",
   x05_x00: "LOCATION REJECT",
   x06_x00: "ASSIGNMENT FAILURE",
@@ -59,7 +60,10 @@ function getCausePolicy(callData) {
       };
     }
   }
-  if ([0x04, 0x05, 0x06, 0x0a].includes(callData[0]) && callData[1] === 0x00) {
+  if (
+    [0x03, 0x04, 0x05, 0x06, 0x0a].includes(callData[0]) &&
+    callData[1] === 0x00
+  ) {
     return {
       policy: "RETRY",
       cause: callData[0],
