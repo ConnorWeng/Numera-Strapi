@@ -180,6 +180,10 @@ class UDPServer {
         task.appendLog(`Call data: ${call.callData}`);
 
         const policy = getCausePolicy(call.callData);
+        strapi.log.info(
+          `Policy for IMSI: ${call.IMSI} is ${JSON.stringify(policy)}`,
+        );
+
         if (policy.policy === "REJECT") {
           taskManager.removeTask(task);
           this.reportCallErrorToCloudServer({
