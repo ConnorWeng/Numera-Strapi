@@ -5,12 +5,14 @@ const strapiUtils = require("@strapi/utils");
 const UDPServer = require("../../../udp/server");
 const UDPClient = require("../../../udp/client");
 const { makeCallMessage } = require("../../../util/message");
+const { Task, MemTaskManager } = require("../../../udp/mem-task-manager");
 
 /**
  * local controller
  */
 
 const { createCoreController } = require("@strapi/strapi").factories;
+const taskManager = MemTaskManager.getInstance();
 
 module.exports = createCoreController("api::local.local", ({ strapi }) => ({
   async devices(ctx) {
@@ -29,6 +31,7 @@ module.exports = createCoreController("api::local.local", ({ strapi }) => ({
     }
     // @ts-ignore
     const IMSI = data.IMSI;
+    taskManager.addTask(new Task(IMSI));
 
     UDPClient.getInstance().send(makeCallMessage(IMSI), 9000, "localhost");
     const entity = {

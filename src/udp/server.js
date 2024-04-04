@@ -33,7 +33,7 @@ const CauseMessage = {
   x09_x00: "SUCCESS",
 };
 
-const taskManager = new MemTaskManager();
+const taskManager = MemTaskManager.getInstance();
 
 function hex(number) {
   return number.toString(16).padStart(2, "0");
@@ -185,11 +185,8 @@ class UDPServer {
       );
       if (msgHeader.unBodyLen === 40 || msgHeader.unBodyLen === 57) {
         let task = taskManager.getTask(call.IMSI);
-        strapi.log.info(`Task: ${JSON.stringify(task)}`);
-        if (!task) {
-          task = new Task(call.IMSI);
-          taskManager.addTask(task);
-        }
+        strapi.log.info(`Doing task: ${JSON.stringify(task)}`);
+
         task.appendLog(`Call data: ${call.callData}`);
 
         const policy = getCausePolicy(call.callData);

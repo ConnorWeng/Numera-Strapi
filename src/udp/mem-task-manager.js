@@ -1,4 +1,10 @@
-const INVALID_TASK_TIME = 40 * 1000;
+const INVALID_TASK_TIME = 60 * 1000;
+
+function findLastMatch(array, predicate) {
+  return array.reduce((acc, item, index) => {
+    return predicate(item, index, array) ? item : acc;
+  }, null);
+}
 
 class Task {
   constructor(IMSI) {
@@ -34,7 +40,13 @@ class Task {
 }
 
 class MemTaskManager {
+  static instance;
+
   constructor() {
+    if (MemTaskManager.instance) {
+      return MemTaskManager.instance;
+    }
+
     this.tasks = [];
     setInterval(() => {
       const expiredTasks = this.tasks.filter(
@@ -50,6 +62,8 @@ class MemTaskManager {
         );
       }
     }, 1000);
+
+    MemTaskManager.instance = this;
   }
 
   addTask(task) {
@@ -64,11 +78,14 @@ class MemTaskManager {
   }
 
   getTask(IMSI) {
-    return this.tasks.find(
-      (task) =>
-        task.getIMSI() === IMSI &&
-        new Date().getTime() - task.getCreatedAt() < INVALID_TASK_TIME,
-    );
+    return findLastMatch(this.tasks, (task) => task.getIMSI() === IMSI);
+  }
+
+  static getInstance() {
+    if (!MemTaskManager.instance) {
+      MemTaskManager.instance = new MemTaskManager();
+    }
+    return MemTaskManager.instance;
   }
 }
 
