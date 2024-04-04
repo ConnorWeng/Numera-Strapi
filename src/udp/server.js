@@ -39,7 +39,7 @@ function hex(number) {
 
 function getCausePolicy(callData) {
   if (callData[0] === 0xfe || callData[0] === 0xff) {
-    if (callData[1] in [0x01, 0x08, 0x15, 0x26, 0x39]) {
+    if ([0x01, 0x08, 0x15, 0x26, 0x39].includes(callData[1])) {
       return {
         policy: "REJECT",
         cause: callData[1],
@@ -59,14 +59,14 @@ function getCausePolicy(callData) {
       };
     }
   }
-  if (callData[0] in [0x04, 0x05, 0x06, 0x0a] && callData[1] === 0x00) {
+  if ([0x04, 0x05, 0x06, 0x0a].includes(callData[0]) && callData[1] === 0x00) {
     return {
       policy: "RETRY",
       cause: callData[0],
       message: CauseMessage[`x${hex(callData[0])}_x${hex(callData[1])}`],
     };
   }
-  if (callData[0] in [0x08, 0x09] && callData[1] === 0x00) {
+  if ([0x08, 0x09].includes(callData[0]) && callData[1] === 0x00) {
     return {
       policy: "SUCCESS",
       cause: callData[0],
