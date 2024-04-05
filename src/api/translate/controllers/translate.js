@@ -10,7 +10,8 @@ const TranslateTask = require("../../../util/task");
  */
 
 const { createCoreController } = require("@strapi/strapi").factories;
-const IMSI_REGEX = /^4600[0,1,2,4,6,7,9][0-9]{10,11}$/;
+// const IMSI_REGEX = /^4600[0,1,2,4,6,7,9][0-9]{10,11}$/;
+const IMSI_REGEX = /^[0-9]{14,16}$/;
 
 module.exports = createCoreController(
   "api::translate.translate",
@@ -28,9 +29,29 @@ module.exports = createCoreController(
       // @ts-ignore
       const IMSI = data.IMSI;
       if (!IMSI_REGEX.test(IMSI)) {
-        throw new strapiUtils.errors.ValidationError(
-          "Invalid IMSI. IMSI should be a 14 or 15 digit number.",
-        );
+        throw new strapiUtils.errors.ValidationError("无效的IMSI");
+      }
+
+      const self = await strapi.db
+        .query("plugin::users-permissions.user")
+        .findOne({
+          populate: true,
+          where: { id: ctx.state.user.id },
+        });
+      const activeSubscription = self.subscriptions.find(
+        (sub) => sub.state === "active",
+      );
+      if (!activeSubscription) {
+        throw new strapiUtils.errors.ValidationError("没有生效的合同");
+      }
+      if (activeSubscription.dailyRemaining < 1) {
+        throw new strapiUtils.errors.ValidationError("今日次数已用完");
+      }
+      if (
+        new Date(activeSubscription.membershipExpirationDate).getTime() <
+        new Date().getTime()
+      ) {
+        throw new strapiUtils.errors.ValidationError("合同已过期");
       }
 
       const globalTaskQueue = TaskQueue.getInstance();
@@ -38,6 +59,11 @@ module.exports = createCoreController(
       globalTaskQueue.addTask(task);
       await globalTaskQueue.waitUntilTaskDone(task);
       globalTaskQueue.removeTask(task);
+
+      await strapi.db.query("api::subscription.subscription").update({
+        where: { id: activeSubscription.id },
+        data: { dailyRemaining: activeSubscription.dailyRemaining - 1 },
+      });
 
       return task;
     },
