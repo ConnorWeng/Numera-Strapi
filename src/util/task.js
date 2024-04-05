@@ -22,6 +22,8 @@ class TranslateTask {
       return "CMCC";
     } else if (prefix === "46001" || prefix === "46006" || prefix === "46009") {
       return "CUCC";
+    } else { // FIXME: 国外号码暂时写死用移动
+      return "CMCC";
     }
   }
 
