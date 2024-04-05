@@ -18,18 +18,18 @@
     "dailyRemaining": {
       "type": "biginteger"
     },
-    "user": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "plugin::users-permissions.user",
-      "inversedBy": "subscriptions"
-    },
     "state": {
       "type": "enumeration",
       "enum": ["active", "cancelled", "expired", "limited"]
     },
     "dailyQuota": {
       "type": "biginteger"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "subscriptions"
     }
   }
 }
