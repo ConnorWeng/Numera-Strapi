@@ -910,13 +910,14 @@ export interface ApiSubscriptionSubscription extends Schema.CollectionType {
   };
   attributes: {
     membershipExpirationDate: Attribute.DateTime;
-    remainingAPICalls: Attribute.BigInteger;
+    dailyRemaining: Attribute.BigInteger;
     user: Attribute.Relation<
       "api::subscription.subscription",
       "manyToOne",
       "plugin::users-permissions.user"
     >;
     state: Attribute.Enumeration<["active", "cancelled", "expired", "limited"]>;
+    dailyQuota: Attribute.BigInteger;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;
