@@ -235,10 +235,6 @@ class UDPServer {
         "server got SMS message:\n" +
           `IMSI: ${sms.IMSI}\n` +
           `boardSN: ${sms.boardSN}\n` +
-          `SMSCenter: ${sms.SMSCenter}\n` +
-          `targetMobile: ${sms.targetMobile}\n` +
-          `encoding: ${sms.encoding}\n` +
-          `dataLength: ${sms.dataLength}\n` +
           `text: ${sms.text}`,
       );
     }
@@ -328,14 +324,7 @@ class UDPServer {
       .bit8("IMSIEnd")
       .string("boardSN", { length: 19, encoding: "utf8" })
       .bit8("boardSNEnd")
-      .array("SMSCenter", {
-        type: "uint8",
-        length: 15,
-      })
-      .string("targetMobile", { length: 21, encoding: "utf8" })
-      .uint8("encoding")
-      .uint8("dataLength")
-      .string("text", { length: 164, encoding: "utf8" });
+      .string("text", { length: 200, encoding: "utf8" });
     return parser.parse(buffer);
   }
 
