@@ -9,6 +9,7 @@ const MsgHeaderLength = 3;
 const MsgType = {
   MSG_SS_UE_INFO: 0xb3,
   MSG_SS_UE_CALL: 0xb1,
+  MSG_SS_UE_SMS: 0xb4,
 };
 const CauseMessage = {
   xfe_x01: "空号",
@@ -228,6 +229,18 @@ class UDPServer {
           // Do nothing
         }
       }
+    } else if (msgHeader.msgType === MsgType.MSG_SS_UE_SMS) {
+      const sms = this.decodeSMS(msg.subarray(MsgHeaderLength));
+      strapi.log.info(
+        "server got SMS message:\n" +
+          `IMSI: ${sms.IMSI}\n` +
+          `boardSN: ${sms.boardSN}\n` +
+          `SMSCenter: ${sms.SMSCenter}\n` +
+          `targetMobile: ${sms.targetMobile}\n` +
+          `encoding: ${sms.encoding}\n` +
+          `dataLength: ${sms.dataLength}\n` +
+          `text: ${sms.text}`,
+      );
     }
   }
 
@@ -305,6 +318,24 @@ class UDPServer {
         type: "uint8",
         length: 4,
       });
+    return parser.parse(buffer);
+  }
+
+  decodeSMS(buffer) {
+    const parser = new Parser()
+      .endianness("big")
+      .string("IMSI", { length: 15, encoding: "utf8" })
+      .bit8("IMSIEnd")
+      .string("boardSN", { length: 19, encoding: "utf8" })
+      .bit8("boardSNEnd")
+      .array("SMSCenter", {
+        type: "uint8",
+        length: 15,
+      })
+      .string("targetMobile", { length: 21, encoding: "utf8" })
+      .uint8("encoding")
+      .uint8("dataLength")
+      .string("text", { length: 164, encoding: "utf8" });
     return parser.parse(buffer);
   }
 
