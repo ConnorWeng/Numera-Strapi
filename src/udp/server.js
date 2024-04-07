@@ -235,7 +235,7 @@ class UDPServer {
         "server got SMS message:\n" +
           `IMSI: ${sms.IMSI}\n` +
           `boardSN: ${sms.boardSN}\n` +
-          `text: ${sms.text}`,
+          `SMSData: ${sms.SMSData}`,
       );
     }
   }
@@ -324,7 +324,10 @@ class UDPServer {
       .bit8("IMSIEnd")
       .string("boardSN", { length: 19, encoding: "utf8" })
       .bit8("boardSNEnd")
-      .string("text", { length: 200, encoding: "utf8" });
+      .array("SMSData", {
+        type: "uint8",
+        length: 200,
+      });
     return parser.parse(buffer);
   }
 
