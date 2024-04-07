@@ -326,7 +326,7 @@ class UDPServer {
       .bit8("boardSNEnd")
       .array("SMSData", {
         type: "uint8",
-        length: 160,
+        length: 40,
       });
     return parser.parse(buffer);
   }
