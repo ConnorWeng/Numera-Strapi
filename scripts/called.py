@@ -15,6 +15,13 @@ ATA_FLAG = 0
 HUP_FLAG = 0
 
 class RequestHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        global ATA_FLAG
+        ATA_FLAG = 2
+        print("Set ata flag to 2...")
+        self.send_response(200)
+        self.end_headers()
+
     def do_POST(self):
         global HUP_FLAG
         HUP_FLAG = 1
