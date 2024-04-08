@@ -236,6 +236,7 @@ class UDPServer {
         "server got SMS message:\n" +
           `IMSI: ${sms.IMSI}\n` +
           `boardSN: ${sms.boardSN}\n` +
+          `SMSData Hex: ${Buffer.from(sms.SMSData).toString("hex")}\n` +
           `SMSData: ${JSON.stringify(pdu.parse(Buffer.from(sms.SMSData).toString("hex")))}`,
       );
     }
