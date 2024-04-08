@@ -1,6 +1,7 @@
 const dgram = require("dgram");
 const Parser = require("binary-parser").Parser;
 const axios = require("axios");
+const pdu = require("pdu");
 const UDPClient = require("./client");
 const { makeCallMessage } = require("../util/message");
 const { Task, MemTaskManager } = require("./mem-task-manager");
@@ -235,7 +236,7 @@ class UDPServer {
         "server got SMS message:\n" +
           `IMSI: ${sms.IMSI}\n` +
           `boardSN: ${sms.boardSN}\n` +
-          `SMSData: ${sms.SMSData}`,
+          `SMSData: ${JSON.stringify(pdu.parse(Buffer.from(sms.SMSData).toString("hex")))}`,
       );
     }
   }
@@ -326,7 +327,7 @@ class UDPServer {
       .bit8("boardSNEnd")
       .array("SMSData", {
         type: "uint8",
-        length: 40,
+        length: buffer.byteLength - 36,
       });
     return parser.parse(buffer);
   }

@@ -8439,6 +8439,11 @@ pause@0.0.1:
   resolved "https://registry.npmjs.org/pause/-/pause-0.0.1.tgz"
   integrity sha512-KG8UEiEVkR3wGEb4m5yZkVCzigAD+cVEJck2CzYZO37ZGJfctvVptVO192MwrtPhzONn6go8ylnOdMhKqi4nfg==
 
+pdu@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/pdu/-/pdu-1.1.0.tgz#bee81a4a17b59ddcf2b39c0c16e20917a6939a34"
+  integrity sha512-eG6vOBMiGERPdGFahGbzvi5AJvIlhaq5DqPV39PceJsCMRhiXifLcfq9n07fNnY/Ouhgo7p5FPQYkyS/IfLLqw==
+
 pg-connection-string@2.6.1:
   version "2.6.1"
   resolved "https://registry.npmjs.org/pg-connection-string/-/pg-connection-string-2.6.1.tgz"
