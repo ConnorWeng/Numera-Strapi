@@ -232,13 +232,25 @@ class UDPServer {
       }
     } else if (msgHeader.msgType === MsgType.MSG_SS_UE_SMS) {
       const sms = this.decodeSMS(msg.subarray(MsgHeaderLength));
+      const buffer = Buffer.from(sms.SMSData);
+      const newBuffer = Buffer.alloc(buffer.length - 2);
+      buffer.copy(newBuffer, 0, 0, 8);
+      buffer.copy(newBuffer, 8, 10);
+      const smsObj = pdu.parse(newBuffer.toString("hex"));
+      const smsJSON = JSON.stringify(smsObj);
       strapi.log.info(
         "server got SMS message:\n" +
           `IMSI: ${sms.IMSI}\n` +
           `boardSN: ${sms.boardSN}\n` +
           `SMSData Hex: ${Buffer.from(sms.SMSData).toString("hex")}\n` +
-          `SMSData: ${JSON.stringify(pdu.parse(Buffer.from(sms.SMSData).toString("hex")))}`,
+          `SMSData: ${smsJSON}`,
       );
+      this.reportCallErrorToCloudServer({
+        error: {
+          errorCode: -1,
+          errorMessage: smsJSON,
+        },
+      });
     }
   }
 
