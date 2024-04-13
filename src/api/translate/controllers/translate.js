@@ -65,6 +65,8 @@ module.exports = createCoreController(
         data: { dailyRemaining: activeSubscription.dailyRemaining - 1 },
       });
 
+      task.setDailyRemaining(activeSubscription.dailyRemaining - 1);
+
       return task;
     },
   }),

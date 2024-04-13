@@ -5,6 +5,8 @@ class TranslateTask {
     this.callingNumber = null;
     this.error = null;
     this.taken = false;
+    this.operator = null;
+    this.dailyRemaining = null;
   }
 
   getIMSI() {
@@ -12,6 +14,9 @@ class TranslateTask {
   }
 
   getOperator() {
+    if (this.operator) {
+      return this.operator;
+    }
     const prefix = this.IMSI.substring(0, 5);
     if (
       prefix === "46000" ||
@@ -19,13 +24,14 @@ class TranslateTask {
       prefix === "46004" ||
       prefix === "46007"
     ) {
-      return "CMCC";
+      this.operator = "CMCC";
     } else if (prefix === "46001" || prefix === "46006" || prefix === "46009") {
-      return "CUCC";
+      this.operator = "CUCC";
     } else {
       // FIXME: 国外号码暂时写死用移动
-      return "CMCC";
+      this.operator = "CMCC";
     }
+    return this.operator;
   }
 
   getCreateTime() {
@@ -38,6 +44,10 @@ class TranslateTask {
 
   setError(error) {
     this.error = error;
+  }
+
+  setDailyRemaining(dailyRemaining) {
+    this.dailyRemaining = dailyRemaining;
   }
 
   getError() {
