@@ -1,5 +1,6 @@
 from usr import common
 from machine import Pin, UART, Timer
+from queue import Queue
 import sim, net, dataCall, usocket, ujson, log, utime, checkNet, _thread
 import sys
 import request
@@ -36,6 +37,7 @@ logger = common.LogAdapter("Numera-Quec-Python-Client")
 logger.log_service.logtimeflag = True  # 设置LOG时间输出: True; False.
 logger.log_service.LEVEL = common.LOG_LV.DEBUG  # 设置LOG输出等级: DEBUG; INFO; CRITICAL; WARNING; ERROR.
 
+q = Queue(1000)
 uart = None
 jwt_token = None
 
@@ -59,19 +61,25 @@ def handle_request(json_string):
     json = ujson.loads(json_string)
     if jwt_token is None:
         handle_login(json['user'], json['password'])
+    del json['user']
+    del json['password']
+    headers = {
+        'Content-Type': 'application/json',
+        "Authorization": "Bearer " + jwt_token,
+    }
+    request_json = {
+        'clientName': CLIENT_NAME,
+        'clientVersion': CLIENT_VERSION,
+        'data': json
+    }
+    logger.info('Ready to send data: {}'.format(ujson.dumps(request_json)))
+    response = request.post(url + '/translates', data=ujson.dumps(request_json), headers=headers, timeout=50)
+    response_data = response.json()
+    if response.status_code == 200:
+        uart.write(ujson.dumps(response_data))
+        logger.info('Translate result: {}'.format(response_data))
     else:
-        headers = {
-            'Content-Type': 'application/json',
-            "Authorization": "Bearer " + jwt_token,
-        }
-        del json['password']
-        logger.info('Ready to send data: {}'.format(ujson.dumps(json)))
-        """ response = request.post(url + '/calls', data=ujson.dumps(json), headers=headers)
-        response_data = response.json()
-        if response.status_code == 200:
-            logger.info('Call report: {}'.format(response_data))
-        else:
-            logger.error('Call report failed: {}'.format(response_data['error']['message'])) """
+        logger.error('Translate failed: {}'.format(response_data['error']['message']))
 
 def uart_read():
     global uart
@@ -83,12 +91,26 @@ def uart_read():
                 msg = uart.read(msglen)
                 # 初始数据是字节类型（bytes）,将字节类型数据进行编码
                 utf8_msg = msg.decode()
-                logger.info('uart recv {:03d} bytes data: {}'.format(len(utf8_msg), utf8_msg))
-                handle_request(utf8_msg)
+                q.put(utf8_msg)
+                logger.info('uart recv {} bytes data: {}'.format(len(utf8_msg), utf8_msg))
             else:
                 utime.sleep_ms(1)
     except Exception as e:
-        logger.error('Exception1: {}'.format(e))
+        logger.error('UART Read Exception: {}'.format(e))
+        sys.exit(1)
+
+def process_queue():
+    global q
+    try:
+        while True:
+            if not q.empty():
+                task = q.get()
+                logger.info('Processing task: {}, remain {} tasks'.format(task, q.size()))
+                handle_request(task)
+            else:
+                utime.sleep_ms(1000)
+    except Exception as e:
+        logger.error('Process Queue Exception: {}'.format(e))
         sys.exit(1)
 
 if __name__ == "__main__":
@@ -108,4 +130,5 @@ if __name__ == "__main__":
 
     uart = UART(UART.UART2, 115200, 8, 0, 1, 0)
     _thread.start_new_thread(uart_read, ())
+    _thread.start_new_thread(process_queue, ())
     logger.info('UART2 initialized.')
