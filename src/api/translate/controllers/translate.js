@@ -4,6 +4,13 @@ const _ = require("lodash/fp");
 const strapiUtils = require("@strapi/utils");
 const TaskQueue = require("../../../util/task-queue");
 const TranslateTask = require("../../../util/task");
+const {
+  MISSING_DATA,
+  INVALID_IMSI,
+  NO_ACTIVE_SUBSCRIPTION,
+  DAILY_REMAINING_RUN_OUT,
+  SUBSCRIPTION_EXPIRED,
+} = require("../../../util/error-codes");
 
 /**
  * translate controller
@@ -13,12 +20,13 @@ const { createCoreController } = require("@strapi/strapi").factories;
 // const IMSI_REGEX = /^4600[0,1,2,4,6,7,9][0-9]{10,11}$/;
 const IMSI_REGEX = /^[0-9]{14,16}$/;
 
-const transformErrorTask = (isQuecClient, task, errorCode, errorMessage) => {
+const transformErrorTask = (isQuecClient, task, error) => {
   if (isQuecClient) {
-    task.setError({ errorCode, errorMessage });
+    task.setError(error);
+    task.setCode(error.code);
     return task;
   } else {
-    throw new strapiUtils.errors.ValidationError(errorMessage);
+    throw new strapiUtils.errors.ValidationError(error.errorMessage);
   }
 };
 
@@ -33,19 +41,14 @@ module.exports = createCoreController(
       const isQuecClient = clientName?.includes("Quec");
       const task = new TranslateTask(null);
       if (!_.isObject(data)) {
-        return transformErrorTask(
-          isQuecClient,
-          task,
-          400,
-          "Missing 'data' payload in the request body",
-        );
+        return transformErrorTask(isQuecClient, task, MISSING_DATA);
       }
 
       // @ts-ignore
       const IMSI = data.IMSI;
       task.setIMSI(IMSI);
       if (!IMSI_REGEX.test(IMSI)) {
-        return transformErrorTask(isQuecClient, task, 400, "无效的IMSI");
+        return transformErrorTask(isQuecClient, task, INVALID_IMSI);
       }
 
       let validationError = null;
@@ -59,19 +62,16 @@ module.exports = createCoreController(
         (sub) => sub.state === "active",
       );
       if (!activeSubscription) {
-        validationError = "没有生效的合同";
+        return transformErrorTask(isQuecClient, task, NO_ACTIVE_SUBSCRIPTION);
       }
       if (activeSubscription.dailyRemaining < 1) {
-        validationError = "今日次数已用完";
+        return transformErrorTask(isQuecClient, task, DAILY_REMAINING_RUN_OUT);
       }
       if (
         new Date(activeSubscription.membershipExpirationDate).getTime() <
         new Date().getTime()
       ) {
-        validationError = "合同已过期";
-      }
-      if (validationError) {
-        return transformErrorTask(isQuecClient, task, 400, validationError);
+        return transformErrorTask(isQuecClient, task, SUBSCRIPTION_EXPIRED);
       }
 
       const globalTaskQueue = TaskQueue.getInstance();

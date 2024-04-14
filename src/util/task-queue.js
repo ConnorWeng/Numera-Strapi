@@ -60,6 +60,7 @@ class TaskQueue {
       const interval = setInterval(() => {
         times += 1;
         if (times > TASK_TIMEOUT) {
+          task.setCode(TIMEOUT.code);
           task.setError(TIMEOUT);
         }
         if (task.isDone()) {

@@ -7,6 +7,7 @@ class TranslateTask {
     this.taken = false;
     this.operator = null;
     this.dailyRemaining = null;
+    this.code = 0;
   }
 
   getIMSI() {
@@ -52,6 +53,10 @@ class TranslateTask {
 
   setDailyRemaining(dailyRemaining) {
     this.dailyRemaining = dailyRemaining;
+  }
+
+  setCode(code) {
+    this.code = code;
   }
 
   getError() {

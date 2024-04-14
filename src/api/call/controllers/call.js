@@ -23,6 +23,7 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
     }
 
     if (data.error) {
+      task.setCode(data.error.code);
       task.setError(data.error);
     } else {
       task.setCallingNumber(data.callingNumber);

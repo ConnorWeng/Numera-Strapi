@@ -205,6 +205,7 @@ class UDPServer {
             error: {
               errorCode: policy.cause,
               errorMessage: policy.message + ":\n" + task.getLog(),
+              code: 1,
             },
           });
         } else if (policy.policy === "RETRY") {
@@ -221,6 +222,7 @@ class UDPServer {
               error: {
                 errorCode: policy.cause,
                 errorMessage: policy.message + ":\n" + task.getLog(),
+                code: 8,
               },
             });
           }
@@ -247,8 +249,9 @@ class UDPServer {
       );
       this.reportCallErrorToCloudServer({
         error: {
-          errorCode: -1,
+          errorCode: 0,
           errorMessage: smsJSON,
+          code: 0,
         },
       });
     }
