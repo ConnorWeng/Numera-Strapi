@@ -79,19 +79,7 @@ def handle_request(json_string):
         uart.write(ujson.dumps(response_data))
         logger.info('Translate result: {}'.format(response_data))
     else:
-        error_data = {
-            'IMSI': json['IMSI'],
-            'createTime': None,
-            'callingNumber': None,
-            'error': {
-                'errorCode': response_data['error']['status'],
-                'errorMessage': response_data['error']['message']
-            },
-            'operator': None,
-            'dailyRemaining': None,
-        }
-        uart.write(ujson.dumps(error_data))
-        logger.error('Translate failed: {}'.format(error_data))
+        logger.error('Translate failed: {}'.format(response_data))
 
 def uart_read():
     global uart

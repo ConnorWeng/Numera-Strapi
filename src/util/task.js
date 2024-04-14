@@ -38,6 +38,10 @@ class TranslateTask {
     return this.createTime;
   }
 
+  setIMSI(IMSI) {
+    this.IMSI = IMSI;
+  }
+
   setCallingNumber(callingNumber) {
     this.callingNumber = callingNumber;
   }

@@ -13,6 +13,15 @@ const { createCoreController } = require("@strapi/strapi").factories;
 // const IMSI_REGEX = /^4600[0,1,2,4,6,7,9][0-9]{10,11}$/;
 const IMSI_REGEX = /^[0-9]{14,16}$/;
 
+const transformErrorTask = (isQuecClient, task, errorCode, errorMessage) => {
+  if (isQuecClient) {
+    task.setError({ errorCode, errorMessage });
+    return task;
+  } else {
+    throw new strapiUtils.errors.ValidationError(errorMessage);
+  }
+};
+
 module.exports = createCoreController(
   "api::translate.translate",
   ({ strapi }) => ({
@@ -20,18 +29,26 @@ module.exports = createCoreController(
       await this.validateQuery(ctx);
 
       // @ts-ignore
-      const { data } = ctx.request.body;
+      const { data, clientName, clientVersion } = ctx.request.body;
+      const isQuecClient = clientName?.includes("Quec");
+      const task = new TranslateTask(null);
       if (!_.isObject(data)) {
-        throw new strapiUtils.errors.ValidationError(
-          'Missing "data" payload in the request body',
+        return transformErrorTask(
+          isQuecClient,
+          task,
+          400,
+          "Missing 'data' payload in the request body",
         );
       }
+
       // @ts-ignore
       const IMSI = data.IMSI;
+      task.setIMSI(IMSI);
       if (!IMSI_REGEX.test(IMSI)) {
-        throw new strapiUtils.errors.ValidationError("无效的IMSI");
+        return transformErrorTask(isQuecClient, task, 400, "无效的IMSI");
       }
 
+      let validationError = null;
       const self = await strapi.db
         .query("plugin::users-permissions.user")
         .findOne({
@@ -42,20 +59,22 @@ module.exports = createCoreController(
         (sub) => sub.state === "active",
       );
       if (!activeSubscription) {
-        throw new strapiUtils.errors.ValidationError("没有生效的合同");
+        validationError = "没有生效的合同";
       }
       if (activeSubscription.dailyRemaining < 1) {
-        throw new strapiUtils.errors.ValidationError("今日次数已用完");
+        validationError = "今日次数已用完";
       }
       if (
         new Date(activeSubscription.membershipExpirationDate).getTime() <
         new Date().getTime()
       ) {
-        throw new strapiUtils.errors.ValidationError("合同已过期");
+        validationError = "合同已过期";
+      }
+      if (validationError) {
+        return transformErrorTask(isQuecClient, task, 400, validationError);
       }
 
       const globalTaskQueue = TaskQueue.getInstance();
-      const task = new TranslateTask(IMSI);
       globalTaskQueue.addTask(task);
       await globalTaskQueue.waitUntilTaskDone(task);
       globalTaskQueue.removeTask(task);
