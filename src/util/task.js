@@ -1,17 +1,27 @@
+const { v4: uuidv4 } = require("uuid");
+
 class TranslateTask {
   constructor(IMSI) {
+    this.uid = uuidv4();
     this.IMSI = IMSI;
+    this.mode = "translate";
     this.createTime = new Date().getTime();
     this.callingNumber = null;
+    this.SMSData = [];
     this.error = null;
     this.taken = false;
     this.operator = null;
     this.dailyRemaining = null;
+    this.done = false;
     this.code = 0;
   }
 
   getIMSI() {
     return this.IMSI;
+  }
+
+  getUID() {
+    return this.uid;
   }
 
   getOperator() {
@@ -43,6 +53,10 @@ class TranslateTask {
     this.IMSI = IMSI;
   }
 
+  setMode(mode) {
+    this.mode = mode;
+  }
+
   setCallingNumber(callingNumber) {
     this.callingNumber = callingNumber;
   }
@@ -59,6 +73,10 @@ class TranslateTask {
     this.code = code;
   }
 
+  addSMS(SMS) {
+    this.SMSData.push(SMS);
+  }
+
   getError() {
     return this.error;
   }
@@ -72,7 +90,12 @@ class TranslateTask {
   }
 
   isDone() {
-    return this.callingNumber !== null || this.error !== null;
+    if (this.mode === "translate") {
+      this.done = this.callingNumber !== null || this.error !== null;
+    } else if (this.mode === "cloud_fetch") {
+      this.done = this.SMSData.length > 5 || this.error !== null;
+    }
+    return this.done;
   }
 }
 

@@ -17,7 +17,7 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
     // @ts-ignore
     const { data } = ctx.request.body || {};
 
-    const task = TaskQueue.getInstance().findClosestTask();
+    const task = TaskQueue.getInstance().findClosestTask(data.uid);
     if (!task) {
       throw new strapiUtils.errors.NotFoundError("No task found");
     }
@@ -25,8 +25,14 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
     if (data.error) {
       task.setCode(data.error.code);
       task.setError(data.error);
-    } else {
+    }
+
+    if (data.callingNumber) {
       task.setCallingNumber(data.callingNumber);
+    }
+
+    if (data.SMS) {
+      task.addSMS(data.SMS);
     }
 
     const sanitizedEntity = await this.sanitizeOutput({ ...task }, ctx);

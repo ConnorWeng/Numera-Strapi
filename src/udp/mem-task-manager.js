@@ -11,12 +11,15 @@ function findLastMatch(array, predicate) {
 }
 
 class Task {
-  constructor(IMSI) {
+  constructor(IMSI, uid) {
+    this.uid = uid;
     this.IMSI = IMSI;
     this.createdAt = new Date().getTime();
     this.retriedTimes = 0;
     this.logs = [];
     this.touched = false;
+    this.error = null;
+    this.SMS = null;
   }
 
   getIMSI() {
@@ -49,6 +52,14 @@ class Task {
 
   setTouched() {
     this.touched = true;
+  }
+
+  setError(error) {
+    this.error = error;
+  }
+
+  setSMS(SMS) {
+    this.SMS = SMS;
   }
 }
 

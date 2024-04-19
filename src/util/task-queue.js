@@ -1,6 +1,6 @@
 const { TIMEOUT } = require("./error-codes");
 
-const TASK_TIMEOUT = 40;
+const TASK_TIMEOUT = 60;
 const INVALID_TASK_TIME = 4;
 
 class TaskQueue {
@@ -13,6 +13,39 @@ class TaskQueue {
 
     this.queue = [];
     TaskQueue.instance = this;
+
+    if (process.env.IS_DEVICE === "false" || !process.env.IS_DEVICE) {
+      setInterval(() => {
+        const timeoutTasks = this.queue.filter(
+          (task) =>
+            !task.isDone() &&
+            new Date().getTime() - task.getCreateTime() > TASK_TIMEOUT * 1000,
+        );
+        for (const timeoutTask of timeoutTasks) {
+          timeoutTask.setCode(TIMEOUT.code);
+          timeoutTask.setError(TIMEOUT);
+        }
+        if (timeoutTasks.length > 0) {
+          strapi.log.info(
+            `Timeout ${timeoutTasks.length} tasks, now ${this.queue.length} tasks remain`,
+          );
+        }
+
+        const expiredTasks = this.queue.filter(
+          (task) =>
+            new Date().getTime() - task.getCreateTime() >
+            TASK_TIMEOUT * 5 * 1000,
+        );
+        for (const expiredTask of expiredTasks) {
+          this.removeTask(expiredTask);
+        }
+        if (expiredTasks.length > 0) {
+          strapi.log.info(
+            `Expire ${expiredTasks.length} tasks, now ${this.queue.length} tasks remain`,
+          );
+        }
+      }, 1000);
+    }
   }
 
   addTask(task) {
@@ -35,19 +68,27 @@ class TaskQueue {
     }
   }
 
-  findClosestTask() {
-    const findArray = this.queue.filter((task) => {
-      if (
-        !task.isDone() &&
-        new Date().getTime() - task.getCreateTime() < TASK_TIMEOUT * 1000 &&
-        new Date().getTime() - task.getCreateTime() > INVALID_TASK_TIME * 1000
-      ) {
-        return true;
-      } else {
-        return false;
-      }
-    });
+  findClosestTask(uid) {
+    let findArray;
+    if (uid) {
+      findArray = this.queue.filter((task) => task.getUID() === uid);
+    } else {
+      findArray = this.queue.filter((task) => {
+        if (
+          !task.isDone() &&
+          new Date().getTime() - task.getCreateTime() < TASK_TIMEOUT * 1000 &&
+          new Date().getTime() - task.getCreateTime() > INVALID_TASK_TIME * 1000
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+    }
     if (findArray.length > 0) {
+      strapi.log.info(
+        `Found task by ${uid ? "uid" : "create time"}: ${JSON.stringify(findArray[0])}.`,
+      );
       return findArray[0];
     } else {
       return null;

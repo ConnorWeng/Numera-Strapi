@@ -201,13 +201,12 @@ class UDPServer {
         );
 
         if (policy.policy === "REJECT") {
-          this.reportCallErrorToCloudServer({
-            error: {
-              errorCode: policy.cause,
-              errorMessage: policy.message + ":\n" + task.getLog(),
-              code: 1,
-            },
+          task.setError({
+            errorCode: policy.cause,
+            errorMessage: policy.message + ":\n" + task.getLog(),
+            code: 1,
           });
+          this.reportCallToCloudServer(task);
         } else if (policy.policy === "RETRY") {
           if (task.getRetriedTimes() < 2) {
             task.increaseRetry();
@@ -218,13 +217,12 @@ class UDPServer {
               "localhost",
             );
           } else {
-            this.reportCallErrorToCloudServer({
-              error: {
-                errorCode: policy.cause,
-                errorMessage: policy.message + ":\n" + task.getLog(),
-                code: 8,
-              },
+            task.setError({
+              errorCode: policy.cause,
+              errorMessage: policy.message + ":\n" + task.getLog(),
+              code: 8,
             });
+            this.reportCallToCloudServer(task);
           }
         } else if (policy.policy === "SUCCESS") {
           strapi.log.info(`Call success to IMSI: ${call.IMSI}`);
@@ -234,6 +232,7 @@ class UDPServer {
       }
     } else if (msgHeader.msgType === MsgType.MSG_SS_UE_SMS) {
       const sms = this.decodeSMS(msg.subarray(MsgHeaderLength));
+      let task = taskManager.getTask(sms.IMSI);
       const buffer = Buffer.from(sms.SMSData);
       const newBuffer = Buffer.alloc(buffer.length - 2);
       buffer.copy(newBuffer, 0, 0, 8);
@@ -247,27 +246,22 @@ class UDPServer {
           `SMSData Hex: ${Buffer.from(sms.SMSData).toString("hex")}\n` +
           `SMSData: ${smsJSON}`,
       );
-      this.reportCallErrorToCloudServer({
-        error: {
-          errorCode: 0,
-          errorMessage: smsJSON,
-          code: 0,
-        },
-      });
+      task.setSMS(smsJSON);
+      this.reportCallToCloudServer(task);
     }
   }
 
-  reportCallErrorToCloudServer(error) {
-    strapi.log.info(`Report error to cloud server: ${JSON.stringify(error)}`);
+  reportCallToCloudServer(task) {
+    strapi.log.info(`Report call to cloud server: ${JSON.stringify(task)}`);
     this.axiosInstance
       .post(`${process.env.CLOUD_API_URL}/api/calls`, {
-        data: error,
+        data: task,
       })
       .then((res) => {
-        strapi.log.info(`Report error to cloud server success: ${res.status}`);
+        strapi.log.info(`Report call to cloud server success: ${res.status}`);
       })
       .catch((err) => {
-        strapi.log.error(`Report error to cloud server failed: ${err}`);
+        strapi.log.error(`Report call to cloud server failed: ${err}`);
       });
   }
 

@@ -45,13 +45,16 @@ module.exports = createCoreController(
       }
 
       // @ts-ignore
-      const IMSI = data.IMSI;
+      const { IMSI, mode } = data;
       task.setIMSI(IMSI);
       if (!IMSI_REGEX.test(IMSI)) {
         return transformErrorTask(isQuecClient, task, INVALID_IMSI);
       }
 
-      let validationError = null;
+      if (mode === "translate" || mode === "cloud_fetch") {
+        task.setMode(mode);
+      }
+
       const self = await strapi.db
         .query("plugin::users-permissions.user")
         .findOne({
@@ -76,8 +79,6 @@ module.exports = createCoreController(
 
       const globalTaskQueue = TaskQueue.getInstance();
       globalTaskQueue.addTask(task);
-      await globalTaskQueue.waitUntilTaskDone(task);
-      globalTaskQueue.removeTask(task);
 
       await strapi.db.query("api::subscription.subscription").update({
         where: { id: activeSubscription.id },
@@ -85,6 +86,25 @@ module.exports = createCoreController(
       });
 
       task.setDailyRemaining(activeSubscription.dailyRemaining - 1);
+
+      return task;
+    },
+
+    async findOne(ctx) {
+      const { id } = ctx.params;
+      await this.validateQuery(ctx);
+      const sanitizedQuery = await this.sanitizeQuery(ctx);
+
+      const globalTaskQueue = TaskQueue.getInstance();
+      const task = globalTaskQueue.findClosestTask(id);
+
+      if (!task) {
+        throw new strapiUtils.errors.NotFoundError("No task found");
+      }
+
+      if (task.isDone()) {
+        globalTaskQueue.removeTask(task);
+      }
 
       return task;
     },
