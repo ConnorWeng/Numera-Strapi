@@ -1,6 +1,6 @@
 const { TIMEOUT } = require("./error-codes");
 
-const TASK_TIMEOUT = 60;
+const TASK_TIMEOUT = 70;
 const INVALID_TASK_TIME = 4;
 
 class TaskQueue {
