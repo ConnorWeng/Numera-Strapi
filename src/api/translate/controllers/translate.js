@@ -35,6 +35,7 @@ const transformResult = (isQuecClient, task) => {
     return {
       uid: task.uid,
       imsi_phone: task.callingNumber,
+      sms_data: task.SMSData,
       type: task.operator === "CMCC" ? 0 : 1,
       timestamp: new Date().getTime() - task.createTime,
       imsi: task.IMSI,
