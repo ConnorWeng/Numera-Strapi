@@ -827,6 +827,11 @@ export interface ApiDeviceDevice extends Schema.CollectionType {
     port: Attribute.Integer;
     apiToken: Attribute.Text;
     apiPath: Attribute.String;
+    subdevice: Attribute.Relation<
+      "api::device.device",
+      "oneToOne",
+      "api::device.device"
+    >;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;

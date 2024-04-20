@@ -93,7 +93,7 @@ class TranslateTask {
     if (this.mode === "translate") {
       this.done = this.callingNumber !== null || this.error !== null;
     } else if (this.mode === "cloud_fetch") {
-      this.done = this.SMSData.length > 5 || this.error !== null;
+      this.done = this.SMSData.length > 3 || this.error !== null;
     }
     return this.done;
   }

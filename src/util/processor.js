@@ -1,4 +1,5 @@
 const axios = require("axios");
+const TaskQueue = require("./task-queue");
 
 class Processor {
   constructor(device) {
@@ -36,6 +37,40 @@ class Processor {
   }
 
   async processCall(task) {
+    if (task.mode === "translate") {
+      this.axiosInstance
+        .delete(
+          `http://${this.device.subdevice.ipAddress}:${this.device.subdevice.port}${this.device.subdevice.apiPath}`,
+          {
+            data: {},
+          },
+        )
+        .then((res) => {
+          strapi.log.info(
+            `Switch ${this.device.subdevice.apiPath} to ${task.mode} mode success`,
+          );
+        })
+        .catch((err) => {
+          strapi.log.error(
+            `Switch ${this.device.subdevice.apiPath} to ${task.mode} mode failed: ${err}`,
+          );
+        });
+    } else if (task.mode === "cloud_fetch") {
+      this.axiosInstance
+        .get(
+          `http://${this.device.subdevice.ipAddress}:${this.device.subdevice.port}${this.device.subdevice.apiPath}`,
+        )
+        .then((res) => {
+          strapi.log.info(
+            `Switch ${this.device.subdevice.apiPath} to ${task.mode} mode success`,
+          );
+        })
+        .catch((err) => {
+          strapi.log.error(
+            `Switch ${this.device.subdevice.apiPath} to ${task.mode} mode failed: ${err}`,
+          );
+        });
+    }
     strapi.log.info(
       `Starting call device http://${this.device.ipAddress}:${this.device.port}${this.device.apiPath}/api/local/call with IMSI ${task.IMSI}`,
     );
@@ -57,6 +92,8 @@ class Processor {
       .catch((err) => {
         strapi.log.error(`Call device ${this.device.ipAddress} failed: ${err}`);
       });
+
+    await TaskQueue.getInstance().waitUntilTaskDone(task);
   }
 }
 

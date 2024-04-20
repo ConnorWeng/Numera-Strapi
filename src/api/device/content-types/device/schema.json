@@ -29,6 +29,11 @@
     },
     "apiPath": {
       "type": "string"
+    },
+    "subdevice": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::device.device"
     }
   }
 }

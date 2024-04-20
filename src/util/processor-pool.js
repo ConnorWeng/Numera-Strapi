@@ -28,6 +28,7 @@ class ProcessorPool {
 
   static async createNewProcessorPoolFromDB(strapi) {
     const devices = await strapi.db.query("api::device.device").findMany({
+      populate: { subdevice: true },
       pagination: { pageSize: 1000 },
     });
     const processors = devices

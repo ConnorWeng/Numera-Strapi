@@ -73,13 +73,41 @@ def handle_request(json_string):
         'data': json
     }
     logger.info('Ready to send data: {}'.format(ujson.dumps(request_json)))
-    response = request.post(url + '/translates', data=ujson.dumps(request_json), headers=headers, timeout=50)
+    response = request.post(url + '/translates', data=ujson.dumps(request_json), headers=headers, timeout=30)
     response_data = response.json()
     if response.status_code == 200:
         uart.write(ujson.dumps(response_data))
         logger.info('Translate result: {}'.format(response_data))
+        start_poll(response_data.uid)
     else:
         logger.error('Translate failed: {}'.format(response_data))
+
+def start_poll(uid):
+    try:
+        while True:
+            data = poll(uid)
+            if data['done'] == 'true':
+                break
+            utime.sleep(10)
+    except Exception as e:
+        logger.error('Poll Exception: {}'.format(e))
+        sys.exit(1)
+
+def poll(uid):
+    global jwt_token
+    headers = {
+        'Content-Type': 'application/json',
+        "Authorization": "Bearer " + jwt_token,
+    }
+    logger.info('Ready to poll task: {}'.format(uid))
+    response = request.get(url + '/translates/' + uid, headers=headers, timeout=30)
+    response_data = response.json()
+    if response.status_code == 200:
+        uart.write(ujson.dumps(response_data))
+        logger.info('Poll result: {}'.format(response_data))
+    else:
+        logger.error('Poll failed: {}'.format(response_data))
+    return response_data
 
 def uart_read():
     global uart
