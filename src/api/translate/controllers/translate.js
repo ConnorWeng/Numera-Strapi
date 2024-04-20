@@ -33,6 +33,7 @@ const transformErrorTask = (isQuecClient, task, error) => {
 const transformResult = (isQuecClient, task) => {
   if (isQuecClient) {
     return {
+      uid: task.uid,
       imsi_phone: task.callingNumber,
       type: task.operator === "CMCC" ? 0 : 1,
       timestamp: new Date().getTime() - task.createTime,
