@@ -78,7 +78,7 @@ def handle_request(json_string):
     if response.status_code == 200:
         uart.write(ujson.dumps(response_data))
         logger.info('Translate result: {}'.format(response_data))
-        start_poll(response_data.uid)
+        start_poll(response_data['uid'])
     else:
         logger.error('Translate failed: {}'.format(response_data))
 
@@ -86,7 +86,7 @@ def start_poll(uid):
     try:
         while True:
             data = poll(uid)
-            if data['done'] == 'true':
+            if data['done']:
                 break
             utime.sleep(10)
     except Exception as e:
@@ -100,7 +100,7 @@ def poll(uid):
         "Authorization": "Bearer " + jwt_token,
     }
     logger.info('Ready to poll task: {}'.format(uid))
-    response = request.get(url + '/translates/' + uid + '?clientName=' + CLIENT_NAME + '&clientVersion=' + CLIENT_VERSION, headers=headers, timeout=30)
+    response = request.get(url + '/translates/' + uid + '?clientName=' + CLIENT_NAME.replace(" ", "%20") + '&clientVersion=' + CLIENT_VERSION, headers=headers, timeout=30)
     response_data = response.json()
     if response.status_code == 200:
         uart.write(ujson.dumps(response_data))
