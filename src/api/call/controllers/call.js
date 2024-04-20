@@ -28,10 +28,12 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
     }
 
     if (data.callingNumber) {
+      task.setCode(0);
       task.setCallingNumber(data.callingNumber);
     }
 
     if (data.SMS) {
+      task.setCode(0);
       task.addSMS(data.SMS);
     }
 

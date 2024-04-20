@@ -13,7 +13,7 @@ class TranslateTask {
     this.operator = null;
     this.dailyRemaining = null;
     this.done = false;
-    this.code = 0;
+    this.code = 999;
   }
 
   getIMSI() {

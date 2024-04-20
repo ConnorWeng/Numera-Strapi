@@ -100,7 +100,7 @@ def poll(uid):
         "Authorization": "Bearer " + jwt_token,
     }
     logger.info('Ready to poll task: {}'.format(uid))
-    response = request.get(url + '/translates/' + uid, headers=headers, timeout=30)
+    response = request.get(url + '/translates/' + uid + '?clientName=' + CLIENT_NAME + '&clientVersion=' + CLIENT_VERSION, headers=headers, timeout=30)
     response_data = response.json()
     if response.status_code == 200:
         uart.write(ujson.dumps(response_data))

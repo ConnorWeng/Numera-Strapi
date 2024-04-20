@@ -30,6 +30,21 @@ const transformErrorTask = (isQuecClient, task, error) => {
   }
 };
 
+const transformResult = (isQuecClient, task) => {
+  if (isQuecClient) {
+    return {
+      imsi_phone: task.callingNumber,
+      type: task.operator === "CMCC" ? 0 : 1,
+      timestamp: new Date().getTime() - task.createTime,
+      imsi: task.IMSI,
+      code: task.code,
+      quantity: task.dailyRemaining,
+    };
+  } else {
+    return task;
+  }
+};
+
 module.exports = createCoreController(
   "api::translate.translate",
   ({ strapi }) => ({
@@ -87,13 +102,15 @@ module.exports = createCoreController(
 
       task.setDailyRemaining(activeSubscription.dailyRemaining - 1);
 
-      return task;
+      return transformResult(isQuecClient, task);
     },
 
     async findOne(ctx) {
       const { id } = ctx.params;
       await this.validateQuery(ctx);
       const sanitizedQuery = await this.sanitizeQuery(ctx);
+      const { clientName, clientVersion } = sanitizedQuery;
+      const isQuecClient = clientName?.includes("Quec");
 
       const globalTaskQueue = TaskQueue.getInstance();
       const task = globalTaskQueue.findClosestTask(id);
@@ -106,7 +123,7 @@ module.exports = createCoreController(
         globalTaskQueue.removeTask(task);
       }
 
-      return task;
+      return transformResult(isQuecClient, task);
     },
   }),
 );
