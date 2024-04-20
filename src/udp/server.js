@@ -242,8 +242,6 @@ class UDPServer {
       buffer.copy(newBuffer, 0, 0, 8);
       buffer.copy(newBuffer, 8, 10);
       const smsObj = pdu.parse(newBuffer.toString("hex"));
-      smsObj.text = smsObj.text.trim();
-      smsObj.sender = smsObj.sender.substring(0, smsObj.sender.length - 2);
       strapi.log.info(
         "server got SMS message:\n" +
           `IMSI: ${sms.IMSI}\n` +
@@ -251,7 +249,16 @@ class UDPServer {
           `SMSData Hex: ${Buffer.from(sms.SMSData).toString("hex")}\n` +
           `SMSData: ${JSON.stringify(smsObj)}`,
       );
-      task.setSMS(smsObj);
+      task.setSMS(
+        Object.assign(
+          {},
+          {
+            sender: smsObj.sender.substring(0, smsObj.sender.length - 2),
+            time: smsObj.time,
+            text: smsObj.text.replace(/[\u0000]/g, ""),
+          },
+        ),
+      );
       this.reportCallToCloudServer(task);
     }
   }
