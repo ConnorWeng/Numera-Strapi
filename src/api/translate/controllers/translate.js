@@ -40,6 +40,7 @@ const transformResult = (isQuecClient, task) => {
       imsi: task.IMSI,
       code: task.code,
       quantity: task.dailyRemaining,
+      done: task.done,
     };
   } else {
     return task;
