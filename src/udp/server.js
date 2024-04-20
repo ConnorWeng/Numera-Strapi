@@ -233,20 +233,25 @@ class UDPServer {
     } else if (msgHeader.msgType === MsgType.MSG_SS_UE_SMS) {
       const sms = this.decodeSMS(msg.subarray(MsgHeaderLength));
       let task = taskManager.getTask(sms.IMSI);
+      if (!task) {
+        return;
+      }
+
       const buffer = Buffer.from(sms.SMSData);
       const newBuffer = Buffer.alloc(buffer.length - 2);
       buffer.copy(newBuffer, 0, 0, 8);
       buffer.copy(newBuffer, 8, 10);
       const smsObj = pdu.parse(newBuffer.toString("hex"));
-      const smsJSON = JSON.stringify(smsObj);
+      smsObj.text = smsObj.text.trim();
+      smsObj.sender = smsObj.sender.substring(0, smsObj.sender.length - 2);
       strapi.log.info(
         "server got SMS message:\n" +
           `IMSI: ${sms.IMSI}\n` +
           `boardSN: ${sms.boardSN}\n` +
           `SMSData Hex: ${Buffer.from(sms.SMSData).toString("hex")}\n` +
-          `SMSData: ${smsJSON}`,
+          `SMSData: ${JSON.stringify(smsObj)}`,
       );
-      task.setSMS(smsJSON);
+      task.setSMS(smsObj);
       this.reportCallToCloudServer(task);
     }
   }
