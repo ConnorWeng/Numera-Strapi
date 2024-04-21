@@ -2,6 +2,7 @@ const dgram = require("dgram");
 const Parser = require("binary-parser").Parser;
 const axios = require("axios");
 const pdu = require("pdu");
+const moment = require("moment");
 const UDPClient = require("./client");
 const { makeCallMessage } = require("../util/message");
 const { Task, MemTaskManager } = require("./mem-task-manager");
@@ -269,17 +270,13 @@ class UDPServer {
           `SMSData: ${JSON.stringify(smsObj)}`,
       );
       smsObj.time.setHours(smsObj.time.getHours() + 8);
-      let text = smsObj.text.replace(/[\n\u001d\u0000]/g, "").trim();
-      if (smsObj.encoding === "7bit" && text.length > 0) {
-        text = text.substring(0, text.length - 1);
-      }
       task.setSMS(
         Object.assign(
           {},
           {
             sender: smsObj.sender.substring(0, smsObj.sender.length - 2),
-            time: smsObj.time,
-            text: text,
+            time: moment(smsObj.time).format("YYYY-MM-DD HH:mm:ss.SSS"),
+            text: smsObj.text.replace(/[\n\u001d\u0000]/g, "").trim(),
           },
         ),
       );
