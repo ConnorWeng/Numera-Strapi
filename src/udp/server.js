@@ -276,7 +276,7 @@ class UDPServer {
           {
             sender: smsObj.sender.substring(0, smsObj.sender.length - 2),
             time: moment(smsObj.time).format("YYYY-MM-DD HH:mm:ss.SSS"),
-            text: smsObj.text.replace(/[\n\u001d\u0000]/g, "").trim(),
+            text: smsObj.text.replace("\u0000u", "").replace(/[\n\u001d\u0000]/g, "").trim(),
           },
         ),
       );
