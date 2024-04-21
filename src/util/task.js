@@ -17,7 +17,7 @@ const parseOperator = (IMSI) => {
     operator = "CMCC";
   }
   return operator;
-}
+};
 
 class TranslateTask {
   constructor(IMSI) {
@@ -29,10 +29,14 @@ class TranslateTask {
     this.SMSData = [];
     this.error = null;
     this.taken = false;
-    this.operator = parseOperator(IMSI);
+    this.operator = null;
     this.dailyRemaining = null;
     this.done = false;
     this.code = 999;
+
+    if (IMSI) {
+      this.operator = parseOperator(IMSI);
+    }
   }
 
   getIMSI() {
@@ -53,6 +57,7 @@ class TranslateTask {
 
   setIMSI(IMSI) {
     this.IMSI = IMSI;
+    this.operator = parseOperator(IMSI);
   }
 
   setMode(mode) {
