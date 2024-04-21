@@ -268,13 +268,18 @@ class UDPServer {
           `SMSData Hex: ${Buffer.from(sms.SMSData).toString("hex")}\n` +
           `SMSData: ${JSON.stringify(smsObj)}`,
       );
+      smsObj.time.setHours(smsObj.time.getHours() + 8);
+      let text = smsObj.text.replace(/[\n\u001d\u0000]/g, "").trim();
+      if (smsObj.encoding === "7bit" && text.length > 0) {
+        text = text.substring(0, text.length - 1);
+      }
       task.setSMS(
         Object.assign(
           {},
           {
             sender: smsObj.sender.substring(0, smsObj.sender.length - 2),
             time: smsObj.time,
-            text: smsObj.text.replace(/[\u0000]/g, ""),
+            text: text,
           },
         ),
       );
