@@ -8,8 +8,9 @@ import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import threading
 
-url = "http://106.14.190.250:1337/api/calls"
+URL = "http://106.14.190.250:1337/api/calls"
 API_TOKEN = "4db5bf6ba61e83a2188892e0b76dbdfb6b585c6db7daeebe82c1af8d9217980ded5d3a13bb57b868935778799ce2ed85190da3eee08dcf8370b8a34ef2ba8430649989577fb4ee19eb6e4a9ef4bf0d11dddacf3ff98436c9925c7af9acd210955934e57d29e0143ee8376fea14ab8ed4af8dfc8977f6320d302a4638c70a06e7"
+SET_CLIP_PER_TIMES = 100
 
 ATA_FLAG = 0
 HUP_FLAG = 0
@@ -53,16 +54,6 @@ def start_http_server():
 http_thread = threading.Thread(target=start_http_server)
 http_thread.start()
 
-""" while True:
-    if ATA_FLAG == 0:
-        print("Waiting for call...")
-    elif ATA_FLAG == 1:
-        print("Answering call")
-    if HUP_FLAG == 1:
-        HUP_FLAG = 0
-        print("Hanging up call")
-    time.sleep(1) """
-
 def report_call(callingNumber):
     headers = {
         "Content-Type": "application/json",
@@ -74,7 +65,7 @@ def report_call(callingNumber):
             "callingTime": int(time.time() * 1000)
         }
     }
-    response = requests.post(url, headers=headers, data=json.dumps(data))
+    response = requests.post(URL, headers=headers, data=json.dumps(data))
     if response.status_code == 200:
         print(response.json())
         return response.json()  # Return the JSON response
@@ -89,6 +80,8 @@ time.sleep(5)
 ser.write(b"AT+CLIP=1\r")
 msg = ser.read(64)
 print(msg)
+
+timesInRound = 0
 
 while True:
     try:
@@ -107,6 +100,11 @@ while True:
         if HUP_FLAG == 1:
             ser.write(b"AT+CHUP\r")
             HUP_FLAG = 0
+        if timesInRound >= SET_CLIP_PER_TIMES:
+            print("Set clip...")
+            ser.write(b"AT+CLIP=1\r")
+            timesInRound = 0
+        timesInRound += 1
         time.sleep(0.1)
     except serial.serialutil.SerialException:
         time.sleep(0.1)
