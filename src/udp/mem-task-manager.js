@@ -34,6 +34,10 @@ class Task {
     this.logs.push(log);
   }
 
+  getLogs() {
+    return this.logs;
+  }
+
   getLog() {
     return this.logs.join("\n");
   }

@@ -41,6 +41,19 @@ function hex(number) {
   return number.toString(16).padStart(2, "0");
 }
 
+function isLastCallDataMeanSuccess(task) {
+  const logs = task.getLogs();
+  if (logs.length === 0) {
+    return false;
+  }
+  const lastCallData = logs[logs.length - 1];
+  const policy = getCausePolicy(lastCallData);
+  if (policy.policy === "SUCCESS") {
+    return true;
+  }
+  return false;
+}
+
 function getCausePolicy(callData) {
   if (callData[0] === 0xfe || callData[0] === 0xff) {
     if ([0x01, 0x08, 0x15, 0x26, 0x39].includes(callData[1])) {
@@ -192,9 +205,15 @@ class UDPServer {
           return;
         }
 
-        task.setTouched();
-        task.appendLog(`Call data: ${call.callData}`);
+        if (isLastCallDataMeanSuccess(task)) {
+          strapi.log.info(
+            `Last call data already mean success, ignore this call data: ${JSON.stringify(task)}`,
+          );
+          return;
+        }
 
+        task.setTouched();
+        task.appendLog(call.callData);
         const policy = getCausePolicy(call.callData);
         strapi.log.info(
           `Policy for IMSI: ${call.IMSI} is ${JSON.stringify(policy)}`,
