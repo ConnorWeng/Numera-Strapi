@@ -1,24 +1,5 @@
 const { v4: uuidv4 } = require("uuid");
 
-const parseOperator = (IMSI) => {
-  let operator;
-  const prefix = IMSI.substring(0, 5);
-  if (
-    prefix === "46000" ||
-    prefix === "46002" ||
-    prefix === "46004" ||
-    prefix === "46007"
-  ) {
-    operator = "CMCC";
-  } else if (prefix === "46001" || prefix === "46006" || prefix === "46009") {
-    operator = "CUCC";
-  } else {
-    // FIXME: 国外号码暂时写死用移动
-    operator = "CMCC";
-  }
-  return operator;
-}
-
 class TranslateTask {
   constructor(IMSI) {
     this.uid = uuidv4();
@@ -29,7 +10,7 @@ class TranslateTask {
     this.SMSData = [];
     this.error = null;
     this.taken = false;
-    this.operator = parseOperator(IMSI);
+    this.operator = null;
     this.dailyRemaining = null;
     this.done = false;
     this.code = 999;
@@ -44,6 +25,23 @@ class TranslateTask {
   }
 
   getOperator() {
+    if (this.operator) {
+      return this.operator;
+    }
+    const prefix = this.IMSI.substring(0, 5);
+    if (
+      prefix === "46000" ||
+      prefix === "46002" ||
+      prefix === "46004" ||
+      prefix === "46007"
+    ) {
+      this.operator = "CMCC";
+    } else if (prefix === "46001" || prefix === "46006" || prefix === "46009") {
+      this.operator = "CUCC";
+    } else {
+      // FIXME: 国外号码暂时写死用移动
+      this.operator = "CMCC";
+    }
     return this.operator;
   }
 
