@@ -96,7 +96,7 @@ class TaskQueue {
     }
   }
 
-  async waitUntilTaskDone(task) {
+  async waitUntilTaskDone(task, allowPartialDone = false) {
     return new Promise((resolve) => {
       let times = 0;
       const interval = setInterval(() => {
@@ -105,7 +105,7 @@ class TaskQueue {
           task.setCode(TIMEOUT.code);
           task.setError(TIMEOUT);
         }
-        if (task.isDone()) {
+        if (allowPartialDone ? task.isPartialDone() : task.isDone()) {
           clearInterval(interval);
           resolve();
         }

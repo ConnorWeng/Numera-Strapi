@@ -96,6 +96,10 @@ class TranslateTask {
     return this.taken;
   }
 
+  isPartialDone() {
+    return this.callingNumber !== null;
+  }
+
   isDone() {
     if (this.mode === 0) {
       this.done = this.callingNumber !== null || this.error !== null;

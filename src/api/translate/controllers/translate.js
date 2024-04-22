@@ -98,9 +98,10 @@ module.exports = createCoreController(
       const globalTaskQueue = TaskQueue.getInstance();
       globalTaskQueue.addTask(task);
 
-      if (task.mode === 0) {
-        await globalTaskQueue.waitUntilTaskDone(task);
-      }
+      await globalTaskQueue.waitUntilTaskDone(
+        task,
+        task.mode === 0 ? false : true,
+      );
 
       await strapi.db.query("api::subscription.subscription").update({
         where: { id: activeSubscription.id },
