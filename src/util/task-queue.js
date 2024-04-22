@@ -24,6 +24,7 @@ class TaskQueue {
         for (const timeoutTask of timeoutTasks) {
           timeoutTask.setCode(TIMEOUT.code);
           timeoutTask.setError(TIMEOUT);
+          timeoutTask.isDone();
         }
         if (timeoutTasks.length > 0) {
           strapi.log.info(
