@@ -25,15 +25,10 @@ class Processor {
       `Device ${this.device.ipAddress} start processing ${that.constructor.name} IMSI ${task.IMSI}`,
     );
     await this.processCall(task);
-    await new Promise((resolve) =>
-      setTimeout(() => {
-        strapi.log.info(
-          `Device ${this.device.ipAddress} finish processing ${that.constructor.name} IMSI ${task.IMSI}`,
-        );
-        that.available = true;
-        resolve();
-      }, 15000),
+    strapi.log.info(
+      `Device ${this.device.ipAddress} finish processing ${that.constructor.name} IMSI ${task.IMSI}`,
     );
+    that.available = true;
   }
 
   async processCall(task) {

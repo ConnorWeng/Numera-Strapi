@@ -78,7 +78,8 @@ def handle_request(json_string):
     if response.status_code == 200:
         uart.write(ujson.dumps(response_data))
         logger.info('Translate result: {}'.format(response_data))
-        start_poll(response_data['uid'])
+        if not response_data['done']:
+          start_poll(response_data['uid'])
     else:
         logger.error('Translate failed: {}'.format(response_data))
 
