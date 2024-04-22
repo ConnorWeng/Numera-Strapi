@@ -69,7 +69,7 @@ module.exports = createCoreController(
         return transformErrorTask(isQuecClient, task, INVALID_IMSI);
       }
 
-      if (mode === "translate" || mode === "cloud_fetch") {
+      if (mode === 0 || mode === 1) {
         task.setMode(mode);
       }
 

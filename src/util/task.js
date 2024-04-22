@@ -23,7 +23,7 @@ class TranslateTask {
   constructor(IMSI) {
     this.uid = uuidv4();
     this.IMSI = IMSI;
-    this.mode = "translate";
+    this.mode = 0;
     this.createTime = new Date().getTime();
     this.callingNumber = null;
     this.SMSData = [];
@@ -97,10 +97,10 @@ class TranslateTask {
   }
 
   isDone() {
-    if (this.mode === "translate") {
+    if (this.mode === 0) {
       this.done = this.callingNumber !== null || this.error !== null;
-    } else if (this.mode === "cloud_fetch") {
-      this.done = this.SMSData.length > 3 || this.error !== null;
+    } else if (this.mode === 1) {
+      this.done = this.SMSData.length > 5 || this.error !== null;
     }
     return this.done;
   }

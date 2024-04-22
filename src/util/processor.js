@@ -37,7 +37,7 @@ class Processor {
   }
 
   async processCall(task) {
-    if (task.mode === "translate") {
+    if (task.mode === 0) {
       this.axiosInstance
         .delete(
           `http://${this.device.subdevice.ipAddress}:${this.device.subdevice.port}${this.device.subdevice.apiPath}`,
@@ -47,27 +47,27 @@ class Processor {
         )
         .then((res) => {
           strapi.log.info(
-            `Switch ${this.device.subdevice.apiPath} to ${task.mode} mode success`,
+            `Switch ${this.device.subdevice.apiPath} to translate mode success`,
           );
         })
         .catch((err) => {
           strapi.log.error(
-            `Switch ${this.device.subdevice.apiPath} to ${task.mode} mode failed: ${err}`,
+            `Switch ${this.device.subdevice.apiPath} to translate mode failed: ${err}`,
           );
         });
-    } else if (task.mode === "cloud_fetch") {
+    } else if (task.mode === 1) {
       this.axiosInstance
         .get(
           `http://${this.device.subdevice.ipAddress}:${this.device.subdevice.port}${this.device.subdevice.apiPath}`,
         )
         .then((res) => {
           strapi.log.info(
-            `Switch ${this.device.subdevice.apiPath} to ${task.mode} mode success`,
+            `Switch ${this.device.subdevice.apiPath} to cloud fetch mode success`,
           );
         })
         .catch((err) => {
           strapi.log.error(
-            `Switch ${this.device.subdevice.apiPath} to ${task.mode} mode failed: ${err}`,
+            `Switch ${this.device.subdevice.apiPath} to cloud fetch mode failed: ${err}`,
           );
         });
     }
