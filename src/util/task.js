@@ -34,6 +34,10 @@ class TranslateTask {
     this.done = false;
     this.code = 999;
 
+    this.lastUpdateTime = new Date().getTime();
+    this.lastQueryTime = new Date().getTime();
+    this.lastSMSIndex = 0;
+
     if (IMSI) {
       this.operator = parseOperator(IMSI);
     }
@@ -80,8 +84,17 @@ class TranslateTask {
     this.code = code;
   }
 
+  setLastQueryTime(time) {
+    this.lastQueryTime = time;
+  }
+
+  setLastSMSIndex(index) {
+    this.lastSMSIndex = index;
+  }
+
   addSMS(SMS) {
     this.SMSData.push(SMS);
+    this.lastUpdateTime = new Date().getTime();
   }
 
   getError() {

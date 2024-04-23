@@ -113,6 +113,23 @@ class TaskQueue {
     });
   }
 
+  async waitUntilTaskUpdate(task) {
+    return new Promise((resolve) => {
+      let times = 0;
+      const interval = setInterval(() => {
+        times += 1;
+        if (times > TASK_TIMEOUT) {
+          task.setCode(TIMEOUT.code);
+          task.setError(TIMEOUT);
+        }
+        if (task.lastUpdateTime > task.lastQueryTime) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, 1000);
+    });
+  }
+
   static getInstance() {
     if (!TaskQueue.instance) {
       TaskQueue.instance = new TaskQueue();

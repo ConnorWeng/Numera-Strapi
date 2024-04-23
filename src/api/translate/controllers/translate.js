@@ -30,12 +30,12 @@ const transformErrorTask = (isQuecClient, task, error) => {
   }
 };
 
-const transformResult = (isQuecClient, task) => {
+const transformResult = (isQuecClient, task, updatedSMS) => {
   if (isQuecClient) {
     return {
       uid: task.uid,
       imsi_phone: task.callingNumber,
-      sms_data: task.SMSData,
+      sms_data: updatedSMS || task.SMSData,
       type: task.operator === "CMCC" ? 0 : 1,
       timestamp: new Date().getTime() - task.createTime,
       imsi: task.IMSI,
@@ -127,11 +127,21 @@ module.exports = createCoreController(
         throw new strapiUtils.errors.NotFoundError("No task found");
       }
 
+      await globalTaskQueue.waitUntilTaskUpdate(task);
+      task.setLastQueryTime(new Date().getTime());
+      const updatedSMS = task.SMSData.slice(task.lastSMSIndex);
+      task.setLastSMSIndex(task.SMSData.length);
+
       if (task.isDone()) {
         globalTaskQueue.removeTask(task);
+        return transformResult(isQuecClient, task, updatedSMS);
       }
 
-      return transformResult(isQuecClient, task);
+      if (isQuecClient) {
+        return updatedSMS;
+      } else {
+        return task;
+      }
     },
   }),
 );
