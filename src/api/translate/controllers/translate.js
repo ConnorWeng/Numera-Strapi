@@ -134,14 +134,9 @@ module.exports = createCoreController(
 
       if (task.isDone()) {
         globalTaskQueue.removeTask(task);
-        return transformResult(isQuecClient, task, updatedSMS);
       }
 
-      if (isQuecClient) {
-        return updatedSMS;
-      } else {
-        return task;
-      }
+      return transformResult(isQuecClient, task, updatedSMS);
     },
   }),
 );
