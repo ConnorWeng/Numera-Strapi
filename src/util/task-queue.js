@@ -122,7 +122,7 @@ class TaskQueue {
           task.setCode(TIMEOUT.code);
           task.setError(TIMEOUT);
         }
-        if (task.lastUpdateTime > task.lastQueryTime) {
+        if (task.lastUpdateTime > task.lastQueryTime || task.isDone()) {
           clearInterval(interval);
           resolve();
         }
