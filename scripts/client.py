@@ -87,9 +87,9 @@ def start_poll(uid):
     try:
         while True:
             data = poll(uid)
-            if data['done']:
+            if not data or data['done']:
                 break
-            utime.sleep(10)
+            utime.sleep_ms(1000)
     except Exception as e:
         logger.error('Poll Exception: {}'.format(e))
         sys.exit(1)
@@ -106,9 +106,10 @@ def poll(uid):
     if response.status_code == 200:
         uart.write(ujson.dumps(response_data))
         logger.info('Poll result: {}'.format(response_data))
+        return response_data
     else:
         logger.error('Poll failed: {}'.format(response_data))
-    return response_data
+        return False
 
 def uart_read():
     global uart
