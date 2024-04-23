@@ -5,7 +5,7 @@ files = uos.listdir('/usr/')
 
 if 'client.py' in files:
   print('client.py found')
-  example.exec('/usr/client.mpy')
+  example.exec('/usr/client.py')
 
 if 'client.mpy' in files:
   print('client.mpy found')
