@@ -143,7 +143,8 @@ def process_queue():
         logger.error('Process Queue Exception: {}'.format(e))
         sys.exit(1)
 
-if __name__ == "__main__":
+def start():
+    global uart
     # utime.sleep(5)  # 手动运行本例程时, 可以去掉该延时, 如果将例程文件名改为main.py, 希望开机自动运行时, 需要加上该延时.
     checknet.poweron_print_once()  # CDC口打印poweron_print_once()信息, 注释则无法从CDC口看到下面的poweron_print_once()中打印的信息.
 
