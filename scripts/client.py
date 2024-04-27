@@ -1,6 +1,7 @@
 from usr import common
 from machine import Pin, UART, Timer
 from queue import Queue
+from misc import Power
 import sim, net, dataCall, usocket, ujson, log, utime, checkNet, _thread
 import sys
 import request
@@ -19,11 +20,6 @@ def wdg_feed(args):
 wdg_time = Timer(Timer.Timer0)
 wdg_time.start(period=1000, mode=wdg_time.PERIODIC, callback=wdg_feed)
 
-# 下面两个全局变量是必须有的，用户可以根据自己的实际项目修改下面两个全局变量的值，
-# 在执行用户代码前，会先打印这两个变量的值。
-CLIENT_NAME = "Numera Quec Python Client"
-CLIENT_VERSION = "0.0.1"
-checknet = checkNet.CheckNetwork(CLIENT_NAME, CLIENT_VERSION)
 
 # | 参数      | 参数类型 | 说明                | 类型      |
 # | -------- | ------- | ------------------ | -------- |
@@ -37,6 +33,54 @@ checknet = checkNet.CheckNetwork(CLIENT_NAME, CLIENT_VERSION)
 logger = common.LogAdapter("Numera-Quec-Python-Client")
 logger.log_service.logtimeflag = True  # 设置LOG时间输出: True; False.
 logger.log_service.LEVEL = common.LOG_LV.DEBUG  # 设置LOG输出等级: DEBUG; INFO; CRITICAL; WARNING; ERROR.
+
+
+class WatchDog:
+    def __init__(self, max_count):
+        self.__max_count = max_count
+        self.__count = self.__max_count
+        self.__tid = None
+
+    def __bark(self):
+        logger.info('WatchDog: I will restart the system.')
+        Power.powerRestart()
+
+    def __check(self):
+        while True:
+            if self.__count == 0:
+                self.__bark()
+            else:
+                self.__count = (self.__count - 1)
+            utime.sleep(10)
+
+    def start(self):
+        if not self.__tid or (self.__tid and not _thread.threadIsRunning(self.__tid)):
+            try:
+                _thread.stack_size(0x1000)
+                self.__tid = _thread.start_new_thread(self.__check, ())
+                logger.info('WatchDog[{}]: I am watching you.'.format(self.__tid))
+            except Exception as e:
+                sys.print_exception(e)
+
+    def stop(self):
+        if self.__tid:
+            try:
+                _thread.stop_thread(self.__tid)
+            except:
+                pass
+        self.__tid = None
+
+    def feed(self):
+        self.__count = self.__max_count
+
+uart_wdg = WatchDog(10)
+queue_wdg = WatchDog(10)
+
+# 下面两个全局变量是必须有的，用户可以根据自己的实际项目修改下面两个全局变量的值，
+# 在执行用户代码前，会先打印这两个变量的值。
+CLIENT_NAME = "Numera Quec Python Client"
+CLIENT_VERSION = "0.0.1"
+checknet = checkNet.CheckNetwork(CLIENT_NAME, CLIENT_VERSION)
 
 q = Queue(1000)
 uart = None
@@ -95,7 +139,7 @@ def start_poll(uid):
             utime.sleep_ms(1000)
     except Exception as e:
         logger.error('Poll Exception: {}'.format(e))
-        sys.exit(1)
+        raise e
 
 def poll(uid):
     global jwt_token
@@ -118,6 +162,7 @@ def uart_read():
     global uart
     try:
         while True:
+            uart_wdg.feed()
             msglen = uart.any()  # 返回是否有可读取的数据长度
             # 当有数据时进行读取
             if msglen:
@@ -130,12 +175,12 @@ def uart_read():
                 utime.sleep_ms(1)
     except Exception as e:
         logger.error('UART Read Exception: {}'.format(e))
-        sys.exit(1)
 
 def process_queue():
     global q
     try:
         while True:
+            queue_wdg.feed()
             if not q.empty():
                 task = q.get()
                 logger.info('Processing task: {}, remain {} tasks'.format(task, q.size()))
@@ -144,7 +189,6 @@ def process_queue():
                 utime.sleep_ms(1000)
     except Exception as e:
         logger.error('Process Queue Exception: {}'.format(e))
-        sys.exit(1)
 
 def start():
     global uart
@@ -165,4 +209,6 @@ def start():
     uart = UART(UART.UART2, 115200, 8, 0, 1, 0)
     _thread.start_new_thread(uart_read, ())
     _thread.start_new_thread(process_queue, ())
+    uart_wdg.start()
+    queue_wdg.start()
     logger.info('UART2 initialized.')
