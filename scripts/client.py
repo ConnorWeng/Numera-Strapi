@@ -4,6 +4,7 @@ from queue import Queue
 import sim, net, dataCall, usocket, ujson, log, utime, checkNet, _thread
 import sys
 import request
+import modem
 
 url = "http://106.14.190.250:1337/api"
 
@@ -45,9 +46,11 @@ def handle_login(user, password):
     global jwt_token
     data = {
         'identifier': user,
-        'password': password
+        'password': password,
+        'imei': modem.getDevImei()
     }
     headers = {'Content-Type': 'application/json'}
+    logger.info('Ready to login: {}'.format(ujson.dumps(data)))
     response = request.post(url + '/auth/local', data=ujson.dumps(data), headers=headers)
     response_data = response.json()
     if response.status_code == 200:
