@@ -30,8 +30,8 @@ module.exports = createCoreController("api::local.local", ({ strapi }) => ({
       );
     }
     // @ts-ignore
-    const { IMSI, uid } = data;
-    taskManager.addTask(new Task(IMSI, uid));
+    const { IMSI, uid, operator } = data;
+    taskManager.addTask(new Task(IMSI, uid, operator));
 
     UDPClient.getInstance().send(makeCallMessage(IMSI), 9000, "localhost");
     const entity = {

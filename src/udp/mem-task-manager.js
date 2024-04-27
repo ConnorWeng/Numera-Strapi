@@ -11,9 +11,10 @@ function findLastMatch(array, predicate) {
 }
 
 class Task {
-  constructor(IMSI, uid) {
+  constructor(IMSI, uid, operator) {
     this.uid = uid;
     this.IMSI = IMSI;
+    this.operator = this.operator;
     this.createdAt = new Date().getTime();
     this.retriedTimes = 0;
     this.logs = [];

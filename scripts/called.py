@@ -7,11 +7,16 @@ import json
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import threading
+import os
+from dotenv import load_dotenv
 
-URL = "http://106.14.190.250:1337/api/calls"
-API_TOKEN = "4db5bf6ba61e83a2188892e0b76dbdfb6b585c6db7daeebe82c1af8d9217980ded5d3a13bb57b868935778799ce2ed85190da3eee08dcf8370b8a34ef2ba8430649989577fb4ee19eb6e4a9ef4bf0d11dddacf3ff98436c9925c7af9acd210955934e57d29e0143ee8376fea14ab8ed4af8dfc8977f6320d302a4638c70a06e7"
+load_dotenv()
+
+URL = os.getenv("CLOUD_API_URL")
+API_TOKEN = os.getenv("CLOUD_API_TOKEN")
+DEVICE_OPERATOR = os.getenv("DEVICE_OPERATOR")
+
 SET_CLIP_PER_TIMES = 100
-
 ATA_FLAG = 0
 HUP_FLAG = 0
 
@@ -62,7 +67,8 @@ def report_call(callingNumber):
     data = {
         "data": {
             "callingNumber": callingNumber,
-            "callingTime": int(time.time() * 1000)
+            "callingTime": int(time.time() * 1000),
+            "operator": DEVICE_OPERATOR
         }
     }
     response = requests.post(URL, headers=headers, data=json.dumps(data))

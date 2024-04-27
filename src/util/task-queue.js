@@ -69,7 +69,7 @@ class TaskQueue {
     }
   }
 
-  findClosestTask(uid) {
+  findClosestTask(uid, operator) {
     let findArray;
     if (uid) {
       findArray = this.queue.filter((task) => task.getUID() === uid);
@@ -77,6 +77,7 @@ class TaskQueue {
       findArray = this.queue.filter((task) => {
         if (
           !task.isDone() &&
+          task.operator === operator &&
           new Date().getTime() - task.getCreateTime() < TASK_TIMEOUT * 1000 &&
           new Date().getTime() - task.getCreateTime() > INVALID_TASK_TIME * 1000
         ) {

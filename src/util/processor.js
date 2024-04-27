@@ -76,6 +76,7 @@ class Processor {
           data: {
             IMSI: task.IMSI,
             uid: task.uid,
+            operator: task.operator,
           },
         },
       )

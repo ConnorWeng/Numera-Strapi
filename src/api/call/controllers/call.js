@@ -17,7 +17,10 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
     // @ts-ignore
     const { data } = ctx.request.body || {};
 
-    const task = TaskQueue.getInstance().findClosestTask(data.uid);
+    const task = TaskQueue.getInstance().findClosestTask(
+      data.uid,
+      data.operator,
+    );
     if (!task) {
       throw new strapiUtils.errors.NotFoundError("No task found");
     }
