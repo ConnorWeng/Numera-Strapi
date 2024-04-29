@@ -6,8 +6,10 @@ import sim, net, dataCall, usocket, ujson, log, utime, checkNet, _thread
 import sys
 import request
 import modem
+import app_fota
 
 url = "http://106.14.190.250:1337/api"
+fota = app_fota.new()
 
 # 华DTU板喂狗脚本. 必须存在, 否则模块会反复复位
 work = Pin(Pin.GPIO12, Pin.OUT, Pin.PULL_PU, 0)
@@ -79,12 +81,13 @@ queue_wdg = WatchDog(10)
 # 下面两个全局变量是必须有的，用户可以根据自己的实际项目修改下面两个全局变量的值，
 # 在执行用户代码前，会先打印这两个变量的值。
 CLIENT_NAME = "Numera Quec Python Client"
-CLIENT_VERSION = "0.0.1"
+CLIENT_VERSION = "0.0.0"
 checknet = checkNet.CheckNetwork(CLIENT_NAME, CLIENT_VERSION)
 
 q = Queue(1000)
 uart = None
 jwt_token = None
+upgrade_checked = None
 
 def handle_login(user, password):
     global jwt_token
@@ -100,6 +103,8 @@ def handle_login(user, password):
     if response.status_code == 200:
         jwt_token = response_data['jwt']
         logger.info('JWT token: {}'.format(jwt_token))
+        if not upgrade_checked:
+            check_upgrade()
     else:
         logger.error('Login failed: {}'.format(response_data['error']['message']))
 
@@ -189,6 +194,28 @@ def process_queue():
                 utime.sleep_ms(1000)
     except Exception as e:
         logger.error('Process Queue Exception: {}'.format(e))
+
+def check_upgrade():
+    global jwt_token
+    global upgrade_checked
+    headers = {
+        'Content-Type': 'application/json',
+        "Authorization": "Bearer " + jwt_token,
+    }
+    logger.info('Ready to check upgrade')
+    response = request.get(url + '/devices/upgrade?clientVersion=' + CLIENT_VERSION, headers=headers, timeout=90)
+    response_data = response.json()
+    if response.status_code == 200:
+        upgrade_checked = True
+        logger.info('Check upgrade result: {}'.format(response_data))
+        if response_data['upgrade']:
+            fota.download(response_data['url'], '/usr/client.py')
+            logger.info('Succeed to download the new version')
+            fota.set_update_flag()
+            logger.info('Upgrading...')
+            Power.powerRestart()
+    else:
+        logger.error('Check upgrade failed: {}'.format(response_data))
 
 def start():
     global uart
