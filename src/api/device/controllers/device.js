@@ -8,19 +8,19 @@ const { createCoreController } = require("@strapi/strapi").factories;
 const axios = require("axios");
 const axiosInstance = axios.create();
 
-module.exports = createCoreController("api::device.device", ({ strapi }) => ({
-  async update(ctx) {
-    await axiosInstance.put(`http://106.14.190.250:3000/cmcc1-called`, {
-      data: {},
-    });
-    return this.transformResponse({});
-  },
+const LASTEST_VERSION = "0.0.1";
 
-  async delete(ctx) {
-    await axiosInstance.delete(`http://106.14.190.250:3000/cmcc1-called`, {
-      data: {},
-    });
-    return this.transformResponse({});
+module.exports = createCoreController("api::device.device", ({ strapi }) => ({
+  async upgrade(ctx) {
+    await this.validateQuery(ctx);
+    const sanitizedQuery = await this.sanitizeQuery(ctx);
+    const { clientVersion } = sanitizedQuery;
+
+    return {
+      upgrade: clientVersion !== LASTEST_VERSION,
+      version: LASTEST_VERSION,
+      url: "http://106.14.190.250/scripts/client.py",
+    };
   },
 
   async create(ctx) {
