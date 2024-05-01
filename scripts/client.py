@@ -206,7 +206,7 @@ def check_upgrade():
     response_data = response.json()
     if response.status_code == 200:
         last_check_upgrade_time = utime.time()
-        logger.info('Check upgrade result: {}'.format(response_data))
+        logger.info('Check upgrade result: {}, version: {}'.format(response_data['upgrade'], response_data['version']))
         if response_data['upgrade']:
             fota.download(response_data['url'], '/usr/client.mpy')
             logger.info('Succeed to download the new version')
