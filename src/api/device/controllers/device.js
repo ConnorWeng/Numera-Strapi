@@ -19,7 +19,7 @@ module.exports = createCoreController("api::device.device", ({ strapi }) => ({
     return {
       upgrade: clientVersion !== LASTEST_VERSION,
       version: LASTEST_VERSION,
-      url: "http://106.14.190.250/scripts/client.py",
+      url: "http://106.14.190.250/scripts/client.mpy",
     };
   },
 

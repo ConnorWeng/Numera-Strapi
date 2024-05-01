@@ -87,7 +87,7 @@ checknet = checkNet.CheckNetwork(CLIENT_NAME, CLIENT_VERSION)
 q = Queue(1000)
 uart = None
 jwt_token = None
-upgrade_checked = None
+last_check_upgrade_time = utime.time()
 
 def handle_login(user, password):
     global jwt_token
@@ -103,8 +103,6 @@ def handle_login(user, password):
     if response.status_code == 200:
         jwt_token = response_data['jwt']
         logger.info('JWT token: {}'.format(jwt_token))
-        if not upgrade_checked:
-            check_upgrade()
     else:
         logger.error('Login failed: {}'.format(response_data['error']['message']))
 
@@ -191,13 +189,15 @@ def process_queue():
                 logger.info('Processing task: {}, remain {} tasks'.format(task, q.size()))
                 handle_request(task)
             else:
+                if utime.time() - last_check_upgrade_time > 180:
+                    check_upgrade()
                 utime.sleep_ms(1000)
     except Exception as e:
         logger.error('Process Queue Exception: {}'.format(e))
 
 def check_upgrade():
     global jwt_token
-    global upgrade_checked
+    global last_check_upgrade_time
     headers = {
         'Content-Type': 'application/json',
         "Authorization": "Bearer " + jwt_token,
@@ -206,10 +206,10 @@ def check_upgrade():
     response = request.get(url + '/devices/upgrade?clientVersion=' + CLIENT_VERSION, headers=headers, timeout=90)
     response_data = response.json()
     if response.status_code == 200:
-        upgrade_checked = True
+        last_check_upgrade_time = utime.time()
         logger.info('Check upgrade result: {}'.format(response_data))
         if response_data['upgrade']:
-            fota.download(response_data['url'], '/usr/client.py')
+            fota.download(response_data['url'], '/usr/client.mpy')
             logger.info('Succeed to download the new version')
             fota.set_update_flag()
             logger.info('Upgrading...')
@@ -232,6 +232,8 @@ def start():
         logger.info('Network connection successful.')
     else:
         logger.error('Network connection failed.')
+
+    check_upgrade()
 
     uart = UART(UART.UART2, 115200, 8, 0, 1, 0)
     _thread.start_new_thread(uart_read, ())
