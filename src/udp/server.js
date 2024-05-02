@@ -32,6 +32,7 @@ const CauseMap = {
   x06_x00: { message: "ASSIGNMENT FAILURE", code: 10 },
   x0a_x00: { message: "3126", code: 9 },
   x31_x33: { message: "NO RESPONSE", code: 10 },
+  x08_x00: { message: "SUCCESS", code: 0 },
   x09_x00: { message: "SUCCESS", code: 0 },
 };
 
@@ -95,7 +96,7 @@ function getCausePolicy(callData) {
       ...cause,
     };
   }
-  if ([0x09].includes(callData[0]) && callData[1] === 0x00) {
+  if ([0x08, 0x09].includes(callData[0]) && callData[1] === 0x00) {
     return {
       policy: "SUCCESS",
       cause: callData[0],
