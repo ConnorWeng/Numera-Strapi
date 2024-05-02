@@ -17,13 +17,13 @@ const CauseMap = {
   xfe_x01: { message: "空号", code: 1 },
   xfe_x08: { message: "物联网卡或流量卡", code: 3 },
   xfe_x15: { message: "物联网卡或流量卡", code: 6 },
-  xfe_x1f: { message: "可忽略错误", code: 0 },
+  xfe_x1f: { message: "物联网卡或流量卡", code: 4 },
   xfe_x26: { message: "不支持的新卡", code: 2 },
   xfe_x39: { message: "物联网卡或流量卡", code: 5 },
   xff_x01: { message: "空号", code: 1 },
   xff_x08: { message: "物联网卡或流量卡", code: 3 },
   xff_x15: { message: "物联网卡或流量卡", code: 6 },
-  xff_x1f: { message: "可忽略错误", code: 0 },
+  xff_x1f: { message: "物联网卡或流量卡", code: 4 },
   xff_x26: { message: "不支持的新卡", code: 2 },
   xff_x39: { message: "物联网卡或流量卡", code: 5 },
   x03_x00: { message: "RELEASE", code: 9 },
@@ -58,15 +58,9 @@ function isLastCallDataMeanSuccess(task) {
 function getCausePolicy(callData) {
   const cause = CauseMap[`x${hex(callData[0])}_x${hex(callData[1])}`];
   if (callData[0] === 0xfe || callData[0] === 0xff) {
-    if ([0x01, 0x08, 0x15, 0x26, 0x39].includes(callData[1])) {
+    if ([0x01, 0x08, 0x15, 0x1f, 0x26, 0x39].includes(callData[1])) {
       return {
         policy: "REJECT",
-        cause: callData[1],
-        ...cause,
-      };
-    } else if (callData[1] === 0x1f) {
-      return {
-        policy: "SUCCESS",
         cause: callData[1],
         ...cause,
       };
