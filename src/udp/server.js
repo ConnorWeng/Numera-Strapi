@@ -13,27 +13,27 @@ const MsgType = {
   MSG_SS_UE_CALL: 0xb1,
   MSG_SS_UE_SMS: 0xb4,
 };
-const CauseMessage = {
-  xfe_x01: "空号",
-  xfe_x08: "物联网卡或流量卡",
-  xfe_x15: "物联网卡或流量卡",
-  xfe_x1f: "可忽略错误",
-  xfe_x26: "不支持的新卡",
-  xfe_x39: "物联网卡或流量卡",
-  xff_x01: "空号",
-  xff_x08: "物联网卡或流量卡",
-  xff_x15: "物联网卡或流量卡",
-  xff_x1f: "可忽略错误",
-  xff_x26: "不支持的新卡",
-  xff_x39: "物联网卡或流量卡",
-  x03_x00: "RELEASE",
-  x04_x00: "AUTHENTICATION REJECT",
-  x05_x00: "LOCATION REJECT",
-  x06_x00: "ASSIGNMENT FAILURE",
-  x0a_x00: "3126",
-  x31_x33: "NO RESPONSE",
-  x08_x00: "SUCCESS",
-  x09_x00: "SUCCESS",
+const CauseMap = {
+  xfe_x01: { message: "空号", code: 1 },
+  xfe_x08: { message: "物联网卡或流量卡", code: 3 },
+  xfe_x15: { message: "物联网卡或流量卡", code: 6 },
+  xfe_x1f: { message: "可忽略错误", code: 0 },
+  xfe_x26: { message: "不支持的新卡", code: 2 },
+  xfe_x39: { message: "物联网卡或流量卡", code: 5 },
+  xff_x01: { message: "空号", code: 1 },
+  xff_x08: { message: "物联网卡或流量卡", code: 3 },
+  xff_x15: { message: "物联网卡或流量卡", code: 6 },
+  xff_x1f: { message: "可忽略错误", code: 0 },
+  xff_x26: { message: "不支持的新卡", code: 2 },
+  xff_x39: { message: "物联网卡或流量卡", code: 5 },
+  x03_x00: { message: "RELEASE", code: 7 },
+  x04_x00: { message: "AUTHENTICATION REJECT", code: 8 },
+  x05_x00: { message: "LOCATION REJECT", code: 9 },
+  x06_x00: { message: "ASSIGNMENT FAILURE", code: 10 },
+  x0a_x00: { message: "3126", code: 9 },
+  x31_x33: { message: "NO RESPONSE", code: 10 },
+  x08_x00: { message: "SUCCESS", code: 0 },
+  x09_x00: { message: "SUCCESS", code: 0 },
 };
 
 const taskManager = MemTaskManager.getInstance();
@@ -56,24 +56,26 @@ function isLastCallDataMeanSuccess(task) {
 }
 
 function getCausePolicy(callData) {
+  const cause = CauseMap[`x${hex(callData[0])}_x${hex(callData[1])}`];
   if (callData[0] === 0xfe || callData[0] === 0xff) {
     if ([0x01, 0x08, 0x15, 0x26, 0x39].includes(callData[1])) {
       return {
         policy: "REJECT",
         cause: callData[1],
-        message: CauseMessage[`x${hex(callData[0])}_x${hex(callData[1])}`],
+        ...cause,
       };
     } else if (callData[1] === 0x1f) {
       return {
         policy: "SUCCESS",
         cause: callData[1],
-        message: CauseMessage[`x${hex(callData[0])}_x${hex(callData[1])}`],
+        ...cause,
       };
     } else {
       return {
         policy: "RETRY",
         cause: callData[1],
         message: "UNKNOWN CAUSE",
+        code: 7,
       };
     }
   }
@@ -84,27 +86,28 @@ function getCausePolicy(callData) {
     return {
       policy: "RETRY",
       cause: callData[0],
-      message: CauseMessage[`x${hex(callData[0])}_x${hex(callData[1])}`],
+      ...cause,
     };
   }
   if (callData[0] === 0x31 && callData[1] === 0x33) {
     return {
       policy: "RETRY",
       cause: callData[0],
-      message: CauseMessage[`x${hex(callData[0])}_x${hex(callData[1])}`],
+      ...cause,
     };
   }
   if ([0x08, 0x09].includes(callData[0]) && callData[1] === 0x00) {
     return {
       policy: "SUCCESS",
       cause: callData[0],
-      message: CauseMessage[`x${hex(callData[0])}_x${hex(callData[1])}`],
+      ...cause,
     };
   }
   return {
     policy: "CONTINUE",
     cause: -1,
     message: "UNKNOWN CAUSE",
+    code: 0,
   };
 }
 
@@ -224,7 +227,7 @@ class UDPServer {
           task.setError({
             errorCode: policy.cause,
             errorMessage: policy.message + ":\n" + task.getLog(),
-            code: 1,
+            code: policy.code,
           });
           this.reportCallToCloudServer(task);
         } else if (policy.policy === "RETRY") {
@@ -240,7 +243,7 @@ class UDPServer {
             task.setError({
               errorCode: policy.cause,
               errorMessage: policy.message + ":\n" + task.getLog(),
-              code: 8,
+              code: policy.code,
             });
             this.reportCallToCloudServer(task);
           }
