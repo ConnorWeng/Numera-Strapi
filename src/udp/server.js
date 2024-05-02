@@ -26,7 +26,7 @@ const CauseMap = {
   xff_x1f: { message: "可忽略错误", code: 0 },
   xff_x26: { message: "不支持的新卡", code: 2 },
   xff_x39: { message: "物联网卡或流量卡", code: 5 },
-  x03_x00: { message: "RELEASE", code: 7 },
+  x03_x00: { message: "RELEASE", code: 9 },
   x04_x00: { message: "AUTHENTICATION REJECT", code: 8 },
   x05_x00: { message: "LOCATION REJECT", code: 9 },
   x06_x00: { message: "ASSIGNMENT FAILURE", code: 10 },
