@@ -23,9 +23,17 @@ const IMSI_REGEX = /^[0-9]{14,16}$/;
 
 const transformErrorTask = (isQuecClient, task, error) => {
   if (isQuecClient) {
-    task.setError(error);
-    task.setCode(error.code);
-    return task;
+    return {
+      uid: task.uid,
+      imsi_phone: task.callingNumber,
+      sms_data: task.SMSData,
+      type: task.operator === "CMCC" ? 0 : 1,
+      timestamp: new Date().getTime() - task.createTime,
+      imsi: task.IMSI,
+      code: error.code,
+      quantity: task.dailyRemaining,
+      done: task.done,
+    };
   } else {
     throw new strapiUtils.errors.ValidationError(error.errorMessage);
   }
@@ -87,6 +95,7 @@ module.exports = createCoreController(
         return transformErrorTask(isQuecClient, task, NO_ACTIVE_SUBSCRIPTION);
       }
       if (activeSubscription.dailyRemaining < 1) {
+        task.setDailyRemaining(activeSubscription.dailyRemaining);
         return transformErrorTask(isQuecClient, task, DAILY_REMAINING_RUN_OUT);
       }
       if (
