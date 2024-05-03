@@ -70,6 +70,9 @@
       "relation": "oneToMany",
       "target": "api::subscription.subscription",
       "mappedBy": "user"
+    },
+    "IMEIs": {
+      "type": "json"
     }
   }
 }
