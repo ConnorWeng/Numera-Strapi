@@ -5,6 +5,10 @@ module.exports = (plugin) => {
     const params = ctx.request.body;
     const { identifier, imei } = params;
 
+    strapi.log.info(
+      `Someone is trying to login with identifier: ${identifier} and imei: ${imei}`,
+    );
+
     // Check if the user exists.
     const user = await strapi.query("plugin::users-permissions.user").findOne({
       where: {
