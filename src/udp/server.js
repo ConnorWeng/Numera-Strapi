@@ -20,18 +20,20 @@ const CauseMap = {
   xfe_x1f: { message: "物联网卡或流量卡", code: 4 },
   xfe_x26: { message: "不支持的新卡", code: 2 },
   xfe_x39: { message: "物联网卡或流量卡", code: 5 },
+  xfe_x60: { message: "96", code: 9 },
   xff_x01: { message: "空号", code: 1 },
   xff_x08: { message: "物联网卡或流量卡", code: 3 },
   xff_x15: { message: "物联网卡或流量卡", code: 6 },
   xff_x1f: { message: "物联网卡或流量卡", code: 4 },
   xff_x26: { message: "不支持的新卡", code: 2 },
   xff_x39: { message: "物联网卡或流量卡", code: 5 },
-  x03_x00: { message: "RELEASE", code: 9 },
-  x04_x00: { message: "AUTHENTICATION REJECT", code: 8 },
-  x05_x00: { message: "LOCATION REJECT", code: 9 },
-  x06_x00: { message: "ASSIGNMENT FAILURE", code: 10 },
-  x0a_x00: { message: "3126", code: 9 },
-  x31_x33: { message: "NO RESPONSE", code: 10 },
+  xff_x60: { message: "96", code: 9 },
+  x03_x00: { message: "RELEASE", code: 7 },
+  x04_x00: { message: "AUTHENTICATION REJECT", code: 7 },
+  x05_x00: { message: "LOCATION REJECT", code: 7 },
+  x06_x00: { message: "ASSIGNMENT FAILURE", code: 7 },
+  x0a_x00: { message: "3126", code: 7 },
+  x31_x33: { message: "NO RESPONSE", code: 7 },
   x09_x00: { message: "SUCCESS", code: 0 },
 };
 
@@ -60,6 +62,12 @@ function getCausePolicy(callData) {
     if ([0x01, 0x08, 0x15, 0x1f, 0x26, 0x39].includes(callData[1])) {
       return {
         policy: "REJECT",
+        cause: callData[1],
+        ...cause,
+      };
+    } else if ([0x60].includes(callData[1])) {
+      return {
+        policy: "RETRY",
         cause: callData[1],
         ...cause,
       };
