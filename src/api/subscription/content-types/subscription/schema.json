@@ -30,6 +30,10 @@
       "relation": "manyToOne",
       "target": "plugin::users-permissions.user",
       "inversedBy": "subscriptions"
+    },
+    "mode": {
+      "type": "enumeration",
+      "enum": ["translate", "cloud_fetch", "all"]
     }
   }
 }

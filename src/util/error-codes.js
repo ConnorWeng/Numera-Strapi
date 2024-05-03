@@ -29,4 +29,9 @@ module.exports = {
     errorMessage: "合同已过期",
     code: -1,
   },
+  MODE_NOT_ALLOWED: {
+    errorCode: 1007,
+    errorMessage: "翻译模式不允许",
+    code: -1,
+  },
 };

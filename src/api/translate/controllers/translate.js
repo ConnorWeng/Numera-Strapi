@@ -10,6 +10,7 @@ const {
   NO_ACTIVE_SUBSCRIPTION,
   DAILY_REMAINING_RUN_OUT,
   SUBSCRIPTION_EXPIRED,
+  MODE_NOT_ALLOWED,
 } = require("../../../util/error-codes");
 
 /**
@@ -93,6 +94,14 @@ module.exports = createCoreController(
         new Date().getTime()
       ) {
         return transformErrorTask(isQuecClient, task, SUBSCRIPTION_EXPIRED);
+      }
+      if (activeSubscription.mode !== "all") {
+        if (
+          (mode === 0 && activeSubscription.mode !== "translate") ||
+          (mode === 1 && activeSubscription.mode !== "cloud_fetch")
+        ) {
+          return transformErrorTask(isQuecClient, task, MODE_NOT_ALLOWED);
+        }
       }
 
       const globalTaskQueue = TaskQueue.getInstance();
