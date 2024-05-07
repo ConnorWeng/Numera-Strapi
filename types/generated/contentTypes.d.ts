@@ -925,6 +925,7 @@ export interface ApiSubscriptionSubscription extends Schema.CollectionType {
       "plugin::users-permissions.user"
     >;
     mode: Attribute.Enumeration<["translate", "cloud_fetch", "all"]>;
+    IMSIs: Attribute.JSON;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;

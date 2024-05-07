@@ -11,6 +11,7 @@ const {
   DAILY_REMAINING_RUN_OUT,
   SUBSCRIPTION_EXPIRED,
   MODE_NOT_ALLOWED,
+  IMSI_NOT_ALLOWED,
 } = require("../../../util/error-codes");
 
 /**
@@ -111,6 +112,13 @@ module.exports = createCoreController(
         ) {
           return transformErrorTask(isQuecClient, task, MODE_NOT_ALLOWED);
         }
+      }
+      if (
+        mode === 1 &&
+        activeSubscription.IMSIs &&
+        !activeSubscription.IMSIs.includes(IMSI)
+      ) {
+        return transformErrorTask(isQuecClient, task, IMSI_NOT_ALLOWED);
       }
 
       const globalTaskQueue = TaskQueue.getInstance();

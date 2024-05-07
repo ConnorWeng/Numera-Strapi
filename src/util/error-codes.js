@@ -31,7 +31,12 @@ module.exports = {
   },
   MODE_NOT_ALLOWED: {
     errorCode: 1007,
-    errorMessage: "翻译模式不允许",
+    errorMessage: "翻译模式不被允许",
+    code: -1,
+  },
+  IMSI_NOT_ALLOWED: {
+    errorCode: 1008,
+    errorMessage: "当前IMSI不被允许",
     code: -1,
   },
 };
