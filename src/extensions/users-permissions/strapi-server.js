@@ -40,6 +40,12 @@ module.exports = (plugin) => {
       );
     }
 
+    if (user.blocked === true) {
+      throw new strapiUtils.errors.ApplicationError(
+        "Your account has been blocked by an administrator",
+      );
+    }
+
     if (imei && (!user.IMEIs || !user.IMEIs.includes(imei))) {
       throw new strapiUtils.errors.ValidationError("Invalid device imei");
     }
