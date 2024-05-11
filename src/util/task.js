@@ -110,14 +110,19 @@ class TranslateTask {
   }
 
   isPartialDone() {
-    return this.callingNumber !== null;
+    if (this.error !== null) {
+      this.done = true;
+      return this.done;
+    } else {
+      return this.callingNumber !== null;
+    }
   }
 
   isDone() {
     if (this.mode === 0) {
       this.done = this.callingNumber !== null || this.error !== null;
     } else if (this.mode === 1) {
-      this.done = this.SMSData.length > 5 || this.error !== null;
+      this.done = this.SMSData.length > 20 || this.error !== null;
     }
     return this.done;
   }
