@@ -1,4 +1,4 @@
-const { v4: uuidv4 } = require("uuid");
+const short = require("short-uuid");
 
 const parseOperator = (IMSI) => {
   let operator;
@@ -21,7 +21,7 @@ const parseOperator = (IMSI) => {
 
 class TranslateTask {
   constructor(IMSI) {
-    this.uid = uuidv4();
+    this.uid = short.generate();
     this.IMSI = IMSI;
     this.mode = 0;
     this.createTime = new Date().getTime();
