@@ -13,8 +13,7 @@ const parseOperator = (IMSI) => {
   } else if (prefix === "46001" || prefix === "46006" || prefix === "46009") {
     operator = "CUCC";
   } else {
-    // FIXME: 国外号码暂时写死用移动
-    operator = "CMCC";
+    operator = "FOR";
   }
   return operator;
 };
@@ -33,6 +32,7 @@ class TranslateTask {
     this.dailyRemaining = null;
     this.done = false;
     this.code = 999;
+    this.derived = false;
 
     this.lastUpdateTime = new Date().getTime();
     this.lastQueryTime = new Date().getTime();

@@ -1,5 +1,6 @@
 const CMCCProcessor = require("./cmcc-processor");
 const CUCCProcessor = require("./cucc-processor");
+const FORProcessor = require("./for-processor");
 
 class ProcessorPool {
   constructor(processors) {
@@ -40,8 +41,10 @@ class ProcessorPool {
           return new CUCCProcessor(device);
         }
       });
-    const processorPool = new ProcessorPool(processors);
-    return processorPool;
+    const pool = new ProcessorPool(processors);
+    const forProcessor = new FORProcessor(pool);
+    pool.addProcessor(forProcessor);
+    return pool;
   }
 }
 

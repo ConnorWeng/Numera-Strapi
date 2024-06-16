@@ -32,7 +32,7 @@ class TickConsumer {
         task.take();
         setTimeout(() => {
           processor.process(task);
-        }, 1000);
+        }, 0);
       }
     }
   }

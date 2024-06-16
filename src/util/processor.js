@@ -22,11 +22,11 @@ class Processor {
     const that = this;
     that.available = false;
     strapi.log.info(
-      `Device ${this.device.ipAddress} start processing ${that.constructor.name} IMSI ${task.IMSI}`,
+      `Device ${this.device.ipAddress} start processing ${that.constructor.name} task: ${JSON.stringify(task)}`,
     );
     await this.processCall(task);
     strapi.log.info(
-      `Device ${this.device.ipAddress} finish processing ${that.constructor.name} IMSI ${task.IMSI}`,
+      `Device ${this.device.ipAddress} finish processing ${that.constructor.name} task: ${JSON.stringify(task)}`,
     );
     that.available = true;
   }

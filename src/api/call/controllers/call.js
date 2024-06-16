@@ -25,7 +25,7 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
       throw new strapiUtils.errors.NotFoundError("No task found");
     }
 
-    if (data.error) {
+    if (data.error && task.operator !== "FOR") {
       task.setCode(data.error.code);
       task.setError(data.error);
     }
