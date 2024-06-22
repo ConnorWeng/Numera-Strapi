@@ -59,7 +59,7 @@ const transformErrorTask = (isQuecClient, task, error) => {
 const transformResult = (isQuecClient, task, updatedSMS) => {
   promCounter.inc({
     code: task.code,
-    status: "success",
+    status: task.code === 0 || task.code === 999 ? "success" : "error",
     operator: task.operator,
   });
   if (isQuecClient) {
