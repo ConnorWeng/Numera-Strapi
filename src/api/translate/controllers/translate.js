@@ -18,6 +18,7 @@ const promClient = require("prom-client");
 const promCounter = new promClient.Counter({
   name: "numera_translate_requests_total",
   help: "Total number of translate requests",
+  labelNames: ["code", "status", "operator"],
 });
 
 /**
