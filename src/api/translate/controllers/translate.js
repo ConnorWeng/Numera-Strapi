@@ -21,6 +21,10 @@ const promCounter = new promClient.Counter({
   labelNames: ["code", "status", "operator"],
 });
 
+const { service } = strapi.plugin("strapi-prometheus");
+const register = service("registry");
+register.registerMetric(promCounter);
+
 /**
  * translate controller
  */
