@@ -13,6 +13,12 @@ const {
   MODE_NOT_ALLOWED,
   IMSI_NOT_ALLOWED,
 } = require("../../../util/error-codes");
+const promClient = require("prom-client");
+
+const promCounter = new promClient.Counter({
+  name: "numera_translate_requests_total",
+  help: "Total number of translate requests",
+});
 
 /**
  * translate controller
@@ -23,6 +29,11 @@ const { createCoreController } = require("@strapi/strapi").factories;
 const IMSI_REGEX = /^[0-9]{14,16}$/;
 
 const transformErrorTask = (isQuecClient, task, error) => {
+  promCounter.inc({
+    code: error.code,
+    status: "error",
+    operator: task.operator,
+  });
   if (isQuecClient) {
     return {
       uid: task.uid,
@@ -41,6 +52,11 @@ const transformErrorTask = (isQuecClient, task, error) => {
 };
 
 const transformResult = (isQuecClient, task, updatedSMS) => {
+  promCounter.inc({
+    code: task.code,
+    status: "success",
+    operator: task.operator,
+  });
   if (isQuecClient) {
     return {
       uid: task.uid,
