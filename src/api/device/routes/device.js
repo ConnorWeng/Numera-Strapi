@@ -28,5 +28,10 @@ module.exports = {
       path: "/devices/upgrade",
       handler: "device.upgrade",
     },
+    {
+      method: "POST",
+      path: "/devices/heartbeat",
+      handler: "device.heartbeat",
+    },
   ],
 };
