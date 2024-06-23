@@ -54,5 +54,7 @@ module.exports = createCoreController("api::device.device", ({ strapi }) => ({
     const { imei } = data;
 
     promCounter.inc({ imei });
+
+    return this.transformResponse({});
   },
 }));
