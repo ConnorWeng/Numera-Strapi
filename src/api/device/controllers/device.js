@@ -7,6 +7,15 @@
 const { createCoreController } = require("@strapi/strapi").factories;
 const axios = require("axios");
 const axiosInstance = axios.create();
+const promClient = require("prom-client");
+
+const promCounter = new promClient.Counter({
+  name: "numera_device_heartbeats_total",
+  help: "Total number of device heartbeats",
+  labelNames: ["imei"],
+});
+
+let metricsRegistered = false;
 
 const LASTEST_VERSION = "0.0.1";
 
@@ -28,5 +37,22 @@ module.exports = createCoreController("api::device.device", ({ strapi }) => ({
       data: {},
     });
     return this.transformResponse({});
+  },
+
+  async heartbeat(ctx) {
+    await this.validateQuery(ctx);
+
+    if (!metricsRegistered) {
+      const { service } = strapi.plugin("strapi-prometheus");
+      const register = service("registry");
+      register.registerMetric(promCounter);
+      metricsRegistered = true;
+    }
+
+    // @ts-ignore
+    const { data } = ctx.request.body;
+    const { imei } = data;
+
+    promCounter.inc({ imei });
   },
 }));
