@@ -79,7 +79,7 @@ def report_call(callingNumber):
     else:
         return None
 
-phoneRegex = r"[\d]{7,15}"
+phoneRegex = r"\"([\d]{7,15})\""
 ser = serial.Serial("/dev/ttyUSB2", baudrate=9600, timeout=1)
 sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
 
