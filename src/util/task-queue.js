@@ -77,7 +77,7 @@ class TaskQueue {
       findArray = this.queue.filter((task) => {
         if (
           !task.isDone() &&
-          task.operator === operator &&
+          (task.operator === operator || task.operator === "FOR") &&
           new Date().getTime() - task.getCreateTime() < TASK_TIMEOUT * 1000 &&
           new Date().getTime() - task.getCreateTime() > INVALID_TASK_TIME * 1000
         ) {
