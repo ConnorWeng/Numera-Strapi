@@ -71,6 +71,7 @@ def report_call(callingNumber):
             "operator": DEVICE_OPERATOR
         }
     }
+    print("Report call data: " + json.dumps(data))
     response = requests.post(URL, headers=headers, data=json.dumps(data))
     if response.status_code == 200:
         print(response.json())
@@ -97,7 +98,7 @@ while True:
                 print(output)
             find = re.findall(phoneRegex, output)
             if find:
-                print(find[0])
+                print("Get phone number: " + find[0])
                 report_call(find[0])
                 if ATA_FLAG == 0:
                     ser.write(b"AT+CHUP\r")
