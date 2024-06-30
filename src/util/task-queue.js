@@ -16,11 +16,28 @@ class TaskQueue {
 
     if (process.env.IS_DEVICE === "false" || !process.env.IS_DEVICE) {
       setInterval(() => {
-        const timeoutTasks = this.queue.filter(
-          (task) =>
-            !task.isDone() &&
-            new Date().getTime() - task.getCreateTime() > TASK_TIMEOUT * 1000,
-        );
+        const timeoutTasks = this.queue.filter((task) => {
+          if (task.isTaken() && !task.isDone()) {
+            if (task.isTranslateMode()) {
+              return (
+                new Date().getTime() - task.takenTime > TASK_TIMEOUT * 1000
+              );
+            } else if (task.isCloudFetchMode()) {
+              if (task.translatedTime) {
+                return (
+                  new Date().getTime() - task.translatedTime >
+                  TASK_TIMEOUT * 1000
+                );
+              } else {
+                return (
+                  new Date().getTime() - task.takenTime > TASK_TIMEOUT * 1000
+                );
+              }
+            }
+          } else {
+            return false;
+          }
+        });
         for (const timeoutTask of timeoutTasks) {
           timeoutTask.setCode(TIMEOUT.code);
           timeoutTask.setError(TIMEOUT);

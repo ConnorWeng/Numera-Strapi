@@ -25,9 +25,11 @@ class TranslateTask {
     this.mode = 0;
     this.createTime = new Date().getTime();
     this.callingNumber = null;
+    this.translatedTime = null;
     this.SMSData = [];
     this.error = null;
     this.taken = false;
+    this.takenTime = null;
     this.operator = null;
     this.dailyRemaining = null;
     this.done = false;
@@ -70,6 +72,7 @@ class TranslateTask {
 
   setCallingNumber(callingNumber) {
     this.callingNumber = callingNumber;
+    this.translatedTime = new Date().getTime();
   }
 
   setError(error) {
@@ -103,6 +106,7 @@ class TranslateTask {
 
   take() {
     this.taken = true;
+    this.takenTime = new Date().getTime();
   }
 
   isTaken() {
@@ -125,6 +129,14 @@ class TranslateTask {
       this.done = this.SMSData.length > 20 || this.error !== null;
     }
     return this.done;
+  }
+
+  isTranslateMode() {
+    return this.mode === 0;
+  }
+
+  isCloudFetchMode() {
+    return this.mode === 1;
   }
 }
 
