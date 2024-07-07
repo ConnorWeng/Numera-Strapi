@@ -25,7 +25,7 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
       throw new strapiUtils.errors.NotFoundError("No task found");
     }
 
-    if (data.error && task.operator !== "FOR") {
+    if (data.error && task.operator !== "FOR" && !task.callingNumber) {
       task.setCode(data.error.code);
       task.setError(data.error);
     }
@@ -33,6 +33,7 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
     if (data.callingNumber) {
       task.setCode(0);
       task.setCallingNumber(data.callingNumber);
+      task.setError(null);
     }
 
     if (data.SMS) {
