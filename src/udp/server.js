@@ -274,16 +274,20 @@ class UDPServer {
           `SMSData: ${JSON.stringify(smsObj)}`,
       );
       smsObj.time.setHours(smsObj.time.getHours() + 8);
+      smsObj.text = smsObj.text
+        .replace("\u0000u", "")
+        .replace(/[\n\u001d\u0000]/g, "")
+        .trim();
+      if (smsObj.encoding === "7bit") {
+        smsObj.text = smsObj.text.substring(0, smsObj.text.length - 2);
+      }
       task.setSMS(
         Object.assign(
           {},
           {
             sender: smsObj.sender.substring(0, smsObj.sender.length - 2),
             time: moment(smsObj.time).format("YYYY-MM-DD HH:mm:ss.SSS"),
-            text: smsObj.text
-              .replace("\u0000u", "")
-              .replace(/[\n\u001d\u0000]/g, "")
-              .trim(),
+            text: smsObj.text,
           },
         ),
       );
