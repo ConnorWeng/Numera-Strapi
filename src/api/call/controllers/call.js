@@ -38,7 +38,12 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
 
     if (data.SMS) {
       task.setCode(0);
-      task.addSMS(data.SMS);
+      const duplicated = task.SMSData.filter((sms) => {
+        return sms.time === data.SMS.time && sms.text === data.SMS.text;
+      });
+      if (duplicated.length === 0) {
+        task.addSMS(data.SMS);
+      }
     }
 
     const sanitizedEntity = await this.sanitizeOutput({ ...task }, ctx);
