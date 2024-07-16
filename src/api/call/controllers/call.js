@@ -1,7 +1,7 @@
 "use strict";
 
 const strapiUtils = require("@strapi/utils");
-const TaskQueue = require("../../../util/task-queue");
+const { TaskQueue } = require("../../../util/task-queue");
 
 /**
  * call controller

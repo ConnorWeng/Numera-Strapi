@@ -2,7 +2,7 @@
 
 const _ = require("lodash/fp");
 const strapiUtils = require("@strapi/utils");
-const TaskQueue = require("../../../util/task-queue");
+const { TaskQueue } = require("../../../util/task-queue");
 const TranslateTask = require("../../../util/task");
 const {
   MISSING_DATA,

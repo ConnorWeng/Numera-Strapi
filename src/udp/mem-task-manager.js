@@ -1,7 +1,7 @@
 const UDPClient = require("./client");
 const { makeCallMessage } = require("../util/message");
+const { TASK_TIMEOUT } = require("../util/task-queue");
 
-const INVALID_TASK_TIME = 80 * 1000;
 const UNTOUCHED_TASK_TIME = 15 * 1000;
 
 function findLastMatch(array, predicate) {
@@ -14,7 +14,7 @@ class Task {
   constructor(IMSI, uid, operator) {
     this.uid = uid;
     this.IMSI = IMSI;
-    this.operator = this.operator;
+    this.operator = operator;
     this.createdAt = new Date().getTime();
     this.retriedTimes = 0;
     this.logs = [];
@@ -80,7 +80,8 @@ class MemTaskManager {
     setInterval(() => {
       const expiredTasks = this.tasks.filter(
         (task) =>
-          new Date().getTime() - task.getCreatedAt() > INVALID_TASK_TIME,
+          new Date().getTime() - task.getCreatedAt() >
+          TASK_TIMEOUT[task.operator],
       );
       for (const expiredTask of expiredTasks) {
         this.removeTask(expiredTask);

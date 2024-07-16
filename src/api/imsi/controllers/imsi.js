@@ -5,7 +5,7 @@
  */
 
 const { createCoreController } = require("@strapi/strapi").factories;
-const TaskQueue = require("../../../util/task-queue");
+const { TaskQueue } = require("../../../util/task-queue");
 
 module.exports = createCoreController("api::imsi.imsi", ({ strapi }) => ({
   async create(ctx) {

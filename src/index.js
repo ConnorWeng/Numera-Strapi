@@ -1,6 +1,6 @@
 "use strict";
 
-const TaskQueue = require("./util/task-queue");
+const { TaskQueue } = require("./util/task-queue");
 const TickConsumer = require("./util/tick-consumer");
 const ProcessorPool = require("./util/processor-pool");
 const UDPServer = require("./udp/server");

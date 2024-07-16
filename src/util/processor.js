@@ -1,5 +1,5 @@
 const axios = require("axios");
-const TaskQueue = require("./task-queue");
+const { TaskQueue } = require("./task-queue");
 
 class Processor {
   constructor(device) {

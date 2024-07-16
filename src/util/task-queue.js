@@ -1,7 +1,11 @@
 const { TIMEOUT } = require("./error-codes");
 
-const TASK_TIMEOUT = 80;
-const INVALID_TASK_TIME = 4;
+const TASK_TIMEOUT = {
+  CMCC: 70 * 1000,
+  CUCC: 80 * 1000,
+  FOR: 70 * 1000,
+};
+const INVALID_TASK_TIME = 4 * 1000;
 
 class TaskQueue {
   static instance;
@@ -20,17 +24,19 @@ class TaskQueue {
           if (task.isTaken() && !task.isDone()) {
             if (task.isTranslateMode()) {
               return (
-                new Date().getTime() - task.takenTime > TASK_TIMEOUT * 1000
+                new Date().getTime() - task.takenTime >
+                TASK_TIMEOUT[task.operator]
               );
             } else if (task.isCloudFetchMode()) {
               if (task.translatedTime) {
                 return (
                   new Date().getTime() - task.translatedTime >
-                  TASK_TIMEOUT * 1000
+                  TASK_TIMEOUT[task.operator]
                 );
               } else {
                 return (
-                  new Date().getTime() - task.takenTime > TASK_TIMEOUT * 1000
+                  new Date().getTime() - task.takenTime >
+                  TASK_TIMEOUT[task.operator]
                 );
               }
             }
@@ -52,7 +58,7 @@ class TaskQueue {
         const expiredTasks = this.queue.filter(
           (task) =>
             new Date().getTime() - task.getCreateTime() >
-            TASK_TIMEOUT * 5 * 1000,
+            TASK_TIMEOUT[task.operator] * 5,
         );
         for (const expiredTask of expiredTasks) {
           this.removeTask(expiredTask);
@@ -95,8 +101,9 @@ class TaskQueue {
         if (
           !task.isDone() &&
           (task.operator === operator || task.operator === "FOR") &&
-          new Date().getTime() - task.getCreateTime() < TASK_TIMEOUT * 1000 &&
-          new Date().getTime() - task.getCreateTime() > INVALID_TASK_TIME * 1000
+          new Date().getTime() - task.getCreateTime() <
+            TASK_TIMEOUT[task.operator] &&
+          new Date().getTime() - task.getCreateTime() > INVALID_TASK_TIME
         ) {
           return true;
         } else {
@@ -119,7 +126,7 @@ class TaskQueue {
       let times = 0;
       const interval = setInterval(() => {
         times += 1;
-        if (times > TASK_TIMEOUT) {
+        if (times > TASK_TIMEOUT[task.operator]) {
           task.setCode(TIMEOUT.code);
           task.setError(TIMEOUT);
         }
@@ -136,7 +143,7 @@ class TaskQueue {
       let times = 0;
       const interval = setInterval(() => {
         times += 1;
-        if (times > TASK_TIMEOUT) {
+        if (times > TASK_TIMEOUT[task.operator]) {
           task.setCode(TIMEOUT.code);
           task.setError(TIMEOUT);
         }
@@ -156,4 +163,4 @@ class TaskQueue {
   }
 }
 
-module.exports = TaskQueue;
+module.exports = { TASK_TIMEOUT, TaskQueue };
