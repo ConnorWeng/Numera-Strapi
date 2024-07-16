@@ -72,7 +72,9 @@ class TranslateTask {
 
   setCallingNumber(callingNumber) {
     this.callingNumber = callingNumber;
-    this.translatedTime = new Date().getTime();
+    if (!this.translatedTime) {
+      this.translatedTime = new Date().getTime();
+    }
   }
 
   setError(error) {
