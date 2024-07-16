@@ -1,7 +1,7 @@
 const UDPClient = require("./client");
 const { makeCallMessage } = require("../util/message");
 
-const INVALID_TASK_TIME = 70 * 1000;
+const INVALID_TASK_TIME = 80 * 1000;
 const UNTOUCHED_TASK_TIME = 15 * 1000;
 
 function findLastMatch(array, predicate) {
