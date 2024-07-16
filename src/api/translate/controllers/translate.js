@@ -156,6 +156,8 @@ module.exports = createCoreController(
       });
 
       task.setDailyRemaining(activeSubscription.dailyRemaining - 1);
+      task.setLastQueryTime(new Date().getTime());
+      task.setLastSMSIndex(task.SMSData.length);
 
       return transformResult(isQuecClient, task);
     },
