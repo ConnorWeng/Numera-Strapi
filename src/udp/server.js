@@ -273,25 +273,27 @@ class UDPServer {
           `SMSData Hex: ${Buffer.from(sms.SMSData).toString("hex")}\n` +
           `SMSData: ${JSON.stringify(smsObj)}`,
       );
-      smsObj.time.setHours(smsObj.time.getHours() + 8);
-      smsObj.text = smsObj.text
-        .replace("\u0000u", "")
-        .replace(/[\n\u001d\u0000]/g, "")
-        .trim();
-      if (smsObj.encoding === "7bit") {
-        smsObj.text = smsObj.text.substring(0, smsObj.text.length - 2);
+      if (smsObj.text) {
+        smsObj.time.setHours(smsObj.time.getHours() + 8);
+        smsObj.text = smsObj.text
+          .replace("\u0000u", "")
+          .replace(/[\n\u001d\u0000]/g, "")
+          .trim();
+        if (smsObj.encoding === "7bit") {
+          smsObj.text = smsObj.text.substring(0, smsObj.text.length - 2);
+        }
+        task.setSMS(
+          Object.assign(
+            {},
+            {
+              sender: smsObj.sender.substring(0, smsObj.sender.length - 2),
+              time: moment(smsObj.time).format("YYYY-MM-DD HH:mm:ss.SSS"),
+              text: smsObj.text,
+            },
+          ),
+        );
+        this.reportCallToCloudServer(task);
       }
-      task.setSMS(
-        Object.assign(
-          {},
-          {
-            sender: smsObj.sender.substring(0, smsObj.sender.length - 2),
-            time: moment(smsObj.time).format("YYYY-MM-DD HH:mm:ss.SSS"),
-            text: smsObj.text,
-          },
-        ),
-      );
-      this.reportCallToCloudServer(task);
     }
   }
 
