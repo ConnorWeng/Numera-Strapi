@@ -89,7 +89,11 @@ class Processor {
         strapi.log.error(`Call device ${this.device.ipAddress} failed: ${err}`);
       });
 
-    await TaskQueue.getInstance().waitUntilTaskDone(task);
+    let targetTask = task;
+    if (task.derived) {
+      targetTask = TaskQueue.getInstance().findClosestTask(task.uid);
+    }
+    await TaskQueue.getInstance().waitUntilTaskDone(targetTask);
   }
 }
 
