@@ -31,10 +31,11 @@ module.exports = createCoreController("api::local.local", ({ strapi }) => ({
     }
     // @ts-ignore
     const { IMSI, uid, operator, mode } = data;
-    taskManager.addTask(new Task(IMSI, uid, operator));
+    const task = new Task(IMSI, uid, operator, mode);
+    taskManager.addTask(task);
 
     UDPClient.getInstance().send(
-      mode === 2 ? makeSMSMessage(IMSI) : makeCallMessage(IMSI),
+      task.isSMSTranslateMode() ? makeSMSMessage(IMSI) : makeCallMessage(IMSI),
       9000,
       "localhost",
     );

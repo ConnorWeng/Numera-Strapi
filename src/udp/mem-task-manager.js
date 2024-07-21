@@ -1,5 +1,5 @@
 const UDPClient = require("./client");
-const { makeCallMessage } = require("../util/message");
+const { makeCallMessage, makeSMSMessage } = require("../util/message");
 const { TASK_TIMEOUT } = require("../util/task-queue");
 
 const UNTOUCHED_TASK_TIME = 15 * 1000;
@@ -11,10 +11,11 @@ function findLastMatch(array, predicate) {
 }
 
 class Task {
-  constructor(IMSI, uid, operator) {
+  constructor(IMSI, uid, operator, mode) {
     this.uid = uid;
     this.IMSI = IMSI;
     this.operator = operator;
+    this.mode = mode;
     this.createdAt = new Date().getTime();
     this.retriedTimes = 0;
     this.logs = [];
@@ -66,6 +67,10 @@ class Task {
   setSMS(SMS) {
     this.SMS = SMS;
   }
+
+  isSMSTranslateMode() {
+    return this.mode === 2;
+  }
 }
 
 class MemTaskManager {
@@ -103,7 +108,9 @@ class MemTaskManager {
         );
         notTouchedTask.setTouched();
         UDPClient.getInstance().send(
-          makeCallMessage(notTouchedTask.getIMSI()),
+          notTouchedTask.isSMSTranslateMode()
+            ? makeSMSMessage(notTouchedTask.getIMSI())
+            : makeCallMessage(notTouchedTask.getIMSI()),
           9000,
           "localhost",
         );
