@@ -125,7 +125,7 @@ class TranslateTask {
   }
 
   isDone() {
-    if (this.isTranslateMode() || this.isSMSTranslateMode) {
+    if (this.isTranslateMode() || this.isSMSTranslateMode()) {
       this.done = this.callingNumber !== null || this.error !== null;
     } else if (this.isCloudFetchMode()) {
       this.done = this.SMSData.length > 20 || this.error !== null;
