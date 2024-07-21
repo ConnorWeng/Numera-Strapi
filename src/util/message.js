@@ -1,6 +1,7 @@
 const MsgType = {
   MSG_SS_UE_INFO: 0xb3,
   MSG_SS_UE_CALL: 0xb1,
+  MSG_SS_UE_SMS: 0xb4,
 };
 
 const UnCode = 0xe5;
@@ -29,6 +30,15 @@ function makeCallMessage(IMSI) {
   return buffer;
 }
 
+function makeSMSMessage(IMSI) {
+  const bodyLength = 57;
+  const headerBuffer = makeMessageHeader(MsgType.MSG_SS_UE_SMS, bodyLength);
+  const bodyData = new DataView(new ArrayBuffer(bodyLength));
+  // TODO:
+  const buffer = Buffer.concat([headerBuffer, Buffer.from(bodyData.buffer)]);
+  return buffer;
+}
+
 function setString(dataview, offset, str) {
   let lastOffset = offset;
   for (let i = 0; i < str.length; i++) {
@@ -40,6 +50,7 @@ function setString(dataview, offset, str) {
 
 module.exports = {
   makeCallMessage,
+  makeSMSMessage,
   MsgType,
 };
 

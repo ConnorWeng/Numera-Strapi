@@ -32,7 +32,7 @@ class Processor {
   }
 
   async processCall(task) {
-    if (task.mode === 0) {
+    if (task.isTranslateMode() || task.isSMSTranslateMode()) {
       this.axiosInstance
         .delete(
           `http://${this.device.subdevice.ipAddress}:${this.device.subdevice.port}${this.device.subdevice.apiPath}`,
@@ -50,7 +50,7 @@ class Processor {
             `Switch ${this.device.subdevice.apiPath} to translate mode failed: ${err}`,
           );
         });
-    } else if (task.mode === 1) {
+    } else if (task.isCloudFetchMode()) {
       this.axiosInstance
         .get(
           `http://${this.device.subdevice.ipAddress}:${this.device.subdevice.port}${this.device.subdevice.apiPath}`,
@@ -77,6 +77,7 @@ class Processor {
             IMSI: task.IMSI,
             uid: task.uid,
             operator: task.operator,
+            mode: task.mode,
           },
         },
       )

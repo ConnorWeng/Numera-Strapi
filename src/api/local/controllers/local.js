@@ -4,7 +4,7 @@ const _ = require("lodash/fp");
 const strapiUtils = require("@strapi/utils");
 const UDPServer = require("../../../udp/server");
 const UDPClient = require("../../../udp/client");
-const { makeCallMessage } = require("../../../util/message");
+const { makeCallMessage, makeSMSMessage } = require("../../../util/message");
 const { Task, MemTaskManager } = require("../../../udp/mem-task-manager");
 
 /**
@@ -30,10 +30,14 @@ module.exports = createCoreController("api::local.local", ({ strapi }) => ({
       );
     }
     // @ts-ignore
-    const { IMSI, uid, operator } = data;
+    const { IMSI, uid, operator, mode } = data;
     taskManager.addTask(new Task(IMSI, uid, operator));
 
-    UDPClient.getInstance().send(makeCallMessage(IMSI), 9000, "localhost");
+    UDPClient.getInstance().send(
+      mode === 2 ? makeSMSMessage(IMSI) : makeCallMessage(IMSI),
+      9000,
+      "localhost",
+    );
     const entity = {
       IMSI: IMSI,
     };

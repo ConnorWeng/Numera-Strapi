@@ -100,9 +100,7 @@ module.exports = createCoreController(
         return transformErrorTask(isQuecClient, task, INVALID_IMSI);
       }
 
-      if (mode === 0 || mode === 1) {
-        task.setMode(mode);
-      }
+      task.setMode(mode);
 
       const self = await strapi.db
         .query("plugin::users-permissions.user")
@@ -128,14 +126,15 @@ module.exports = createCoreController(
       }
       if (activeSubscription.mode !== "all") {
         if (
-          (mode === 0 && activeSubscription.mode !== "translate") ||
-          (mode === 1 && activeSubscription.mode !== "cloud_fetch")
+          ((task.isTranslateMode() || task.isSMSTranslateMode()) &&
+            activeSubscription.mode !== "translate") ||
+          (task.isCloudFetchMode() && activeSubscription.mode !== "cloud_fetch")
         ) {
           return transformErrorTask(isQuecClient, task, MODE_NOT_ALLOWED);
         }
       }
       if (
-        mode === 1 &&
+        task.isCloudFetchMode() &&
         activeSubscription.IMSIs &&
         !activeSubscription.IMSIs.includes(IMSI)
       ) {
@@ -147,7 +146,7 @@ module.exports = createCoreController(
 
       await globalTaskQueue.waitUntilTaskDone(
         task,
-        task.mode === 0 ? false : true,
+        task.isTranslateMode() || task.isSMSTranslateMode() ? false : true,
       );
 
       await strapi.db.query("api::subscription.subscription").update({
