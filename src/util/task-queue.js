@@ -22,7 +22,7 @@ class TaskQueue {
       setInterval(() => {
         const timeoutTasks = this.queue.filter((task) => {
           if (task.isTaken() && !task.isDone()) {
-            if (task.isTranslateMode()) {
+            if (task.isTranslateMode() || task.isSMSTranslateMode()) {
               return (
                 new Date().getTime() - task.takenTime >
                 TASK_TIMEOUT[task.operator]
