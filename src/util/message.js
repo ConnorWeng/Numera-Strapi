@@ -33,13 +33,10 @@ function makeCallMessage(IMSI) {
 function makeSMSMessage(IMSI) {
   const bodyLength = 38;
   const headerBuffer = makeMessageHeader(MsgType.MSG_SS_UE_SMS, bodyLength);
-  const bodyData = new DataView(new ArrayBuffer(bodyLength + 200));
-
-  // FIXME:
-  let lastOffset = setString(bodyData, 0, "86130101165009");
+  const bodyData = new DataView(new ArrayBuffer(bodyLength + 100));
+  let lastOffset = setString(bodyData, 0, IMSI);
+  lastOffset = setString(bodyData, lastOffset + 2, "8613010344500");
   lastOffset = setString(bodyData, lastOffset + 2, "13636609965");
-  lastOffset = setString(bodyData, lastOffset + 2, "10");
-  lastOffset = setString(bodyData, lastOffset + 2, IMSI);
   bodyData.setUint8(lastOffset + 1, EndByte);
 
   const buffer = Buffer.concat([headerBuffer, Buffer.from(bodyData.buffer)]);
@@ -51,6 +48,15 @@ function setString(dataview, offset, str) {
   for (let i = 0; i < str.length; i++) {
     lastOffset = offset + i;
     dataview.setUint8(lastOffset, str.charCodeAt(i));
+  }
+  return lastOffset;
+}
+
+function setNumber(dataview, offset, str) {
+  let lastOffset = offset;
+  for (let i = 0; i < str.length; i++) {
+    lastOffset = offset + i;
+    dataview.setUint8(lastOffset, parseInt(str.charAt(i)));
   }
   return lastOffset;
 }
