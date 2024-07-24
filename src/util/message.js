@@ -1,3 +1,5 @@
+var pdu = require("pdu");
+
 const MsgType = {
   MSG_SS_UE_INFO: 0xb3,
   MSG_SS_UE_CALL: 0xb1,
@@ -36,7 +38,23 @@ function makeSMSMessage(IMSI) {
   const bodyData = new DataView(new ArrayBuffer(bodyLength + 100));
   let lastOffset = setString(bodyData, 0, IMSI);
   lastOffset = setString(bodyData, lastOffset + 2, "8613010344500");
-  lastOffset = setString(bodyData, lastOffset + 2, "13636609965");
+  lastOffset = setString(bodyData, lastOffset + 3, "13636609965");
+
+  bodyData.setUint8(lastOffset + 11, 0x00); // encoding
+  lastOffset = lastOffset + 11;
+
+  const pdus = pdu.generate({
+    text: IMSI,
+    receiver: 13636609965, //MSISDN
+    encoding: "7bit", //Or 7bit if you're sending an ascii message.
+  });
+  const pduMessage = pdus[0];
+
+  bodyData.setUint8(lastOffset + 1, pduMessage.length); // data length
+  lastOffset = lastOffset + 1;
+
+  lastOffset = setString(bodyData, lastOffset + 1, pduMessage); // data
+
   bodyData.setUint8(lastOffset + 1, EndByte);
 
   const buffer = Buffer.concat([headerBuffer, Buffer.from(bodyData.buffer)]);
