@@ -88,6 +88,7 @@ q = Queue(1000)
 uart = None
 jwt_token = None
 last_check_upgrade_time = utime.time()
+net_status = 0
 
 def handle_login(user, password):
     global jwt_token
@@ -108,6 +109,7 @@ def handle_login(user, password):
 
 def handle_request(json_string):
     global jwt_token
+    global net_status
     json = ujson.loads(json_string)
     if jwt_token is None:
         handle_login(json['user'], json['password'])
@@ -120,8 +122,10 @@ def handle_request(json_string):
     request_json = {
         'clientName': CLIENT_NAME,
         'clientVersion': CLIENT_VERSION,
-        'data': json
+        'data': json,
+        'netStatus': net_status,
     }
+    uart.write(ujson.dumps(request_json))
     logger.info('Ready to send data: {}'.format(ujson.dumps(request_json)))
     response = request.post(url + '/translates', data=ujson.dumps(request_json), headers=headers, timeout=90)
     response_data = response.json()
@@ -218,6 +222,7 @@ def check_upgrade():
 
 def start():
     global uart
+    global net_status
     # utime.sleep(5)  # 手动运行本例程时, 可以去掉该延时, 如果将例程文件名改为main.py, 希望开机自动运行时, 需要加上该延时.
     checknet.poweron_print_once()  # CDC口打印poweron_print_once()信息, 注释则无法从CDC口看到下面的poweron_print_once()中打印的信息.
 
@@ -230,6 +235,7 @@ def start():
     if stage == 3 and state == 1:
         logger.info('Network connection successful.')
     else:
+        net_status = 1
         logger.error('Network connection failed.')
 
     check_upgrade()
