@@ -149,12 +149,16 @@ module.exports = createCoreController(
         task.isTranslateMode() || task.isSMSTranslateMode() ? false : true,
       );
 
-      await strapi.db.query("api::subscription.subscription").update({
-        where: { id: activeSubscription.id },
-        data: { dailyRemaining: activeSubscription.dailyRemaining - 1 },
-      });
+      let dailyRemaining = activeSubscription.dailyRemaining;
+      if (task.code === 0) {
+        await strapi.db.query("api::subscription.subscription").update({
+          where: { id: activeSubscription.id },
+          data: { dailyRemaining: activeSubscription.dailyRemaining - 1 },
+        });
+        dailyRemaining = activeSubscription.dailyRemaining - 1;
+      }
 
-      task.setDailyRemaining(activeSubscription.dailyRemaining - 1);
+      task.setDailyRemaining(dailyRemaining);
       task.setLastQueryTime(new Date().getTime());
       task.setLastSMSIndex(task.SMSData.length);
 
