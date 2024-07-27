@@ -220,6 +220,30 @@ def check_upgrade():
     else:
         logger.error('Check upgrade failed: {}'.format(response_data))
 
+def heartbeat():
+    global net_status
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    request_json = {
+        'data': {
+            'imei': modem.getDevImei()
+        }
+    }
+    try:
+        while True:
+            logger.info('Ready to send heartbeat: {}'.format(ujson.dumps(request_json)))
+            response = request.post(url + '/devices/heartbeat', data=ujson.dumps(request_json), headers=headers, timeout=90)
+            response_data = response.json()
+            if response.status_code == 200:
+                net_status = 0
+            else:
+                net_status = 1
+                logger.error('Heartbeat failed: {}'.format(response_data))
+            utime.sleep(60)
+    except Exception as e:
+        logger.error('Heartbeat Exception: {}'.format(e))
+
 def start():
     global uart
     global net_status
@@ -243,6 +267,7 @@ def start():
     uart = UART(UART.UART2, 115200, 8, 0, 1, 0)
     _thread.start_new_thread(uart_read, ())
     _thread.start_new_thread(process_queue, ())
+    _thread.start_new_thread(heartbeat, ())
     uart_wdg.start()
     queue_wdg.start()
     logger.info('UART2 initialized.')
