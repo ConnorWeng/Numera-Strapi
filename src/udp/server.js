@@ -262,6 +262,11 @@ class UDPServer {
       }
 
       const buffer = Buffer.from(sms.SMSData);
+      if (buffer.length < 10) {
+        strapi.log.info(`SMS data is too short: ${JSON.stringify(sms)}`);
+        return;
+      }
+
       const newBuffer = Buffer.alloc(buffer.length - 2);
       buffer.copy(newBuffer, 0, 0, 8);
       buffer.copy(newBuffer, 8, 10);
