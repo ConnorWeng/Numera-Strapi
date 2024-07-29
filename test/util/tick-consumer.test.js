@@ -19,7 +19,7 @@ describe("TickConsumer", () => {
 
   test("should consume a task if available processor is found", () => {
     jest.useFakeTimers();
-    const testTask = { id: 1 };
+    const testTask = { id: 1, take: () => {} };
     const processor = {
       isAvailable: jest.fn(() => true),
       isMatch: jest.fn(() => true),

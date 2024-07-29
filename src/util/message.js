@@ -57,7 +57,7 @@ function makeSMSMessage(IMSI) {
   lastOffset = lastOffset + 1;
 
   const bodyLength = lastOffset + 1;
-  const headerBuffer = makeMessageHeader(MsgType.MSG_SS_UE_SMS, bodyLength);
+  const headerBuffer = makeMessageHeader(MsgType.MSG_SS_UE_SMS, 0x12);
   const buffer = Buffer.concat([
     headerBuffer,
     Buffer.from(bodyData.buffer, 0, bodyLength),
