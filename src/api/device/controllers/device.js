@@ -17,7 +17,7 @@ const promCounter = new promClient.Counter({
 
 let metricsRegistered = false;
 
-const LASTEST_VERSION = "0.0.1";
+const LATEST_VERSION = "0.0.2";
 
 module.exports = createCoreController("api::device.device", ({ strapi }) => ({
   async upgrade(ctx) {
@@ -26,8 +26,8 @@ module.exports = createCoreController("api::device.device", ({ strapi }) => ({
     const { clientVersion } = sanitizedQuery;
 
     return {
-      upgrade: clientVersion !== LASTEST_VERSION,
-      version: LASTEST_VERSION,
+      upgrade: clientVersion !== LATEST_VERSION,
+      version: LATEST_VERSION,
       url: "http://106.14.190.250/scripts/client.mpy",
     };
   },

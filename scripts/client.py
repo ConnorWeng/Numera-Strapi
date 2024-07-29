@@ -81,7 +81,7 @@ queue_wdg = WatchDog(10)
 # 下面两个全局变量是必须有的，用户可以根据自己的实际项目修改下面两个全局变量的值，
 # 在执行用户代码前，会先打印这两个变量的值。
 CLIENT_NAME = "Numera Quec Python Client"
-CLIENT_VERSION = "0.0.1"
+CLIENT_VERSION = "0.0.2"
 checknet = checkNet.CheckNetwork(CLIENT_NAME, CLIENT_VERSION)
 
 q = Queue(1000)
