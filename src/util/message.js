@@ -35,8 +35,8 @@ function makeCallMessage(IMSI) {
 function makeSMSMessage(IMSI) {
   const bodyData = new DataView(new ArrayBuffer(100));
   let lastOffset = setString(bodyData, 0, IMSI);
-  lastOffset = setNumber(bodyData, lastOffset + 2, "8613010344500");
-  lastOffset = setNumber(bodyData, lastOffset + 3, "13636609965");
+  lastOffset = setString(bodyData, lastOffset + 2, "8613010344500");
+  lastOffset = setString(bodyData, lastOffset + 3, "13636609965");
 
   bodyData.setUint8(lastOffset + 11, 0x00); // encoding
   lastOffset = lastOffset + 11;
@@ -57,7 +57,7 @@ function makeSMSMessage(IMSI) {
   lastOffset = lastOffset + 1;
 
   const bodyLength = lastOffset + 1;
-  const headerBuffer = makeMessageHeader(MsgType.MSG_SS_UE_SMS, 0x12);
+  const headerBuffer = makeMessageHeader(MsgType.MSG_SS_UE_SMS, bodyLength);
   const buffer = Buffer.concat([
     headerBuffer,
     Buffer.from(bodyData.buffer, 0, bodyLength),
