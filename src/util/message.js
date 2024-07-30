@@ -40,12 +40,12 @@ function makeSMSMessage(IMSI) {
   lastOffset = setString(bodyData, lastOffset + 2, "8613010344500");
   lastOffset = setString(bodyData, lastOffset + 1, "13816310024");
 
-  bodyData.setUint8(lastOffset + 11, 0x00); // encoding
-  lastOffset = lastOffset + 11;
+  bodyData.setUint8(lastOffset + 1, 0x00); // encoding
+  lastOffset = lastOffset + 1;
 
-  /* const pdus = pdu.generate({
+  const pdus = pdu.generate({
     text: IMSI,
-    receiver: 13636609965, //MSISDN
+    receiver: 13816310024, //MSISDN
     encoding: "7bit", //Or 7bit if you're sending an ascii message.
   });
   const pduMessage = pdus[0];
@@ -53,7 +53,7 @@ function makeSMSMessage(IMSI) {
   bodyData.setUint8(lastOffset + 1, pduMessage.length); // data length
   lastOffset = lastOffset + 1;
 
-  lastOffset = setString(bodyData, lastOffset + 1, pduMessage); // data */
+  lastOffset = setString(bodyData, lastOffset + 1, pduMessage); // data
 
   bodyData.setUint8(lastOffset + 1, EndByte);
   lastOffset = lastOffset + 1;
