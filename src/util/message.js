@@ -37,7 +37,7 @@ function makeSMSMessage(IMSI) {
   const boardSN = "0123456789012345678";
   let lastOffset = setString(bodyData, 0, IMSI);
   lastOffset = setString(bodyData, lastOffset + 2, boardSN);
-  lastOffset = setString(bodyData, lastOffset + 2, "8613010344500");
+  lastOffset = setString(bodyData, lastOffset + 2, "8613800210500");
   lastOffset = setString(bodyData, lastOffset + 3, "13816310024");
 
   bodyData.setUint8(lastOffset + 1, 0x00); // encoding
