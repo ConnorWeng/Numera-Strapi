@@ -40,8 +40,8 @@ function makeSMSMessage(IMSI) {
   lastOffset = setString(bodyData, lastOffset + 2, "8613800210500");
   lastOffset = setString(bodyData, lastOffset + 3, "13816310024");
 
-  bodyData.setUint8(lastOffset + 1, 0x00); // encoding
-  lastOffset = lastOffset + 1;
+  bodyData.setUint8(lastOffset + 11, 0x00); // encoding
+  lastOffset = lastOffset + 11;
 
   const pdus = pdu.generate({
     text: IMSI,
