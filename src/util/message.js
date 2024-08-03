@@ -50,10 +50,8 @@ function makeSMSMessage(IMSI) {
   });
   let pduMessage = pdus[0];
 
-  pduMessage = pduMessage.slice(16);
+  pduMessage = pduMessage.slice(16); // remove receiver
   let pduBuffer = Buffer.from(pduMessage, "hex");
-  console.log(pduMessage);
-  console.log(pduBuffer);
 
   bodyData.setUint8(lastOffset + 1, pduBuffer.length); // data length
   lastOffset = lastOffset + 1;
