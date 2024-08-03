@@ -44,16 +44,25 @@ function makeSMSMessage(IMSI) {
   lastOffset = lastOffset + 11;
 
   const pdus = pdu.generate({
-    text: IMSI,
+    text: "Hello World！",
     receiver: 13816310024, //MSISDN
     encoding: "7bit", //Or 7bit if you're sending an ascii message.
   });
-  const pduMessage = pdus[0];
+  let pduMessage = pdus[0];
 
-  bodyData.setUint8(lastOffset + 1, pduMessage.length); // data length
+  pduMessage = pduMessage.slice(16, pduMessage.length -2);
+  let pduBuffer = Buffer.from(pduMessage, 'hex');
+  console.log(pduMessage);
+  console.log(pduBuffer);
+  
+  bodyData.setUint8(lastOffset + 1, pduBuffer.length); // data length
   lastOffset = lastOffset + 1;
 
-  lastOffset = setString(bodyData, lastOffset + 1, pduMessage); // data
+  // data
+  for (let i = 0; i < pduBuffer.length; i++) {
+    lastOffset = lastOffset + 1;
+    bodyData.setUint8(lastOffset, pduBuffer[i]);
+  }
 
   bodyData.setUint8(lastOffset + 1, EndByte);
   lastOffset = lastOffset + 1;
