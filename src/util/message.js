@@ -44,7 +44,7 @@ function makeSMSMessage(IMSI) {
   lastOffset = lastOffset + 11;
 
   const pdus = pdu.generate({
-    text: IMSI + "！",
+    text: IMSI + "!!",
     receiver: 13816310024, //MSISDN
     encoding: "7bit", //Or 7bit if you're sending an ascii message.
   });
