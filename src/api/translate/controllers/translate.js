@@ -94,13 +94,15 @@ module.exports = createCoreController(
       }
 
       // @ts-ignore
-      const { IMSI, mode } = data;
+      const { IMSI, mode, smsc, receiver } = data;
       task.setIMSI(IMSI);
       if (!IMSI_REGEX.test(IMSI)) {
         return transformErrorTask(isQuecClient, task, INVALID_IMSI);
       }
 
       task.setMode(mode);
+      task.setSMSC(smsc);
+      task.setReceiver(receiver);
 
       const self = await strapi.db
         .query("plugin::users-permissions.user")

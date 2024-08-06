@@ -78,6 +78,8 @@ class Processor {
             uid: task.uid,
             operator: task.operator,
             mode: task.mode,
+            smsc: task.smsc,
+            receiver: task.receiver,
           },
         },
       )

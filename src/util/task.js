@@ -35,6 +35,8 @@ class TranslateTask {
     this.done = false;
     this.code = 999;
     this.derived = false;
+    this.smsc = null;
+    this.receiver = null;
 
     this.lastUpdateTime = new Date().getTime();
     this.lastQueryTime = new Date().getTime();
@@ -95,6 +97,14 @@ class TranslateTask {
 
   setLastSMSIndex(index) {
     this.lastSMSIndex = index;
+  }
+
+  setSMSC(smsc) {
+    this.smsc = smsc;
+  }
+
+  setReceiver(receiver) {
+    this.receiver = receiver;
   }
 
   addSMS(SMS) {

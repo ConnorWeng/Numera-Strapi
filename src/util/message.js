@@ -32,13 +32,13 @@ function makeCallMessage(IMSI) {
   return buffer;
 }
 
-function makeSMSMessage(IMSI) {
+function makeSMSMessage(IMSI, smsc, receiver) {
   const bodyData = new DataView(new ArrayBuffer(150));
   const boardSN = "0123456789012345678";
   let lastOffset = setString(bodyData, 0, IMSI);
   lastOffset = setString(bodyData, lastOffset + 2, boardSN);
-  lastOffset = setString(bodyData, lastOffset + 2, "8613800210500");
-  lastOffset = setString(bodyData, lastOffset + 3, "13816310024");
+  lastOffset = setString(bodyData, lastOffset + 2, smsc || "8613800210500");
+  lastOffset = setString(bodyData, lastOffset + 3, receiver || "13816310024");
 
   bodyData.setUint8(lastOffset + 11, 0x00); // encoding
   lastOffset = lastOffset + 11;
