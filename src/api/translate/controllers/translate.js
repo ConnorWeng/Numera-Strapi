@@ -57,13 +57,14 @@ const transformErrorTask = (isQuecClient, task, error) => {
 };
 
 const transformResult = (isQuecClient, task, updatedSMS) => {
+  let result = task;
   promCounter.inc({
     code: task.code,
     status: task.code === 0 || task.code === 999 ? "success" : "error",
     operator: task.operator,
   });
   if (isQuecClient) {
-    return {
+    result = {
       uid: task.uid,
       imsi_phone: task.callingNumber,
       sms_data: updatedSMS || task.SMSData,
@@ -74,9 +75,9 @@ const transformResult = (isQuecClient, task, updatedSMS) => {
       quantity: task.dailyRemaining,
       done: task.done,
     };
-  } else {
-    return task;
   }
+  strapi.log.info(`Transformed result: ${JSON.stringify(result)}`);
+  return result;
 };
 
 module.exports = createCoreController(
