@@ -48,7 +48,7 @@ const parseText = (sms) => {
       .trim(),
     time: moment().format("YYYY-MM-DD HH:mm:ss.SSS"),
     text: dataString
-      .substring(20)
+      .substring(20, dataString.length - 1)
       .replace(/[\n\u001d\u0000]/g, "")
       .trim(),
   };
