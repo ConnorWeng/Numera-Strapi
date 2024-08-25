@@ -42,9 +42,15 @@ const parseText = (sms) => {
   const dataString = Buffer.from(sms.SMSData).toString("utf-8");
   strapi.log.info(`server got SMS message: ${dataString}`);
   return {
-    sender: dataString.substring(0, 20).trim(),
+    sender: dataString
+      .substring(0, 20)
+      .replace(/[\n\u001d\u0000]/g, "")
+      .trim(),
     time: moment().format("YYYY-MM-DD HH:mm:ss.SSS"),
-    text: dataString.substring(20).trim(),
+    text: dataString
+      .substring(20)
+      .replace(/[\n\u001d\u0000]/g, "")
+      .trim(),
   };
 };
 
