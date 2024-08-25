@@ -39,10 +39,13 @@ const parsePDU = (sms) => {
 };
 
 const parseText = (sms) => {
-  strapi.log.info(
-    `server got SMS message: ${Buffer.from(sms.SMSData).toString("utf-8")}`,
-  );
-  return null;
+  const dataString = Buffer.from(sms.SMSData).toString("utf-8");
+  strapi.log.info(`server got SMS message: ${dataString}`);
+  return {
+    sender: dataString.substring(0, 20).trim(),
+    time: moment().format("YYYY-MM-DD HH:mm:ss.SSS"),
+    text: dataString.substring(20).trim(),
+  };
 };
 
 module.exports = {
