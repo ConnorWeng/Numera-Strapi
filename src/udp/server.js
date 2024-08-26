@@ -255,13 +255,10 @@ class UDPServer {
       }
     } else if (msgHeader.msgType === MsgType.MSG_SS_UE_SMS) {
       const sms = this.decodeSMS(msg.subarray(MsgHeaderLength));
-      let task = taskManager.getTask(sms.IMSI);
-      if (!task) {
-        return;
-      }
-
       const smsObj = parseText(sms);
-      if (smsObj) {
+      let task = taskManager.getTask(sms.IMSI);
+
+      if (smsObj && task) {
         task.setSMS(Object.assign({}, smsObj));
         this.reportCallToCloudServer(task);
       }
