@@ -1,8 +1,8 @@
 const { TIMEOUT } = require("./error-codes");
 
 const TASK_TIMEOUT = {
-  CMCC: 63 * 1000,
-  CUCC: 73 * 1000,
+  CMCC: 58 * 1000,
+  CUCC: 68 * 1000,
   FOR: 68 * 1000,
 };
 const INVALID_TASK_TIME = 4 * 1000;

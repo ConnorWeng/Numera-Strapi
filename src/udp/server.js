@@ -249,6 +249,7 @@ class UDPServer {
           }
         } else if (policy.policy === "SUCCESS") {
           strapi.log.info(`Call success to IMSI: ${call.IMSI}`);
+          task.updateCalledAt();
         } else if (policy.policy === "CONTINUE") {
           // Do nothing
         }
@@ -257,6 +258,7 @@ class UDPServer {
       const sms = this.decodeSMS(msg.subarray(MsgHeaderLength));
       const smsObj = parseText(sms);
       let task = taskManager.getTask(sms.IMSI);
+      strapi.log.info(`Doing task: ${JSON.stringify(task)}`);
 
       if (smsObj && task) {
         task.setSMS(Object.assign({}, smsObj));

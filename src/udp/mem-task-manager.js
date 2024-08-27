@@ -17,6 +17,7 @@ class Task {
     this.operator = operator;
     this.mode = mode;
     this.createdAt = new Date().getTime();
+    this.calledAt = null;
     this.retriedTimes = 0;
     this.logs = [];
     this.touched = false;
@@ -30,6 +31,10 @@ class Task {
 
   getCreatedAt() {
     return this.createdAt;
+  }
+
+  getCalledAt() {
+    return this.calledAt;
   }
 
   appendLog(log) {
@@ -68,6 +73,10 @@ class Task {
     this.SMS = SMS;
   }
 
+  updateCalledAt() {
+    this.calledAt = new Date().getTime();
+  }
+
   isSMSTranslateMode() {
     return this.mode === 2;
   }
@@ -85,7 +94,10 @@ class MemTaskManager {
     setInterval(() => {
       const expiredTasks = this.tasks.filter(
         (task) =>
-          new Date().getTime() - task.getCreatedAt() >
+          new Date().getTime() -
+            (task.isSMSTranslateMode() && task.getCalledAt()
+              ? task.getCalledAt()
+              : task.getCreatedAt()) >
           TASK_TIMEOUT[task.operator],
       );
       for (const expiredTask of expiredTasks) {
