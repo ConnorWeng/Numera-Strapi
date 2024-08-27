@@ -77,6 +77,10 @@ class Task {
     this.calledAt = new Date().getTime();
   }
 
+  isCloudFetchMode() {
+    return this.mode === 1;
+  }
+
   isSMSTranslateMode() {
     return this.mode === 2;
   }
@@ -95,7 +99,7 @@ class MemTaskManager {
       const expiredTasks = this.tasks.filter(
         (task) =>
           new Date().getTime() -
-            (task.isSMSTranslateMode() && task.getCalledAt()
+            (task.isCloudFetchMode() && task.getCalledAt()
               ? task.getCalledAt()
               : task.getCreatedAt()) >
           TASK_TIMEOUT[task.operator],

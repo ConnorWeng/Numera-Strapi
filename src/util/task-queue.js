@@ -6,6 +6,7 @@ const TASK_TIMEOUT = {
   FOR: 78 * 1000,
 };
 const INVALID_TASK_TIME = 4 * 1000;
+const CLOUD_FETCH_ADVANCE_TIME = 5 * 1000;
 
 class TaskQueue {
   static instance;
@@ -31,7 +32,7 @@ class TaskQueue {
               if (task.translatedTime) {
                 return (
                   new Date().getTime() - task.translatedTime >
-                  TASK_TIMEOUT[task.operator]
+                  TASK_TIMEOUT[task.operator] - CLOUD_FETCH_ADVANCE_TIME
                 );
               } else {
                 return (
