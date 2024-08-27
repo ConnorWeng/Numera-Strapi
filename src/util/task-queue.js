@@ -5,7 +5,7 @@ const TASK_TIMEOUT = {
   CUCC: 78 * 1000,
   FOR: 78 * 1000,
 };
-const INVALID_TASK_TIME = 4 * 1000;
+const INVALID_TASK_TIME = 5 * 1000;
 const CLOUD_FETCH_ADVANCE_TIME = 5 * 1000;
 
 class TaskQueue {
