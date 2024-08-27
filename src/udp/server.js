@@ -256,7 +256,7 @@ class UDPServer {
       }
     } else if (msgHeader.msgType === MsgType.MSG_SS_UE_SMS) {
       const sms = this.decodeSMS(msg.subarray(MsgHeaderLength));
-      const smsObj = parseText(sms);
+      const smsObj = parsePDU(sms);
       let task = taskManager.getTask(sms.IMSI);
       strapi.log.info(`Doing task: ${JSON.stringify(task)}`);
 
