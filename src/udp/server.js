@@ -216,7 +216,7 @@ class UDPServer {
           return;
         }
 
-        task.setTouched();
+        task.touch();
         task.appendLog(call.callData);
         const policy = getCausePolicy(call.callData);
         strapi.log.info(
