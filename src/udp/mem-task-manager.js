@@ -20,7 +20,7 @@ class Task {
     this.calledAt = null;
     this.retriedTimes = 0;
     this.logs = [];
-    this.touchedAt = new Date().getTime();
+    this.touched = false;
     this.error = null;
     this.SMS = null;
   }
@@ -31,10 +31,6 @@ class Task {
 
   getCreatedAt() {
     return this.createdAt;
-  }
-
-  getTouchedAt() {
-    return this.touchedAt;
   }
 
   getCalledAt() {
@@ -57,12 +53,16 @@ class Task {
     return this.retriedTimes;
   }
 
+  getTouched() {
+    return this.touched;
+  }
+
   increaseRetry() {
     this.retriedTimes++;
   }
 
-  touch() {
-    this.touchedAt = new Date().getTime();
+  setTouched() {
+    this.touched = true;
   }
 
   setError(error) {
@@ -115,24 +115,21 @@ class MemTaskManager {
 
       const notTouchedTasks = this.tasks.filter(
         (task) =>
-          new Date().getTime() - task.getTouchedAt() > UNTOUCHED_TASK_TIME,
+          !task.getTouched() &&
+          new Date().getTime() - task.getCreatedAt() > UNTOUCHED_TASK_TIME,
       );
       for (const notTouchedTask of notTouchedTasks) {
         strapi.log.info(
-          `Task ${JSON.stringify(notTouchedTask)} untouched for ${UNTOUCHED_TASK_TIME / 1000}s`,
+          `Task ${JSON.stringify(notTouchedTask)} untouched for ${UNTOUCHED_TASK_TIME / 1000}s, retrying...`,
         );
-        notTouchedTask.touch();
-        if (notTouchedTask.getRetriedTimes() < 2) {
-          notTouchedTask.increaseRetry();
-          strapi.log.info(`Retring task: ${JSON.stringify(notTouchedTask)}`);
-          UDPClient.getInstance().send(
-            notTouchedTask.isSMSTranslateMode()
-              ? makeSMSMessage(notTouchedTask.getIMSI())
-              : makeCallMessage(notTouchedTask.getIMSI()),
-            9000,
-            "localhost",
-          );
-        }
+        notTouchedTask.setTouched();
+        UDPClient.getInstance().send(
+          notTouchedTask.isSMSTranslateMode()
+            ? makeSMSMessage(notTouchedTask.getIMSI())
+            : makeCallMessage(notTouchedTask.getIMSI()),
+          9000,
+          "localhost",
+        );
       }
     }, 1000);
 
