@@ -25,19 +25,29 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
       throw new strapiUtils.errors.NotFoundError("No task found");
     }
 
-    if (data.error && task.operator !== "FOR" && !task.callingNumber) {
+    strapi.log.info(
+      `Received call data ${JSON.stringify(data)} for task ${JSON.stringify(task)}`,
+    );
+
+    if (
+      data.error &&
+      task.operator !== "FOR" &&
+      !task.callingNumber &&
+      task.SMSData.length === 0
+    ) {
       task.setCode(data.error.code);
       task.setError(data.error);
     }
 
     if (data.callingNumber && !task.callingNumber) {
       task.setCode(0);
-      task.setCallingNumber(data.callingNumber);
       task.setError(null);
+      task.setCallingNumber(data.callingNumber);
     }
 
     if (data.SMS) {
       task.setCode(0);
+      task.setError(null);
       const duplicated = task.SMSData.filter((sms) => {
         return sms.time === data.SMS.time && sms.text === data.SMS.text;
       });
