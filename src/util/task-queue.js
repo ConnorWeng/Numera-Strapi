@@ -1,3 +1,4 @@
+const NodeCache = require("node-cache");
 const { TIMEOUT } = require("./error-codes");
 
 const TASK_TIMEOUT = {
@@ -17,6 +18,8 @@ class TaskQueue {
     }
 
     this.queue = [];
+    this.cache = new NodeCache({ stdTTL: 3600 });
+
     TaskQueue.instance = this;
 
     if (process.env.IS_DEVICE === "false" || !process.env.IS_DEVICE) {
@@ -154,6 +157,10 @@ class TaskQueue {
         }
       }, 1000);
     });
+  }
+
+  getCache() {
+    return this.cache;
   }
 
   static getInstance() {

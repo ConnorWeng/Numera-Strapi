@@ -43,6 +43,9 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
       task.setCode(0);
       task.setError(null);
       task.setCallingNumber(data.callingNumber);
+      TaskQueue.getInstance()
+        .getCache()
+        .set(task.getIMSI(), data.callingNumber);
     }
 
     if (data.SMS) {

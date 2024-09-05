@@ -145,6 +145,13 @@ module.exports = createCoreController(
       }
 
       const globalTaskQueue = TaskQueue.getInstance();
+
+      if (task.isCloudFetchMode()) {
+        task.setCallingNumber(
+          globalTaskQueue.getCache().get(task.getIMSI()) || null,
+        );
+      }
+
       globalTaskQueue.addTask(task);
 
       await globalTaskQueue.waitUntilTaskDone(
