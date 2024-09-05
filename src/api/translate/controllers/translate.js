@@ -147,9 +147,14 @@ module.exports = createCoreController(
       const globalTaskQueue = TaskQueue.getInstance();
 
       if (task.isCloudFetchMode()) {
+        const cache = globalTaskQueue.getCache();
         task.setCallingNumber(
-          globalTaskQueue.getCache().get(task.getIMSI()) || null,
+          cache.get(`${task.getIMSI()}:callingNumber`) || null,
         );
+        const SMS = cache.take(`${task.getIMSI()}:SMS`);
+        if (SMS) {
+          task.addSMS(SMS);
+        }
       }
 
       globalTaskQueue.addTask(task);
