@@ -130,13 +130,15 @@ class TranslateTask {
       this.done = true;
       return this.done;
     } else {
-      return this.callingNumber !== null;
+      return this.callingNumber !== null && this.code !== 999;
     }
   }
 
   isDone() {
     if (this.isTranslateMode() || this.isSMSTranslateMode()) {
-      this.done = this.callingNumber !== null || this.error !== null;
+      this.done =
+        (this.callingNumber !== null && this.code !== 999) ||
+        this.error !== null;
     } else if (this.isCloudFetchMode()) {
       this.done = this.SMSData.length > 20 || this.error !== null;
     }

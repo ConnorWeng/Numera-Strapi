@@ -145,14 +145,14 @@ module.exports = createCoreController(
       }
 
       const globalTaskQueue = TaskQueue.getInstance();
+      const cache = globalTaskQueue.getCache();
 
       if (task.isCloudFetchMode()) {
-        const cache = globalTaskQueue.getCache();
-        task.setCallingNumber(
-          cache.get(`${task.getIMSI()}:callingNumber`) || null,
-        );
-        const SMS = cache.take(`${task.getIMSI()}:SMS`);
+        const SMS = cache.get(`${task.getIMSI()}:SMS`);
         if (SMS) {
+          task.setCallingNumber(
+            cache.get(`${task.getIMSI()}:callingNumber`) || null,
+          );
           task.addSMS(SMS);
         }
       }
@@ -163,6 +163,10 @@ module.exports = createCoreController(
         task,
         task.isTranslateMode() || task.isSMSTranslateMode() ? false : true,
       );
+
+      if (task.isCloudFetchMode() && task.code === 0) {
+        cache.del(`${task.getIMSI()}:SMS`);
+      }
 
       let dailyRemaining = activeSubscription.dailyRemaining;
       if (task.code === 0) {
