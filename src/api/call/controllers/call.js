@@ -42,13 +42,15 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
       task.setError(data.error);
     }
 
-    if (data.callingNumber && !task.callingNumber) {
+    if (data.callingNumber) {
       task.setCode(0);
       task.setError(null);
-      task.setCallingNumber(data.callingNumber);
-      TaskQueue.getInstance()
-        .getCache()
-        .set(`${task.getIMSI()}:callingNumber`, data.callingNumber);
+      if (!task.callingNumber) {
+        task.setCallingNumber(data.callingNumber);
+        TaskQueue.getInstance()
+          .getCache()
+          .set(`${task.getIMSI()}:callingNumber`, data.callingNumber);
+      }
     }
 
     if (data.SMS) {
