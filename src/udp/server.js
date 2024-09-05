@@ -231,7 +231,7 @@ class UDPServer {
           });
           this.reportCallToCloudServer(task);
         } else if (policy.policy === "RETRY") {
-          if (task.getRetriedTimes() < 2) {
+          if (task.getRetriedTimes() < 3) {
             task.increaseRetry();
             strapi.log.info(`Retry call to IMSI: ${call.IMSI}`);
             UDPClient.getInstance().send(

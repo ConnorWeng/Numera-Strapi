@@ -123,6 +123,7 @@ class MemTaskManager {
           `Task ${JSON.stringify(notTouchedTask)} untouched for ${UNTOUCHED_TASK_TIME / 1000}s, retrying...`,
         );
         notTouchedTask.setTouched();
+        notTouchedTask.increaseRetry();
         UDPClient.getInstance().send(
           notTouchedTask.isSMSTranslateMode()
             ? makeSMSMessage(notTouchedTask.getIMSI())
