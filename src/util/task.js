@@ -33,7 +33,7 @@ class TranslateTask {
     this.operator = null;
     this.dailyRemaining = null;
     this.done = false;
-    this.code = 999;
+    this.code = 0;
     this.derived = false;
     this.smsc = null;
     this.receiver = null;
