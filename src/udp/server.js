@@ -361,9 +361,9 @@ class UDPServer {
   }
 
   killMobile(callData) {
-    const cmd = `ps -ef | grep "mobile ${callData[2]}" | grep -v "auto" | awk 'NR=1 {print $2}' | sed -n 1p`;
-    strapi.log.info(`Find mobile with cmd: ${cmd}`);
-    exec(cmd, (error, stdout, stderr) => {
+    const findcmd = `pgrep -f "mobile ${callData[2]}"`;
+    strapi.log.info(`Find mobile with cmd: ${findcmd}`);
+    exec(findcmd, (error, stdout, stderr) => {
       if (error) {
         strapi.log.error(`Error when exec shell: ${error}`);
         return;
