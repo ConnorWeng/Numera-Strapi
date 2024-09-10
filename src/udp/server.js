@@ -1,5 +1,3 @@
-import { stdout } from "process";
-
 const { exec } = require("child_process");
 const dgram = require("dgram");
 const Parser = require("binary-parser").Parser;
