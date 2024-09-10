@@ -251,7 +251,9 @@ class UDPServer {
         } else if (policy.policy === "SUCCESS") {
           strapi.log.info(`Call success to IMSI: ${call.IMSI}`);
           task.updateCalledAt();
-          this.killMobile(call.callData);
+          if (!task.isCloudFetchMode()) {
+            this.killMobile(call.callData);
+          }
         } else if (policy.policy === "CONTINUE") {
           // Do nothing
         }
