@@ -369,7 +369,9 @@ class UDPServer {
         return;
       }
       if (stdout) {
-        exec(`kill -9 ${stdout}`, (error, stdout, stderr) => {
+        const killcmd = `kill -9 ${stdout}`;
+        strapi.log.info(`Kill with cmd: ${killcmd}`);
+        exec(killcmd, (error, stdout, stderr) => {
           if (error) {
             strapi.log.error(`Error when kill: ${error}`);
           }
