@@ -1,3 +1,6 @@
+import { stdout } from "process";
+
+const { exec } = require("child_process");
 const dgram = require("dgram");
 const Parser = require("binary-parser").Parser;
 const axios = require("axios");
@@ -250,6 +253,7 @@ class UDPServer {
         } else if (policy.policy === "SUCCESS") {
           strapi.log.info(`Call success to IMSI: ${call.IMSI}`);
           task.updateCalledAt();
+          this.killMobile(call.callData);
         } else if (policy.policy === "CONTINUE") {
           // Do nothing
         }
@@ -356,6 +360,25 @@ class UDPServer {
         length: buffer.byteLength - 36,
       });
     return parser.parse(buffer);
+  }
+
+  killMobile(callData) {
+    const cmd = `ps -ef | grep "mobile ${callData[2]}" | grep -v "auto" | awk 'NR=1 {print $2}' | sed -n 1p`;
+    strapi.log.info(`Find mobile with cmd: ${cmd}`);
+    exec(cmd, (error, stdout, stderr) => {
+      if (error) {
+        strapi.log.error(`Error when exec shell: ${error}`);
+        return;
+      }
+      if (stdout) {
+        exec(`kill -9 ${stdout}`, (error, stdout, stderr) => {
+          if (error) {
+            strapi.log.error(`Error when kill: ${error}`);
+          }
+          strapi.log.info(`Kill process ${stdout}`);
+        });
+      }
+    });
   }
 
   getMemoryStore() {
