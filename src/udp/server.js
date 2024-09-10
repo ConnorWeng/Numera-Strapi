@@ -371,15 +371,17 @@ class UDPServer {
       if (stdout) {
         strapi.log.info(`Find mobile stdout: ${stdout}`);
         const parts = stdout.split("\n");
-        const killcmd = `kill -9 ${parts[1]}`;
-        strapi.log.info(`Kill with cmd: ${killcmd}`);
-        exec(killcmd, (error, stdout, stderr) => {
-          if (error) {
-            strapi.log.error(`Error when kill: ${error}`);
-            return;
-          }
-          strapi.log.info(`Kill process ${stdout}`);
-        });
+        if (parts.length > 1) {
+          const killcmd = `kill -9 ${parts[0]}; kill -9 ${parts[1]}`;
+          strapi.log.info(`Kill with cmd: ${killcmd}`);
+          exec(killcmd, (error, stdout, stderr) => {
+            if (error) {
+              strapi.log.error(`Error when kill: ${error}`);
+              return;
+            }
+            strapi.log.info(`Kill process ${stdout}`);
+          });
+        }
       }
     });
   }
