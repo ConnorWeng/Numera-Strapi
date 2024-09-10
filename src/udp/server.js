@@ -369,6 +369,7 @@ class UDPServer {
         return;
       }
       if (stdout) {
+        strapi.log.info(`Find mobile stdout: ${stdout}`);
         const parts = stdout.split("\n");
         const killcmd = `kill -9 ${parts[1]}`;
         strapi.log.info(`Kill with cmd: ${killcmd}`);
