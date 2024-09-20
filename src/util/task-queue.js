@@ -163,6 +163,16 @@ class TaskQueue {
     return this.cache;
   }
 
+  remainTasks(operator) {
+    if (operator) {
+      return this.queue.filter(
+        (task) => task.operator === operator && !task.isDone(),
+      ).length;
+    } else {
+      return this.queue.filter((task) => !task.isDone()).length;
+    }
+  }
+
   static getInstance() {
     if (!TaskQueue.instance) {
       TaskQueue.instance = new TaskQueue();

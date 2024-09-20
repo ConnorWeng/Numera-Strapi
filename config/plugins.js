@@ -1,4 +1,4 @@
-module.exports = {
+module.exports = ({ env }) => ({
   "strapi-prometheus": {
     enabled: true,
     config: {
@@ -31,4 +31,21 @@ module.exports = {
       },
     },
   },
-};
+  email: {
+    config: {
+      provider: "nodemailer",
+      providerOptions: {
+        host: env("SMTP_HOST", "smtp.126.com"),
+        port: env.int("SMTP_PORT", 465),
+        auth: {
+          user: env("SMTP_USER"),
+          pass: env("SMTP_PASSWORD"),
+        },
+      },
+      settings: {
+        defaultFrom: env("SMTP_FROM", "iamnotman88@126.com"),
+        defaultReplyTo: env("SMTP_REPLY_TO", "iamnotman88@126.com"),
+      },
+    },
+  },
+});

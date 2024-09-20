@@ -1,4 +1,4 @@
-const subscriptionTasks = require("./subscription-tasks");
+const cronTasks = require("./cron-tasks");
 
 module.exports = ({ env }) => ({
   host: env("HOST", "0.0.0.0"),
@@ -11,6 +11,6 @@ module.exports = ({ env }) => ({
   },
   cron: {
     enabled: env.bool("CRON_ENABLED", false),
-    tasks: subscriptionTasks,
+    tasks: cronTasks,
   },
 });
