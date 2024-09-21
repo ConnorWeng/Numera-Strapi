@@ -26,10 +26,7 @@ const detectDevice = async (strapi, operator, IMSI) => {
       );
     } else {
       strapi.log.info(`${operator} detected failed`);
-      sendNotifyEmail(
-        `${operator} detected failed`,
-        `${operator} detected failed`,
-      );
+      sendNotifyEmail(`${operator} detected failed`, JSON.stringify(task));
     }
   } else {
     strapi.log.info(`${operator} is busy, skip...`);
