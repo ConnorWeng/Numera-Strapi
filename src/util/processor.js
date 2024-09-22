@@ -1,5 +1,6 @@
 const axios = require("axios");
-const { TaskQueue } = require("./task-queue");
+const { TaskQueue, TASK_TIMEOUT } = require("./task-queue");
+const { TIMEOUT } = require("./error-codes");
 
 class Processor {
   constructor(device) {
@@ -24,10 +25,23 @@ class Processor {
     strapi.log.info(
       `Device ${this.device.ipAddress} start processing ${that.constructor.name} task: ${JSON.stringify(task)}`,
     );
-    await this.processCall(task);
-    strapi.log.info(
-      `Device ${this.device.ipAddress} finish processing ${that.constructor.name} task: ${JSON.stringify(task)}`,
-    );
+
+    if (
+      new Date().getTime() - task.getCreateTime() >
+      TASK_TIMEOUT[task.operator]
+    ) {
+      task.setCode(TIMEOUT.code);
+      task.setError(TIMEOUT);
+      task.isDone();
+      strapi.log.info(
+        `Too long to be in the queue, timeout task: ${JSON.stringify(task)}`,
+      );
+    } else {
+      await this.processCall(task);
+      strapi.log.info(
+        `Device ${this.device.ipAddress} finish processing ${that.constructor.name} task: ${JSON.stringify(task)}`,
+      );
+    }
     that.available = true;
   }
 
