@@ -81,7 +81,7 @@ queue_wdg = WatchDog(10)
 # 下面两个全局变量是必须有的，用户可以根据自己的实际项目修改下面两个全局变量的值，
 # 在执行用户代码前，会先打印这两个变量的值。
 CLIENT_NAME = "Numera Quec Python Client"
-CLIENT_VERSION = "0.0.2"
+CLIENT_VERSION = "0.0.3"
 checknet = checkNet.CheckNetwork(CLIENT_NAME, CLIENT_VERSION)
 
 q = Queue(1000)
@@ -127,7 +127,7 @@ def handle_request(json_string):
     }
     uart.write(ujson.dumps(request_json))
     logger.info('Ready to send data: {}'.format(ujson.dumps(request_json)))
-    response = request.post(url + '/translates', data=ujson.dumps(request_json), headers=headers, timeout=90)
+    response = request.post(url + '/translates', data=ujson.dumps(request_json), headers=headers, timeout=900)
     response_data = response.json()
     if response.status_code == 200:
         uart.write(ujson.dumps(response_data))
@@ -155,7 +155,7 @@ def poll(uid):
         "Authorization": "Bearer " + jwt_token,
     }
     logger.info('Ready to poll task: {}'.format(uid))
-    response = request.get(url + '/translates/' + uid + '?clientName=' + CLIENT_NAME.replace(" ", "%20") + '&clientVersion=' + CLIENT_VERSION, headers=headers, timeout=90)
+    response = request.get(url + '/translates/' + uid + '?clientName=' + CLIENT_NAME.replace(" ", "%20") + '&clientVersion=' + CLIENT_VERSION, headers=headers, timeout=900)
     response_data = response.json()
     if response.status_code == 200:
         uart.write(ujson.dumps(response_data))
@@ -206,7 +206,7 @@ def check_upgrade():
         'Content-Type': 'application/json'
     }
     logger.info('Ready to check upgrade')
-    response = request.get(url + '/devices/upgrade?clientVersion=' + CLIENT_VERSION, headers=headers, timeout=90)
+    response = request.get(url + '/devices/upgrade?clientVersion=' + CLIENT_VERSION, headers=headers, timeout=900)
     response_data = response.json()
     if response.status_code == 200:
         last_check_upgrade_time = utime.time()
@@ -233,7 +233,7 @@ def heartbeat():
     try:
         while True:
             logger.info('Ready to send heartbeat: {}'.format(ujson.dumps(request_json)))
-            response = request.post(url + '/devices/heartbeat', data=ujson.dumps(request_json), headers=headers, timeout=90)
+            response = request.post(url + '/devices/heartbeat', data=ujson.dumps(request_json), headers=headers, timeout=900)
             response_data = response.json()
             if response.status_code == 200:
                 net_status = 0
