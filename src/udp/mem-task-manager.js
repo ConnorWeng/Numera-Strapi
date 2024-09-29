@@ -77,6 +77,10 @@ class Task {
     this.calledAt = new Date().getTime();
   }
 
+  isTranslateMode() {
+    return this.mode === 0;
+  }
+
   isCloudFetchMode() {
     return this.mode === 1;
   }
