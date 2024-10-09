@@ -1,4 +1,5 @@
 const short = require("short-uuid");
+const { TASK_TIMEOUT, CLOUD_FETCH_ADVANCE_TIME } = require("./task-queue");
 
 const parseOperator = (IMSI) => {
   let operator;
@@ -143,6 +144,29 @@ class TranslateTask {
       this.done = this.SMSData.length > 20 || this.error !== null;
     }
     return this.done;
+  }
+
+  isTimeout() {
+    if (this.taken && !this.isDone()) {
+      if (this.isTranslateMode() || this.isSMSTranslateMode()) {
+        return (
+          new Date().getTime() - this.takenTime > TASK_TIMEOUT[this.operator]
+        );
+      } else if (this.isCloudFetchMode()) {
+        if (this.translatedTime) {
+          return (
+            new Date().getTime() - this.translatedTime >
+            TASK_TIMEOUT[this.operator] - CLOUD_FETCH_ADVANCE_TIME
+          );
+        } else {
+          return (
+            new Date().getTime() - this.takenTime > TASK_TIMEOUT[this.operator]
+          );
+        }
+      }
+    } else {
+      return false;
+    }
   }
 
   isTranslateMode() {

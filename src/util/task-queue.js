@@ -24,30 +24,7 @@ class TaskQueue {
 
     if (process.env.IS_DEVICE === "false" || !process.env.IS_DEVICE) {
       setInterval(() => {
-        const timeoutTasks = this.queue.filter((task) => {
-          if (task.isTaken() && !task.isDone()) {
-            if (task.isTranslateMode() || task.isSMSTranslateMode()) {
-              return (
-                new Date().getTime() - task.takenTime >
-                TASK_TIMEOUT[task.operator]
-              );
-            } else if (task.isCloudFetchMode()) {
-              if (task.translatedTime) {
-                return (
-                  new Date().getTime() - task.translatedTime >
-                  TASK_TIMEOUT[task.operator] - CLOUD_FETCH_ADVANCE_TIME
-                );
-              } else {
-                return (
-                  new Date().getTime() - task.takenTime >
-                  TASK_TIMEOUT[task.operator]
-                );
-              }
-            }
-          } else {
-            return false;
-          }
-        });
+        const timeoutTasks = this.queue.filter((task) => task.isTimeout());
         for (const timeoutTask of timeoutTasks) {
           timeoutTask.setCode(TIMEOUT.code);
           timeoutTask.setError(TIMEOUT);
@@ -104,9 +81,9 @@ class TaskQueue {
       findArray = this.queue.filter((task) => {
         if (
           !task.isDone() &&
+          !task.isTimeout() &&
+          task.isTaken() &&
           (task.operator === operator || task.operator === "FOR") &&
-          new Date().getTime() - task.getCreateTime() <
-            TASK_TIMEOUT[task.operator] &&
           new Date().getTime() - task.getCreateTime() > INVALID_TASK_TIME
         ) {
           return true;
@@ -181,4 +158,4 @@ class TaskQueue {
   }
 }
 
-module.exports = { TASK_TIMEOUT, TaskQueue };
+module.exports = { TASK_TIMEOUT, CLOUD_FETCH_ADVANCE_TIME, TaskQueue };

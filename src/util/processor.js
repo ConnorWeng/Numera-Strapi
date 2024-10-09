@@ -80,6 +80,10 @@ class Processor {
           );
         });
     }
+
+    // Make sure called device is hanged up, then task could be taken.
+    task.take();
+
     strapi.log.info(
       `Starting call device http://${this.device.ipAddress}:${this.device.port}${this.device.apiPath}/api/local/call with IMSI ${task.IMSI}`,
     );
