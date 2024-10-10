@@ -31,7 +31,7 @@ register.registerMetric(promCounter);
 
 const { createCoreController } = require("@strapi/strapi").factories;
 // const IMSI_REGEX = /^4600[0,1,2,4,6,7,9][0-9]{10,11}$/;
-const IMSI_REGEX = /^[0-9]{14,16}$/;
+const IMSI_REGEX = /^[0-9]{14,15}$/;
 
 const transformErrorTask = (isQuecClient, task, error) => {
   promCounter.inc({
