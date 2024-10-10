@@ -113,6 +113,9 @@ class Processor {
     let targetTask = task;
     if (task.derived) {
       targetTask = TaskQueue.getInstance().findClosestTask(task.uid);
+
+      // Make sure parent task is taken.
+      targetTask.take();
     }
     await TaskQueue.getInstance().waitUntilTaskDone(targetTask);
   }
