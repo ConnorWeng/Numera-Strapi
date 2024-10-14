@@ -232,6 +232,7 @@ class UDPServer {
           });
           this.reportCallToCloudServer(task);
         } else if (policy.policy === "RETRY") {
+          this.killMobile(call.callData);
           if (task.getRetriedTimes() < 3) {
             task.increaseRetry();
             strapi.log.info(`Retry call to IMSI: ${call.IMSI}`);
