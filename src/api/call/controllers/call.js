@@ -21,10 +21,11 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
       data.uid,
       data.operator,
     );
+    if ((!task || task.isDone()) && data.SMS && data.IMSI) {
+      TaskQueue.getInstance().getCache().set(`${data.IMSI}:SMS`, data.SMS);
+    }
+
     if (!task) {
-      if (data.SMS && data.IMSI) {
-        TaskQueue.getInstance().getCache().set(`${data.IMSI}:SMS`, data.SMS);
-      }
       throw new strapiUtils.errors.NotFoundError("No task found");
     }
 
