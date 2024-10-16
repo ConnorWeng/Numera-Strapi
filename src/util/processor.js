@@ -30,6 +30,7 @@ class Processor {
       new Date().getTime() - task.getCreateTime() >
       TASK_TIMEOUT[task.operator]
     ) {
+      task.take();
       task.setCode(TIMEOUT.code);
       task.setError(TIMEOUT);
       task.isDone();
