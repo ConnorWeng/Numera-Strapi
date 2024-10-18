@@ -16,10 +16,10 @@ class ProcessorPool {
       (processor) => processor.isAvailable() && processor.isMatch(task),
     );
     const unavailableProcessor = this.processors.find(
-      (processor) => !processor.isAvailable(),
+      (processor) => !processor.isAvailable() && processor.isMatch(task),
     );
 
-    // Make sure only one processor is running globally
+    // Make sure one operator one processor is running
     if (availableProcessor && !unavailableProcessor) {
       return availableProcessor;
     } else {
