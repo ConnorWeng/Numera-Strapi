@@ -30,7 +30,6 @@ class Processor {
       new Date().getTime() - task.getCreateTime() >
       TASK_TIMEOUT[task.operator]
     ) {
-      task.take();
       task.setCode(TIMEOUT.code);
       task.setError(TIMEOUT);
       task.isDone();
@@ -82,9 +81,6 @@ class Processor {
         });
     }
 
-    // Make sure called device is hanged up, then task could be taken.
-    task.take();
-
     strapi.log.info(
       `Starting call device http://${this.device.ipAddress}:${this.device.port}${this.device.apiPath}/api/local/call with IMSI ${task.IMSI}`,
     );
@@ -114,9 +110,6 @@ class Processor {
     let targetTask = task;
     if (task.derived) {
       targetTask = TaskQueue.getInstance().findClosestTask(task.uid);
-
-      // Make sure parent task is taken.
-      targetTask.take();
     }
     await TaskQueue.getInstance().waitUntilTaskDone(targetTask);
   }

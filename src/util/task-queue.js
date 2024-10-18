@@ -80,11 +80,11 @@ class TaskQueue {
     } else {
       findArray = this.queue.filter((task) => {
         if (
+          (task.operator === operator || task.operator === "FOR") &&
           !task.isDone() &&
           !task.isTimeout() &&
           task.isTaken() &&
-          (task.operator === operator || task.operator === "FOR") &&
-          new Date().getTime() - task.getCreateTime() > INVALID_TASK_TIME
+          new Date().getTime() - task.takenTime > INVALID_TASK_TIME
         ) {
           return true;
         } else {
