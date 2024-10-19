@@ -1,0 +1,18 @@
+{
+  "kind": "collectionType",
+  "collectionName": "detects",
+  "info": {
+    "singularName": "detect",
+    "pluralName": "detects",
+    "displayName": "Detect"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "IMSI": {
+      "type": "string"
+    }
+  }
+}

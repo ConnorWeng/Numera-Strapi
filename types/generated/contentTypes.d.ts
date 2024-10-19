@@ -810,6 +810,36 @@ export interface ApiCallCall extends Schema.CollectionType {
   };
 }
 
+export interface ApiDetectDetect extends Schema.CollectionType {
+  collectionName: "detects";
+  info: {
+    singularName: "detect";
+    pluralName: "detects";
+    displayName: "Detect";
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    IMSI: Attribute.String;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      "api::detect.detect",
+      "oneToOne",
+      "admin::user"
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      "api::detect.detect",
+      "oneToOne",
+      "admin::user"
+    > &
+      Attribute.Private;
+  };
+}
+
 export interface ApiDeviceDevice extends Schema.CollectionType {
   collectionName: "devices";
   info: {
@@ -993,6 +1023,7 @@ declare module "@strapi/types" {
       "plugin::users-permissions.role": PluginUsersPermissionsRole;
       "plugin::users-permissions.user": PluginUsersPermissionsUser;
       "api::call.call": ApiCallCall;
+      "api::detect.detect": ApiDetectDetect;
       "api::device.device": ApiDeviceDevice;
       "api::imsi.imsi": ApiImsiImsi;
       "api::local.local": ApiLocalLocal;
