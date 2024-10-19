@@ -1,0 +1,11 @@
+[Unit]
+Description=Start Called Script
+After=network.target
+
+[Service]
+Type=forking
+User=user123
+ExecStart=/home/user123/restart_called.sh
+
+[Install]
+WantedBy=multi-user.target

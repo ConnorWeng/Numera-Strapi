@@ -1,4 +1,5 @@
 #!/bin/bash
+cd ~
 
 # 定义最大重试次数
 MAX_RETRIES=10
@@ -42,3 +43,8 @@ done
 
 echo "$(date): 达到最大重试次数，called.py 仍然未能成功运行。"
 exit 1
+
+# 需要将 start-called.service 放到 /etc/systemd/system/ 目录下
+# 注意修改 start-called.service 中的用户和执行路径
+# sudo systemctl daemon-reload
+# sudo systemctl enable start-called.service
