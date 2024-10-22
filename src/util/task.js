@@ -14,7 +14,8 @@ const parseOperator = (IMSI) => {
   } else if (prefix === "46001" || prefix === "46006" || prefix === "46009") {
     operator = "CUCC";
   } else {
-    operator = "FOR";
+    // operator = "FOR";
+    operator = "CMCC"; // Use CMCC to handle FOR temporarily.
   }
   return operator;
 };
