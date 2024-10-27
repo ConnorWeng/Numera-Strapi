@@ -1,3 +1,5 @@
+import os
+import sys
 from flask import Flask, request, jsonify
 import platform
 import uuid
@@ -18,8 +20,19 @@ app = Flask(__name__)
 CLIENT_NAME = "Numera Soft Python Client"
 CLIENT_VERSION = "0.0.3"
 
+# 获取当前运行的文件的目录
+if getattr(sys, 'frozen', False):
+    # 如果是打包后的应用
+    base_path = sys._MEIPASS
+else:
+    # 如果是直接运行的脚本
+    base_path = os.path.dirname(__file__)
+
+# 构建 public_key.pem 的路径
+key_path = os.path.join(base_path, 'public_key.pem')
+
 # 加载公钥
-with open('public_key.pem', 'rb') as key_file:
+with open(key_path, 'rb') as key_file:
     public_key = serialization.load_pem_public_key(key_file.read(), backend=default_backend())
 
 jwt_token = None
