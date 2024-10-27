@@ -1,5 +1,7 @@
 "use strict";
 
+const fs = require("fs");
+const crypto = require("crypto");
 const _ = require("lodash/fp");
 const strapiUtils = require("@strapi/utils");
 const { TaskQueue } = require("../../../util/task-queue");
@@ -12,6 +14,7 @@ const {
   SUBSCRIPTION_EXPIRED,
   MODE_NOT_ALLOWED,
   IMSI_NOT_ALLOWED,
+  INVALID_SIGNATURE,
 } = require("../../../util/error-codes");
 const promClient = require("prom-client");
 
@@ -33,7 +36,16 @@ const { createCoreController } = require("@strapi/strapi").factories;
 // const IMSI_REGEX = /^4600[0,1,2,4,6,7,9][0-9]{10,11}$/;
 const IMSI_REGEX = /^[0-9]{14,15}$/;
 
+// load private key
+const privateKey = fs.readFileSync("private_key.pem", "utf8");
+
 const transformErrorTask = (isPythonClient, task, error) => {
+  strapi.log.info(
+    "translate error: " +
+      error.errorMessage +
+      ", task: " +
+      JSON.stringify(task),
+  );
   promCounter.inc({
     code: error.code,
     status: "error",
@@ -87,7 +99,8 @@ module.exports = createCoreController(
       await this.validateQuery(ctx);
 
       // @ts-ignore
-      const { data, clientName, clientVersion } = ctx.request.body;
+      const { signature, ...body } = ctx.request.body;
+      const { data, clientName, clientVersion } = body;
       const isPythonClient = clientName?.includes("Python");
       const task = new TranslateTask(null);
       if (!_.isObject(data)) {
@@ -119,7 +132,11 @@ module.exports = createCoreController(
       }
       if (activeSubscription.dailyRemaining < 1) {
         task.setDailyRemaining(activeSubscription.dailyRemaining);
-        return transformErrorTask(isPythonClient, task, DAILY_REMAINING_RUN_OUT);
+        return transformErrorTask(
+          isPythonClient,
+          task,
+          DAILY_REMAINING_RUN_OUT,
+        );
       }
       if (
         new Date(activeSubscription.membershipExpirationDate).getTime() <
@@ -142,6 +159,25 @@ module.exports = createCoreController(
         !activeSubscription.IMSIs.includes(IMSI)
       ) {
         return transformErrorTask(isPythonClient, task, IMSI_NOT_ALLOWED);
+      }
+      if (activeSubscription.authSignature) {
+        try {
+          const signatureBuffer = Buffer.from(signature, "base64");
+          const decryptedMessage = crypto.privateDecrypt(
+            {
+              key: privateKey,
+              padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+              oaepHash: "sha256",
+            },
+            signatureBuffer,
+          );
+          const originalMessage = JSON.stringify(body);
+          if (originalMessage !== decryptedMessage.toString()) {
+            return transformErrorTask(isPythonClient, task, INVALID_SIGNATURE);
+          }
+        } catch (err) {
+          return transformErrorTask(isPythonClient, task, INVALID_SIGNATURE);
+        }
       }
 
       const globalTaskQueue = TaskQueue.getInstance();
