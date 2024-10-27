@@ -2,6 +2,7 @@ import os
 import sys
 import atexit
 from flask import Flask, request, jsonify
+from gevent import pywsgi
 import platform
 import uuid
 import requests
@@ -42,10 +43,10 @@ with open(key_path, 'rb') as key_file:
 output_file_path = os.path.join(log_base_path, 'soft_client.log')
 
 # 重定向 stdout 和 stderr 到文件
-f = open(output_file_path, 'w')
+""" f = open(output_file_path, 'w')
 sys.stdout = f
 sys.stderr = f
-atexit.register(f.close)
+atexit.register(f.close) """
 
 jwt_token = None
 last_check_upgrade_time = time.time()
@@ -95,7 +96,7 @@ def handle_login(user, password):
 
     if response.status_code == 200:
         jwt_token = response.json().get('jwt')
-        print('JWT token: {}'.format(jwt_token))
+        print('Login success.')
     else:
         print('Login failed: {}'.format(response.json().get('error', {}).get('message', 'Unknown error')))
 
@@ -167,21 +168,21 @@ def heartbeat():
         }
     }
     while True:
-        print('Ready to send heartbeat: {}'.format(json.dumps(request_json)))
+        print('Send heartbeat: {}'.format(json.dumps(request_json)))
         response = requests.post(url + '/devices/heartbeat', json=request_json, headers=headers, timeout=900)
         if response.status_code == 200:
             net_status = 0
         else:
             net_status = 1
             print('Heartbeat failed: {}'.format(response.json()))
-        f.flush()
         time.sleep(60)
 
 def start():
     # check_upgrade()
     threading.Thread(target=heartbeat).start()
+    server = pywsgi.WSGIServer(('0.0.0.0', 18888), app)
+    print('Running on http://0.0.0.0:18888/api/translate')
+    server.serve_forever()
 
-# 启动 Flask 服务器
 if __name__ == '__main__':
-    threading.Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 18888}).start()
     start()
