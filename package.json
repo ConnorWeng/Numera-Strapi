@@ -10,7 +10,7 @@
     "strapi": "strapi",
     "test": "jest",
     "prettier": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\"",
-    "make": "pyinstaller --onefile --add-data='scripts/public_key.pem:.' scripts/soft_client.py"
+    "make": "pyinstaller --clean --onefile --add-data=\"scripts/public_key.pem:.\" scripts/soft_client.py"
   },
   "dependencies": {
     "@strapi/plugin-cloud": "4.19.0",

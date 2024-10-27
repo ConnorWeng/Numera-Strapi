@@ -178,7 +178,7 @@ def heartbeat():
         time.sleep(60)
 
 def start():
-    check_upgrade()
+    # check_upgrade()
     threading.Thread(target=heartbeat).start()
 
 # 启动 Flask 服务器
