@@ -83,6 +83,7 @@ nbproject
 public/uploads/*
 !public/uploads/.gitkeep
 *.pem
+*.spec
 
 ############################
 # Node.js
