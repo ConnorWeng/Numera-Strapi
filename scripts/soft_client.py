@@ -12,6 +12,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
 url = "http://106.14.190.250:1337/api"
+# url = "http://localhost:1337/api"
 app = Flask(__name__)
 
 CLIENT_NAME = "Numera Soft Python Client"
@@ -46,7 +47,7 @@ def get_encoded_fingerprint():
 
 def create_signature(data):
     # 生成数字签名
-    message = json.dumps(data, sort_keys=True).encode()
+    message = json.dumps(data, sort_keys=True, separators=(',', ':')).encode()
     return public_key.encrypt(
         message,
         padding.OAEP(
@@ -106,13 +107,14 @@ def handle_request(data):
         print('Translate result: {}'.format(response.json()))
     else:
         print('Translate failed: {}'.format(response.json()))
+    return response.json()
 
 @app.route('/api/translate', methods=['POST'])
 def api_task():
     data = request.json
     print('Received task data: {}'.format(data))
-    handle_request(data)
-    return jsonify({"status": "task processed"}), 200
+    result = handle_request(data)
+    return jsonify(result), 200
 
 def check_upgrade():
     global jwt_token
