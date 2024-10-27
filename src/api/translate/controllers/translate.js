@@ -33,13 +33,13 @@ const { createCoreController } = require("@strapi/strapi").factories;
 // const IMSI_REGEX = /^4600[0,1,2,4,6,7,9][0-9]{10,11}$/;
 const IMSI_REGEX = /^[0-9]{14,15}$/;
 
-const transformErrorTask = (isQuecClient, task, error) => {
+const transformErrorTask = (isPythonClient, task, error) => {
   promCounter.inc({
     code: error.code,
     status: "error",
     operator: task.operator,
   });
-  if (isQuecClient) {
+  if (isPythonClient) {
     return {
       uid: task.uid,
       imsi_phone: task.callingNumber,
@@ -56,14 +56,14 @@ const transformErrorTask = (isQuecClient, task, error) => {
   }
 };
 
-const transformResult = (isQuecClient, task, updatedSMS) => {
+const transformResult = (isPythonClient, task, updatedSMS) => {
   let result = task;
   promCounter.inc({
     code: task.code,
     status: task.code === 0 || task.code === 999 ? "success" : "error",
     operator: task.operator,
   });
-  if (isQuecClient) {
+  if (isPythonClient) {
     result = {
       uid: task.uid,
       imsi_phone: task.callingNumber,
@@ -88,17 +88,17 @@ module.exports = createCoreController(
 
       // @ts-ignore
       const { data, clientName, clientVersion } = ctx.request.body;
-      const isQuecClient = clientName?.includes("Quec");
+      const isPythonClient = clientName?.includes("Python");
       const task = new TranslateTask(null);
       if (!_.isObject(data)) {
-        return transformErrorTask(isQuecClient, task, MISSING_DATA);
+        return transformErrorTask(isPythonClient, task, MISSING_DATA);
       }
 
       // @ts-ignore
       const { IMSI, mode, smsc, receiver } = data;
       task.setIMSI(IMSI);
       if (!IMSI_REGEX.test(IMSI)) {
-        return transformErrorTask(isQuecClient, task, INVALID_IMSI);
+        return transformErrorTask(isPythonClient, task, INVALID_IMSI);
       }
 
       task.setMode(mode);
@@ -115,17 +115,17 @@ module.exports = createCoreController(
         (sub) => sub.state === "active",
       );
       if (!activeSubscription) {
-        return transformErrorTask(isQuecClient, task, NO_ACTIVE_SUBSCRIPTION);
+        return transformErrorTask(isPythonClient, task, NO_ACTIVE_SUBSCRIPTION);
       }
       if (activeSubscription.dailyRemaining < 1) {
         task.setDailyRemaining(activeSubscription.dailyRemaining);
-        return transformErrorTask(isQuecClient, task, DAILY_REMAINING_RUN_OUT);
+        return transformErrorTask(isPythonClient, task, DAILY_REMAINING_RUN_OUT);
       }
       if (
         new Date(activeSubscription.membershipExpirationDate).getTime() <
         new Date().getTime()
       ) {
-        return transformErrorTask(isQuecClient, task, SUBSCRIPTION_EXPIRED);
+        return transformErrorTask(isPythonClient, task, SUBSCRIPTION_EXPIRED);
       }
       if (activeSubscription.mode !== "all") {
         if (
@@ -133,7 +133,7 @@ module.exports = createCoreController(
             activeSubscription.mode !== "translate") ||
           (task.isCloudFetchMode() && activeSubscription.mode !== "cloud_fetch")
         ) {
-          return transformErrorTask(isQuecClient, task, MODE_NOT_ALLOWED);
+          return transformErrorTask(isPythonClient, task, MODE_NOT_ALLOWED);
         }
       }
       if (
@@ -141,7 +141,7 @@ module.exports = createCoreController(
         activeSubscription.IMSIs &&
         !activeSubscription.IMSIs.includes(IMSI)
       ) {
-        return transformErrorTask(isQuecClient, task, IMSI_NOT_ALLOWED);
+        return transformErrorTask(isPythonClient, task, IMSI_NOT_ALLOWED);
       }
 
       const globalTaskQueue = TaskQueue.getInstance();
@@ -181,7 +181,7 @@ module.exports = createCoreController(
       task.setLastQueryTime(new Date().getTime());
       task.setLastSMSIndex(task.SMSData.length);
 
-      return transformResult(isQuecClient, task);
+      return transformResult(isPythonClient, task);
     },
 
     async findOne(ctx) {
@@ -189,7 +189,7 @@ module.exports = createCoreController(
       await this.validateQuery(ctx);
       const sanitizedQuery = await this.sanitizeQuery(ctx);
       const { clientName, clientVersion } = sanitizedQuery;
-      const isQuecClient = clientName?.includes("Quec");
+      const isPythonClient = clientName?.includes("Python");
 
       const globalTaskQueue = TaskQueue.getInstance();
       const task = globalTaskQueue.findClosestTask(id);
@@ -207,7 +207,7 @@ module.exports = createCoreController(
         globalTaskQueue.removeTask(task);
       }
 
-      return transformResult(isQuecClient, task, updatedSMS);
+      return transformResult(isPythonClient, task, updatedSMS);
     },
   }),
 );
