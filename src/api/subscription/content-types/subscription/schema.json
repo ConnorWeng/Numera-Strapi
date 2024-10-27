@@ -37,6 +37,9 @@
     },
     "IMSIs": {
       "type": "json"
+    },
+    "authSignature": {
+      "type": "boolean"
     }
   }
 }
