@@ -1,5 +1,6 @@
 import os
 import sys
+import atexit
 from flask import Flask, request, jsonify
 import platform
 import uuid
@@ -23,17 +24,28 @@ CLIENT_VERSION = "0.0.3"
 # 获取当前运行的文件的目录
 if getattr(sys, 'frozen', False):
     # 如果是打包后的应用
-    base_path = sys._MEIPASS
+    key_base_path = sys._MEIPASS
+    log_base_path = os.path.dirname(sys.executable)
 else:
     # 如果是直接运行的脚本
-    base_path = os.path.dirname(__file__)
+    key_base_path = os.path.dirname(__file__)
+    log_base_path = key_base_path
 
 # 构建 public_key.pem 的路径
-key_path = os.path.join(base_path, 'public_key.pem')
+key_path = os.path.join(key_base_path, 'public_key.pem')
 
 # 加载公钥
 with open(key_path, 'rb') as key_file:
     public_key = serialization.load_pem_public_key(key_file.read(), backend=default_backend())
+
+# 构建输出文件的路径
+output_file_path = os.path.join(log_base_path, 'soft_client.log')
+
+# 重定向 stdout 和 stderr 到文件
+f = open(output_file_path, 'w')
+sys.stdout = f
+sys.stderr = f
+atexit.register(f.close)
 
 jwt_token = None
 last_check_upgrade_time = time.time()
@@ -162,6 +174,7 @@ def heartbeat():
         else:
             net_status = 1
             print('Heartbeat failed: {}'.format(response.json()))
+        f.flush()
         time.sleep(60)
 
 def start():
@@ -170,5 +183,5 @@ def start():
 
 # 启动 Flask 服务器
 if __name__ == '__main__':
-    threading.Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 8888}).start()
+    threading.Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 18888}).start()
     start()
