@@ -15,7 +15,7 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
-url = "http://106.14.190.250:1337/api"
+url = "http://106.14.70.37/api"
 # url = "http://localhost:1337/api"
 app = Flask(__name__)
 
@@ -117,16 +117,14 @@ def handle_request(data):
         'data': data,
         'netStatus': net_status,
     }
+    print('Ready to send data: {}'.format(json.dumps(request_json)))
 
     # 创建签名
     signature = create_signature(request_json)
-
     # 转换签名为可传输格式（例如 base64）
     signature_b64 = base64.b64encode(signature).decode()
-
     request_json['signature'] = signature_b64
 
-    print('Ready to send data: {}'.format(json.dumps(request_json)))
     response = requests.post(url + '/translates', json=request_json, headers=headers, timeout=900)
 
     if response.status_code == 200:
