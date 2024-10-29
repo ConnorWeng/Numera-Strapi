@@ -15,7 +15,8 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
-url = "http://106.14.70.37/api"
+API_HOST_IP = "106.14.70.37"
+URL = "http://" + API_HOST_IP + "/api"
 # url = "http://localhost:1337/api"
 app = Flask(__name__)
 
@@ -39,19 +40,24 @@ key_path = os.path.join(key_base_path, 'public_key.pem')
 with open(key_path, 'rb') as key_file:
     public_key = serialization.load_pem_public_key(key_file.read(), backend=default_backend())
 
-# 构建输出文件的路径
-output_file_path = os.path.join(log_base_path, 'soft_client.log')
-
-# 重定向 stdout 和 stderr 到文件
-""" f = open(output_file_path, 'w')
-sys.stdout = f
-sys.stderr = f
-atexit.register(f.close) """
-
 jwt_token = None
 last_check_upgrade_time = time.time()
 device_fingerprint = None
 net_status = 0
+
+def make_request(method, url, json, headers):
+    try:
+        if method == 'GET':
+            response = requests.get(url, headers=headers, timeout=900)
+        elif method == 'POST':
+            response = requests.post(url, json=json, headers=headers, timeout=900)
+        response.raise_for_status()  # 检查是否有 HTTP 错误
+        return response
+    except requests.RequestException as e:
+        # 清理异常信息中的 IP 地址
+        error_message = str(e)
+        cleaned_message = error_message.replace(API_HOST_IP, '*.*.*.*')  # 替换成通用信息
+        raise requests.RequestException(cleaned_message) from None
 
 def get_device_fingerprint():
     global device_fingerprint
@@ -91,8 +97,8 @@ def handle_login(user, password):
         'imei': get_encoded_fingerprint()
     }
     headers = {'Content-Type': 'application/json'}
-    print('Ready to login: {}'.format(json.dumps(data)))
-    response = requests.post(url + '/auth/local', json=data, headers=headers)
+    print('Login: {}'.format(json.dumps(data)))
+    response = make_request('POST', URL + '/auth/local', data, headers)
 
     if response.status_code == 200:
         jwt_token = response.json().get('jwt')
@@ -117,7 +123,7 @@ def handle_request(data):
         'data': data,
         'netStatus': net_status,
     }
-    print('Ready to send data: {}'.format(json.dumps(request_json)))
+    print('Send data: {}'.format(json.dumps(request_json)))
 
     # 创建签名
     signature = create_signature(request_json)
@@ -125,7 +131,7 @@ def handle_request(data):
     signature_b64 = base64.b64encode(signature).decode()
     request_json['signature'] = signature_b64
 
-    response = requests.post(url + '/translates', json=request_json, headers=headers, timeout=900)
+    response = make_request('POST', URL + '/translates', request_json, headers)
 
     if response.status_code == 200:
         print('Translate result: {}'.format(response.json()))
@@ -147,7 +153,7 @@ def check_upgrade():
         'Content-Type': 'application/json'
     }
     print('Ready to check upgrade')
-    response = requests.get(url + '/devices/upgrade?clientVersion=' + CLIENT_VERSION, headers=headers, timeout=900)
+    response = make_request(method='GET', url=URL + '/devices/upgrade?clientVersion=' + CLIENT_VERSION, headers=headers)
 
     if response.status_code == 200:
         last_check_upgrade_time = time.time()
@@ -167,7 +173,7 @@ def heartbeat():
     }
     while True:
         print('Send heartbeat: {}'.format(json.dumps(request_json)))
-        response = requests.post(url + '/devices/heartbeat', json=request_json, headers=headers, timeout=900)
+        response = make_request('POST', URL + '/devices/heartbeat', request_json, headers)
         if response.status_code == 200:
             net_status = 0
         else:
