@@ -185,7 +185,7 @@ def start():
     # check_upgrade()
     threading.Thread(target=heartbeat).start()
     server = pywsgi.WSGIServer(('0.0.0.0', 18888), app)
-    print('Running on http://0.0.0.0:18888/api/translate')
+    print('Running on http://127.0.0.1:18888/api/translate')
     server.serve_forever()
 
 if __name__ == '__main__':
