@@ -92,6 +92,14 @@ const transformResult = (isPythonClient, task, updatedSMS) => {
   return result;
 };
 
+const isTimestampValid = (decryptedMessage) => {
+  const decryptedObject = JSON.parse(decryptedMessage);
+  return (
+    decryptedObject.timestamp &&
+    Date.now() - decryptedObject.timestamp * 1000 < 5 * 60 * 1000
+  );
+};
+
 module.exports = createCoreController(
   "api::translate.translate",
   ({ strapi }) => ({
@@ -163,16 +171,25 @@ module.exports = createCoreController(
       if (activeSubscription.authSignature) {
         try {
           const signatureBuffer = Buffer.from(signature, "base64");
-          const decryptedMessage = crypto.privateDecrypt(
-            {
-              key: privateKey,
-              padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-              oaepHash: "sha256",
-            },
-            signatureBuffer,
-          );
+          const decryptedMessage = crypto
+            .privateDecrypt(
+              {
+                key: privateKey,
+                padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+                oaepHash: "sha256",
+              },
+              signatureBuffer,
+            )
+            .toString();
           const originalMessage = JSON.stringify(body);
-          if (originalMessage !== decryptedMessage.toString()) {
+          if (
+            originalMessage === decryptedMessage &&
+            isTimestampValid(decryptedMessage)
+          ) {
+            strapi.log.info(
+              `Auth signature success, task: ${JSON.stringify(task)}`,
+            );
+          } else {
             return transformErrorTask(isPythonClient, task, INVALID_SIGNATURE);
           }
         } catch (err) {

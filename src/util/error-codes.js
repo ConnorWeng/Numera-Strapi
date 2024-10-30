@@ -42,6 +42,6 @@ module.exports = {
   INVALID_SIGNATURE: {
     errorCode: 1009,
     errorMessage: "无效的数字签名",
-    code: -1,
+    code: -2,
   },
 };

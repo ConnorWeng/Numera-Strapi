@@ -17,7 +17,7 @@ from cryptography.hazmat.primitives import serialization
 
 API_HOST_IP = "106.14.70.37"
 URL = "http://" + API_HOST_IP + "/api"
-# url = "http://localhost:1337/api"
+# URL = "http://localhost:1337/api"
 app = Flask(__name__)
 
 CLIENT_NAME = "Numera Soft Python Client"
@@ -122,6 +122,7 @@ def handle_request(data):
         'clientVersion': CLIENT_VERSION,
         'data': data,
         'netStatus': net_status,
+        'timestamp': time.time(),
     }
     print('Send data: {}'.format(json.dumps(request_json)))
 
