@@ -240,6 +240,8 @@ def heartbeat():
             else:
                 net_status = 1
                 logger.error('Heartbeat failed: {}'.format(response_data))
+            request_json['netStatus'] = net_status
+            uart.write(ujson.dumps(request_json))
             utime.sleep(60)
     except Exception as e:
         logger.error('Heartbeat Exception: {}'.format(e))
