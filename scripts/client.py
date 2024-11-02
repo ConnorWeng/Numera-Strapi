@@ -106,6 +106,10 @@ def handle_login(user, password):
         logger.info('JWT token: {}'.format(jwt_token))
     else:
         logger.error('Login failed: {}'.format(response_data['error']['message']))
+        error_json = {
+            'error': 'Login failed: {}'.format(response_data['error']['message'])
+        }
+        uart.write(ujson.dumps(error_json))
 
 def handle_request(json_string):
     global jwt_token
@@ -136,6 +140,10 @@ def handle_request(json_string):
           start_poll(response_data['uid'])
     else:
         logger.error('Translate failed: {}'.format(response_data))
+        error_json = {
+            'error': 'Translate failed: {}'.format(response_data)
+        }
+        uart.write(ujson.dumps(error_json))
 
 def start_poll(uid):
     try:
