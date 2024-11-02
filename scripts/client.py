@@ -131,7 +131,13 @@ def handle_request(json_string):
     }
     uart.write(ujson.dumps(request_json))
     logger.info('Ready to send data: {}'.format(ujson.dumps(request_json)))
-    response = request.post(url + '/translates', data=ujson.dumps(request_json), headers=headers, timeout=900)
+
+    if json['mode'] == 9:
+        api_path = '/detects'
+    else:
+        api_path = '/translates'
+
+    response = request.post(url + api_path, data=ujson.dumps(request_json), headers=headers, timeout=900)
     response_data = response.json()
     if response.status_code == 200:
         uart.write(ujson.dumps(response_data))
