@@ -40,6 +40,9 @@
     },
     "authSignature": {
       "type": "boolean"
+    },
+    "operator": {
+      "type": "string"
     }
   }
 }

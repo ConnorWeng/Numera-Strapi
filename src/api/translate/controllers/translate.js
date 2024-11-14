@@ -196,6 +196,9 @@ module.exports = createCoreController(
           return transformErrorTask(isPythonClient, task, INVALID_SIGNATURE);
         }
       }
+      if (activeSubscription.operator) {
+        task.setOperator(activeSubscription.operator);
+      }
 
       const globalTaskQueue = TaskQueue.getInstance();
       const cache = globalTaskQueue.getCache();

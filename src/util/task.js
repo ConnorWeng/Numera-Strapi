@@ -61,6 +61,10 @@ class TranslateTask {
     return this.operator;
   }
 
+  setOperator(operator) {
+    this.operator = operator;
+  }
+
   getCreateTime() {
     return this.createTime;
   }

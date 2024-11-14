@@ -957,6 +957,7 @@ export interface ApiSubscriptionSubscription extends Schema.CollectionType {
     mode: Attribute.Enumeration<["translate", "cloud_fetch", "all"]>;
     IMSIs: Attribute.JSON;
     authSignature: Attribute.Boolean;
+    operator: Attribute.String;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;

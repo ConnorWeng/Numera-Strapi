@@ -1,6 +1,7 @@
 const CMCCProcessor = require("./cmcc-processor");
 const CUCCProcessor = require("./cucc-processor");
 const FORProcessor = require("./for-processor");
+const BorderProcessor = require("./border-processor");
 
 class ProcessorPool {
   constructor(processors) {
@@ -39,6 +40,8 @@ class ProcessorPool {
           return new CMCCProcessor(device);
         } else if (device.operator === "CUCC") {
           return new CUCCProcessor(device);
+        } else if (device.operator === "BORDER") {
+          return new BorderProcessor(device);
         }
       });
     const pool = new ProcessorPool(processors);
