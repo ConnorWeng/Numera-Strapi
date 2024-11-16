@@ -232,7 +232,7 @@ class UDPServer {
           });
           this.reportCallToCloudServer(task);
         } else if (policy.policy === "RETRY") {
-          this.killMobile(call.callData);
+          // this.killMobile(call.callData);
           if (task.getRetriedTimes() < 3) {
             task.increaseRetry();
             strapi.log.info(`Retry call to IMSI: ${call.IMSI}`);
@@ -253,7 +253,7 @@ class UDPServer {
           strapi.log.info(`Call success to IMSI: ${call.IMSI}`);
           task.updateCalledAt();
           if (task.isTranslateMode()) {
-            this.killMobile(call.callData);
+            // this.killMobile(call.callData);
           }
         } else if (policy.policy === "CONTINUE") {
           // Do nothing
