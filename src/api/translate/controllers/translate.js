@@ -35,7 +35,7 @@ register.registerMetric(promCounter);
 const { createCoreController } = require("@strapi/strapi").factories;
 // const IMSI_REGEX = /^4600[0,1,2,4,6,7,9][0-9]{10,11}$/;
 const IMSI_REGEX = /^[0-9]{14,15}$/;
-const BORDER_REGEX = /^40101[0-9]{9,10}$/;
+const BORDER_REGEX = /^(40101|46003|46005|46011)[0-9]{9,10}$/;
 
 // load private key
 const privateKey = fs.readFileSync("private_key.pem", "utf8");
