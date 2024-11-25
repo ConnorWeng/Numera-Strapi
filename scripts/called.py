@@ -71,6 +71,11 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def handle_mobile_check(self, data):
         lock.acquire()
+
+        # Clear the queue
+        while not queue.empty():
+            queue.get()
+
         print("Check mobile: " + json.dumps(data))
         ser.write(b"AT+CNMI=2,1,0,1,0\r")
         time.sleep(1)
