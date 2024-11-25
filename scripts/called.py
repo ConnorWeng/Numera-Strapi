@@ -84,13 +84,11 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
         try:
-            result = queue.get(CHECK_MOBILE_STATE_TIMEOUT)
+            result = queue.get(timeout=CHECK_MOBILE_STATE_TIMEOUT)
             if result == MobileCheckResult.OPEN:
                 response_data = {"result": "open"}
-            else:
-                response_data = {"result": "close or error"}
-        except multiprocessing.TimeoutError:
-            response_data = {"result": "timeout"}
+        except Exception as e:
+            response_data = {"result": "close"}
         finally:
             self.end_headers()
             self.wfile.write(json.dumps(response_data).encode('utf-8'))
@@ -170,13 +168,9 @@ def check_output_for_phone_number(output):
 
 def check_output_for_mobile_state(output):
     find = re.findall(mobileCheckRegex, output)
-    if find:
-        if find[0] == "CDS":
-            queue.put(MobileCheckResult.OPEN)
-            print("Mobile state is open")
-        else:
-            queue.put(MobileCheckResult.CLOSE)
-            print("Mobile state is close or error")
+    if find and find[0] == "CDS":
+        queue.put(MobileCheckResult.OPEN)
+        print("Mobile state is open")
 
 ser = serial.Serial("/dev/ttyUSB2", baudrate=9600, timeout=1)
 sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
