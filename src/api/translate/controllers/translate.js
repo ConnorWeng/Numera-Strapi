@@ -201,6 +201,16 @@ module.exports = createCoreController(
         task.setOperator(activeSubscription.operator);
       }
 
+      if (task.getOperator() === "FOR") {
+        const configData =
+          await strapi.entityService.findMany("api::config.config");
+        if (configData.foreignOperator) {
+          task.setOperator(configData.foreignOperator);
+        } else {
+          task.setOperator("CMCC");
+        }
+      }
+
       const globalTaskQueue = TaskQueue.getInstance();
       const cache = globalTaskQueue.getCache();
 
