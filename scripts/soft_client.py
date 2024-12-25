@@ -45,7 +45,14 @@ last_check_upgrade_time = time.time()
 device_fingerprint = None
 net_status = 0
 
+def raise_for_clean_error_message(e):
+    # 清理异常信息中的 IP 地址
+    error_message = str(e)
+    cleaned_message = error_message.replace(API_HOST_IP, '*.*.*.*')  # 替换成通用信息
+    raise requests.RequestException(cleaned_message) from None
+
 def make_request(method, url, json, headers):
+    global jwt_token
     try:
         if method == 'GET':
             response = requests.get(url, headers=headers, timeout=900)
@@ -53,11 +60,14 @@ def make_request(method, url, json, headers):
             response = requests.post(url, json=json, headers=headers, timeout=900)
         response.raise_for_status()  # 检查是否有 HTTP 错误
         return response
+    except requests.HTTPError as e:
+        status_code = e.response.status_code
+        if status_code == 401:
+            print('Unauthorized client error, clean JWT token.')
+            jwt_token = None
+        raise_for_clean_error_message(e)
     except requests.RequestException as e:
-        # 清理异常信息中的 IP 地址
-        error_message = str(e)
-        cleaned_message = error_message.replace(API_HOST_IP, '*.*.*.*')  # 替换成通用信息
-        raise requests.RequestException(cleaned_message) from None
+        raise_for_clean_error_message(e)
 
 def get_device_fingerprint():
     global device_fingerprint
@@ -173,13 +183,16 @@ def heartbeat():
         }
     }
     while True:
-        print('Send heartbeat: {}'.format(json.dumps(request_json)))
-        response = make_request('POST', URL + '/devices/heartbeat', request_json, headers)
-        if response.status_code == 200:
-            net_status = 0
-        else:
-            net_status = 1
-            print('Heartbeat failed: {}'.format(response.json()))
+        try:
+            print('Send heartbeat: {}'.format(json.dumps(request_json)))
+            response = make_request('POST', URL + '/devices/heartbeat', request_json, headers)
+            if response.status_code == 200:
+                net_status = 0
+            else:
+                net_status = 1
+                print('Heartbeat failed: {}'.format(response.json()))
+        except Exception as e:
+            print('Heartbeat Exception: {}'.format(e))
         time.sleep(60)
 
 def start():
