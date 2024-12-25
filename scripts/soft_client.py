@@ -21,7 +21,7 @@ URL = "http://" + API_HOST_IP + "/api"
 app = Flask(__name__)
 
 CLIENT_NAME = "Numera Soft Python Client"
-CLIENT_VERSION = "0.0.3"
+CLIENT_VERSION = "0.0.4"
 
 # 获取当前运行的文件的目录
 if getattr(sys, 'frozen', False):
