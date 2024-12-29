@@ -12,6 +12,12 @@ import os
 import multiprocessing
 from dotenv import load_dotenv
 from enum import Enum
+import logging
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -37,7 +43,7 @@ class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         global ATA_FLAG
         ATA_FLAG = 2
-        print("Set ata flag to 2...")
+        logger.info("Set ata flag to 2...")
         self.send_response(200)
         self.end_headers()
 
@@ -58,14 +64,14 @@ class RequestHandler(BaseHTTPRequestHandler):
     def do_PUT(self):
         global ATA_FLAG
         ATA_FLAG = 1
-        print("Set ata flag...")
+        logger.info("Set ata flag...")
         self.send_response(200)
         self.end_headers()
 
     def do_DELETE(self):
         global ATA_FLAG
         ATA_FLAG = 0
-        print("Unset ata flag...")
+        logger.info("Unset ata flag...")
         self.send_response(200)
         self.end_headers()
 
@@ -76,7 +82,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         while not queue.empty():
             queue.get()
 
-        print("Check mobile: " + json.dumps(data))
+        logger.info("Check mobile: " + json.dumps(data))
         ser.write(b"AT+CNMI=2,1,0,1,0\r")
         time.sleep(1)
         ser.write(b"AT+CMGF=0\r")
@@ -84,7 +90,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         ser.write(b"AT+CMGS=26\r")
         time.sleep(1)
         pdu_string = self.make_mobile_check_pdu(data)
-        print("Send mobile check pdu: " + pdu_string)
+        logger.info("Send mobile check pdu: " + pdu_string)
         ser.write(pdu_string.encode('utf-8'))
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
@@ -97,13 +103,13 @@ class RequestHandler(BaseHTTPRequestHandler):
         finally:
             self.end_headers()
             self.wfile.write(json.dumps(response_data).encode('utf-8'))
-            print("Check mobile state response data: " + json.dumps(response_data))
+            logger.info("Check mobile state response data: " + json.dumps(response_data))
             lock.release()
 
     def handle_hang_up(self, data):
         global HUP_FLAG
         HUP_FLAG = 1
-        print("Set hup flag...")
+        logger.info("Set hup flag...")
         self.send_response(200)
         self.end_headers()
 
@@ -134,7 +140,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 def start_http_server():
     server_address = ('', 1336)
     httpd = HTTPServer(server_address, RequestHandler)
-    print('Starting HTTP server...')
+    logger.info('Starting HTTP server...')
     httpd.serve_forever()
 
 # Start the HTTP server in another thread
@@ -153,10 +159,10 @@ def report_call(callingNumber):
             "operator": DEVICE_OPERATOR
         }
     }
-    print("Report call data: " + json.dumps(data))
+    logger.info("Report call data: " + json.dumps(data))
     response = requests.post(URL, headers=headers, data=json.dumps(data))
     if response.status_code == 200:
-        print(response.json())
+        logger.info(response.json())
         return response.json()  # Return the JSON response
     else:
         return None
@@ -164,7 +170,7 @@ def report_call(callingNumber):
 def check_output_for_phone_number(output):
     find = re.findall(phoneRegex, output)
     if find:
-        print("Get phone number: " + find[0])
+        logger.info("Get phone number: " + find[0])
         report_call(find[0])
         if ATA_FLAG == 0:
             ser.write(b"AT+CHUP\r")
@@ -175,15 +181,25 @@ def check_output_for_mobile_state(output):
     find = re.findall(mobileCheckRegex, output)
     if find and find[0] == "CDS":
         queue.put(MobileCheckResult.OPEN)
-        print("Mobile state is open")
+        logger.info("Mobile state is open")
 
-ser = serial.Serial("/dev/ttyUSB2", baudrate=9600, timeout=1)
+ser = None
+try:
+    ser = serial.Serial("/dev/ttyUSB2", baudrate=9600, timeout=1)
+except Exception as e:
+    logger.error("Error opening serial port /dev/ttyUSB2, try USB3", e)
+if not ser:
+    try:
+        ser = serial.Serial("/dev/ttyUSB3", baudrate=9600, timeout=1)
+    except Exception as e:
+        logger.error("Error opening serial port /dev/ttyUSB3", e)
+        raise e
 sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
 
 time.sleep(5)
 ser.write(b"AT+CLIP=1\r")
 msg = ser.read(64)
-print(msg)
+logger.info(msg)
 
 timesInRound = 0
 
@@ -192,14 +208,14 @@ while True:
         if sio.readable():
             output = sio.readline().strip()
             if output:
-                print(output)
+                logger.info(output)
                 check_output_for_phone_number(output)
                 check_output_for_mobile_state(output)
         if HUP_FLAG == 1:
             ser.write(b"AT+CHUP\r")
             HUP_FLAG = 0
         if timesInRound >= SET_CLIP_PER_TIMES:
-            print("Set clip...")
+            logger.info("Set clip...")
             ser.write(b"AT+CLIP=1\r")
             timesInRound = 0
         timesInRound += 1
