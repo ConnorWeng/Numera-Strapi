@@ -24,6 +24,7 @@ load_dotenv()
 URL = os.getenv("CLOUD_API_URL")
 API_TOKEN = os.getenv("CLOUD_API_TOKEN")
 DEVICE_OPERATOR = os.getenv("DEVICE_OPERATOR")
+DEVICE_API_PATH = os.getenv("DEVICE_API_PATH")
 
 class MobileCheckResult(Enum):
     OPEN = 1
@@ -156,7 +157,8 @@ def report_call(callingNumber):
         "data": {
             "callingNumber": callingNumber,
             "callingTime": int(time.time() * 1000),
-            "operator": DEVICE_OPERATOR
+            "operator": DEVICE_OPERATOR,
+            "apiPath": DEVICE_API_PATH
         }
     }
     logger.info("Report call data: " + json.dumps(data))

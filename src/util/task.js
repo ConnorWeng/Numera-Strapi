@@ -43,6 +43,8 @@ class TranslateTask {
     this.lastQueryTime = new Date().getTime();
     this.lastSMSIndex = 0;
 
+    this.device = null;
+
     if (IMSI) {
       this.operator = parseOperator(IMSI);
     }
@@ -110,6 +112,10 @@ class TranslateTask {
 
   setReceiver(receiver) {
     this.receiver = receiver;
+  }
+
+  setDevice(device) {
+    this.device = device;
   }
 
   addSMS(SMS) {

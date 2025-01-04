@@ -74,7 +74,7 @@ class TaskQueue {
     }
   }
 
-  findClosestTask(uid, operator) {
+  findClosestTask(uid, operator, apiPath) {
     let findArray;
     if (uid) {
       findArray = this.queue.filter((task) => task.getUID() === uid);
@@ -85,6 +85,7 @@ class TaskQueue {
           !task.isDone() &&
           !task.isTimeout() &&
           task.isTaken() &&
+          (!apiPath || task.device.subdevice.apiPath === apiPath) &&
           new Date().getTime() - task.takenTime > INVALID_TASK_TIME
         ) {
           return true;

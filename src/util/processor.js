@@ -26,6 +26,8 @@ class Processor {
       `Device ${this.device.ipAddress} start processing ${that.constructor.name} task: ${JSON.stringify(task)}`,
     );
 
+    task.setDevice(this.device);
+
     if (
       new Date().getTime() - task.getCreateTime() >
       TASK_TIMEOUT[task.operator]

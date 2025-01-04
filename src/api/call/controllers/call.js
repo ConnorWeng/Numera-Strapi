@@ -20,6 +20,7 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
     const task = TaskQueue.getInstance().findClosestTask(
       data.uid,
       data.operator,
+      data.apiPath,
     );
     if ((!task || task.isDone()) && data.SMS && data.IMSI) {
       TaskQueue.getInstance().getCache().set(`${data.IMSI}:SMS`, data.SMS);
