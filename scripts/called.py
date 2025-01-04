@@ -29,7 +29,7 @@ class MobileCheckResult(Enum):
     OPEN = 1
     CLOSE = 2
 
-phoneRegex = r"\"(\+?[\d]{7,15})\""
+phoneRegex = r"\"(\+?[\d]{8,15})\""
 mobileCheckRegex = r"(CDS|CMS)"
 CHECK_MOBILE_STATE_TIMEOUT = 10
 SET_CLIP_PER_TIMES = 100
