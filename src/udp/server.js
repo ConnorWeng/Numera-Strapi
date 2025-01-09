@@ -253,7 +253,7 @@ class UDPServer {
           strapi.log.info(`Call success to IMSI: ${call.IMSI}`);
           task.updateCalledAt();
           if (task.isTranslateMode()) {
-            this.killMobile(call.callData);
+            // this.killMobile(call.callData);
           }
         } else if (policy.policy === "CONTINUE") {
           // Do nothing
