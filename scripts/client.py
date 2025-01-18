@@ -8,6 +8,10 @@ import request
 import modem
 import app_fota
 
+API_REQUEST_TYPE = {
+    'REGULAR': 1,
+    'LEGACY': 2
+}
 url = "http://106.14.190.250:1337/api"
 fota = app_fota.new()
 
@@ -81,7 +85,7 @@ queue_wdg = WatchDog(10)
 # 下面两个全局变量是必须有的，用户可以根据自己的实际项目修改下面两个全局变量的值，
 # 在执行用户代码前，会先打印这两个变量的值。
 CLIENT_NAME = "Numera Quec Python Client"
-CLIENT_VERSION = "0.0.3"
+CLIENT_VERSION = "0.0.4"
 checknet = checkNet.CheckNetwork(CLIENT_NAME, CLIENT_VERSION)
 
 q = Queue(1000)
@@ -123,13 +127,29 @@ def handle_request(json_string):
         'Content-Type': 'application/json',
         "Authorization": "Bearer " + jwt_token,
     }
+
+    use_request_type = (
+        API_REQUEST_TYPE['LEGACY']
+        if 'imsii' in json and json['imsii']
+        else API_REQUEST_TYPE['REGULAR']
+    )
+
+    if use_request_type == API_REQUEST_TYPE['LEGACY']:
+        json['IMSI'] = json['imsii']
+        json['mode'] = 0
+
     request_json = {
         'clientName': CLIENT_NAME,
         'clientVersion': CLIENT_VERSION,
         'data': json,
         'netStatus': net_status,
     }
-    uart.write(ujson.dumps(request_json))
+
+    if use_request_type == API_REQUEST_TYPE['LEGACY']:
+        uart.write(format_status_report(request_json))
+    else:
+        uart.write(ujson.dumps(request_json))
+
     logger.info('Ready to send data: {}'.format(ujson.dumps(request_json)))
 
     if json['mode'] == 9:
@@ -259,6 +279,12 @@ def heartbeat():
             utime.sleep(60)
     except Exception as e:
         logger.error('Heartbeat Exception: {}'.format(e))
+
+def format_status_report(data):
+    if data['netStatus'] == 0:
+        return "handling your request, stage=3, state=1"
+    else:
+        return "handling your request, stage=3, state=0"
 
 def start():
     global uart
