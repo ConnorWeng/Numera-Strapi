@@ -12,6 +12,7 @@ API_REQUEST_TYPE = {
     'REGULAR': 1,
     'LEGACY': 2
 }
+DEFAULT_PASSWORD = "wy1234"
 url = "http://106.14.190.250:1337/api"
 fota = app_fota.new()
 
@@ -120,6 +121,8 @@ def handle_request(json_string):
     global net_status
     json = ujson.loads(json_string)
     if jwt_token is None:
+        if not json['password']:
+            json['password'] = DEFAULT_PASSWORD
         handle_login(json['user'], json['password'])
     del json['user']
     del json['password']
