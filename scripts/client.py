@@ -121,7 +121,7 @@ def handle_request(json_string):
     global net_status
     json = ujson.loads(json_string)
     if jwt_token is None:
-        if not json['password']:
+        if 'password' not in json:
             json['password'] = DEFAULT_PASSWORD
         handle_login(json['user'], json['password'])
     del json['user']
