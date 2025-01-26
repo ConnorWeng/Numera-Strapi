@@ -29,7 +29,7 @@ class ProcessorPool {
       pagination: { pageSize: 1000 },
     });
     const processors = devices
-      .filter((device) => device.type === "calling")
+      .filter((device) => device.type === "calling" && !!device.publishedAt)
       .map((device) => {
         if (device.operator === "CMCC") {
           return new CMCCProcessor(device);
