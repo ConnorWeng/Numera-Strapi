@@ -73,6 +73,9 @@
     },
     "IMEIs": {
       "type": "json"
+    },
+    "rateLimit": {
+      "type": "integer"
     }
   }
 }

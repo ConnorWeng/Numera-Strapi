@@ -769,6 +769,7 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
       "api::subscription.subscription"
     >;
     IMEIs: Attribute.JSON;
+    rateLimit: Attribute.Integer;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
