@@ -964,6 +964,41 @@ export interface ApiLocalLocal extends Schema.SingleType {
   };
 }
 
+export interface ApiRecordRecord extends Schema.CollectionType {
+  collectionName: "records";
+  info: {
+    singularName: "record";
+    pluralName: "records";
+    displayName: "Record";
+    description: "";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    userId: Attribute.Integer;
+    userName: Attribute.String;
+    IMSI: Attribute.String;
+    count: Attribute.BigInteger & Attribute.DefaultTo<"0">;
+    mode: Attribute.Integer;
+    yearMonth: Attribute.String;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      "api::record.record",
+      "oneToOne",
+      "admin::user"
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      "api::record.record",
+      "oneToOne",
+      "admin::user"
+    > &
+      Attribute.Private;
+  };
+}
+
 export interface ApiSubscriptionSubscription extends Schema.CollectionType {
   collectionName: "subscriptions";
   info: {
@@ -1061,6 +1096,7 @@ declare module "@strapi/types" {
       "api::device.device": ApiDeviceDevice;
       "api::imsi.imsi": ApiImsiImsi;
       "api::local.local": ApiLocalLocal;
+      "api::record.record": ApiRecordRecord;
       "api::subscription.subscription": ApiSubscriptionSubscription;
       "api::translate.translate": ApiTranslateTranslate;
     }

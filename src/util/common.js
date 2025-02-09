@@ -78,9 +78,17 @@ const transformResult = (isPythonClient, task, updatedSMS) => {
   return result;
 };
 
+const getCurrentYearMonth = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = (now.getMonth() + 1).toString().padStart(2, "0"); // getMonth() 返回 0-11，需要加 1
+  return `${year}${month}`;
+};
+
 module.exports = {
   transformErrorTask,
   transformResult,
   isPythonClient,
   registerMetric,
+  getCurrentYearMonth,
 };

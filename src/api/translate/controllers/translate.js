@@ -20,6 +20,7 @@ const {
   transformErrorTask,
   transformResult,
   isPythonClient,
+  getCurrentYearMonth,
 } = require("../../../util/common");
 
 /**
@@ -40,6 +41,31 @@ const isTimestampValid = (decryptedMessage) => {
     decryptedObject.timestamp &&
     Date.now() - decryptedObject.timestamp * 1000 < 5 * 60 * 1000
   );
+};
+
+const recordTranslate = async (strapi, user, mode, IMSI) => {
+  try {
+    const tableName = "records"; // 根据实际表名调整
+    const yearMonth = getCurrentYearMonth();
+    const recordIMSI = mode === 1 ? IMSI : "";
+    const selectResult = await strapi.db.connection.raw(
+      `SELECT * FROM ${tableName} WHERE user_id = ? AND year_month = ? AND mode = ? AND imsi = ?`,
+      [user.id, yearMonth, mode, recordIMSI],
+    );
+    if (selectResult.length > 0) {
+      await strapi.db.connection.raw(
+        `UPDATE ${tableName} SET count = count + 1 WHERE id = ?`,
+        [selectResult[0].id],
+      );
+    } else {
+      await strapi.db.connection.raw(
+        `INSERT INTO ${tableName}(user_id, user_name, year_month, mode, imsi, count) VALUES (?, ?, ?, ?, ?, 1)`,
+        [user.id, user.username, yearMonth, mode, recordIMSI],
+      );
+    }
+  } catch (error) {
+    strapi.log.error("Error recording: ", error);
+  }
 };
 
 module.exports = createCoreController(
@@ -199,6 +225,7 @@ module.exports = createCoreController(
           data: { dailyRemaining: activeSubscription.dailyRemaining - 1 },
         });
         dailyRemaining = activeSubscription.dailyRemaining - 1;
+        recordTranslate(strapi, ctx.state.user, mode, IMSI);
       }
 
       task.setDailyRemaining(dailyRemaining);
