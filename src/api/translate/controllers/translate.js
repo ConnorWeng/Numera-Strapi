@@ -16,7 +16,11 @@ const {
   IMSI_NOT_ALLOWED,
   INVALID_SIGNATURE,
 } = require("../../../util/error-codes");
-const { transformErrorTask, transformResult } = require("../../../util/common");
+const {
+  transformErrorTask,
+  transformResult,
+  isPythonClient,
+} = require("../../../util/common");
 
 /**
  * translate controller
@@ -46,18 +50,18 @@ module.exports = createCoreController(
 
       // @ts-ignore
       const { signature, ...body } = ctx.request.body;
-      const { data, clientName, clientVersion } = body;
-      const isPythonClient = clientName?.includes("Python");
+      const { data } = body;
+      const isPythonClientFlag = isPythonClient(ctx);
       const task = new TranslateTask(null);
       if (!_.isObject(data)) {
-        return transformErrorTask(isPythonClient, task, MISSING_DATA);
+        return transformErrorTask(isPythonClientFlag, task, MISSING_DATA);
       }
 
       // @ts-ignore
       const { IMSI, mode, smsc, receiver } = data;
       task.setIMSI(IMSI);
       if (!IMSI_REGEX.test(IMSI)) {
-        return transformErrorTask(isPythonClient, task, INVALID_IMSI);
+        return transformErrorTask(isPythonClientFlag, task, INVALID_IMSI);
       }
 
       task.setMode(mode);
@@ -74,12 +78,16 @@ module.exports = createCoreController(
         (sub) => sub.state === "active",
       );
       if (!activeSubscription) {
-        return transformErrorTask(isPythonClient, task, NO_ACTIVE_SUBSCRIPTION);
+        return transformErrorTask(
+          isPythonClientFlag,
+          task,
+          NO_ACTIVE_SUBSCRIPTION,
+        );
       }
       if (activeSubscription.dailyRemaining < 1) {
         task.setDailyRemaining(activeSubscription.dailyRemaining);
         return transformErrorTask(
-          isPythonClient,
+          isPythonClientFlag,
           task,
           DAILY_REMAINING_RUN_OUT,
         );
@@ -88,7 +96,11 @@ module.exports = createCoreController(
         new Date(activeSubscription.membershipExpirationDate).getTime() <
         new Date().getTime()
       ) {
-        return transformErrorTask(isPythonClient, task, SUBSCRIPTION_EXPIRED);
+        return transformErrorTask(
+          isPythonClientFlag,
+          task,
+          SUBSCRIPTION_EXPIRED,
+        );
       }
       if (activeSubscription.mode !== "all") {
         if (
@@ -96,7 +108,7 @@ module.exports = createCoreController(
             activeSubscription.mode !== "translate") ||
           (task.isCloudFetchMode() && activeSubscription.mode !== "cloud_fetch")
         ) {
-          return transformErrorTask(isPythonClient, task, MODE_NOT_ALLOWED);
+          return transformErrorTask(isPythonClientFlag, task, MODE_NOT_ALLOWED);
         }
       }
       if (
@@ -104,7 +116,7 @@ module.exports = createCoreController(
         activeSubscription.IMSIs &&
         !activeSubscription.IMSIs.includes(IMSI)
       ) {
-        return transformErrorTask(isPythonClient, task, IMSI_NOT_ALLOWED);
+        return transformErrorTask(isPythonClientFlag, task, IMSI_NOT_ALLOWED);
       }
       if (activeSubscription.authSignature) {
         try {
@@ -128,10 +140,18 @@ module.exports = createCoreController(
               `Auth signature success, task: ${JSON.stringify(task)}`,
             );
           } else {
-            return transformErrorTask(isPythonClient, task, INVALID_SIGNATURE);
+            return transformErrorTask(
+              isPythonClientFlag,
+              task,
+              INVALID_SIGNATURE,
+            );
           }
         } catch (err) {
-          return transformErrorTask(isPythonClient, task, INVALID_SIGNATURE);
+          return transformErrorTask(
+            isPythonClientFlag,
+            task,
+            INVALID_SIGNATURE,
+          );
         }
       }
       if (activeSubscription.operator && BORDER_REGEX.test(IMSI)) {
@@ -185,7 +205,7 @@ module.exports = createCoreController(
       task.setLastQueryTime(new Date().getTime());
       task.setLastSMSIndex(task.SMSData.length);
 
-      return transformResult(isPythonClient, task);
+      return transformResult(isPythonClientFlag, task);
     },
 
     async findOne(ctx) {
@@ -193,7 +213,7 @@ module.exports = createCoreController(
       await this.validateQuery(ctx);
       const sanitizedQuery = await this.sanitizeQuery(ctx);
       const { clientName, clientVersion } = sanitizedQuery;
-      const isPythonClient = clientName?.includes("Python");
+      const isPythonClientFlag = isPythonClient(ctx);
 
       const globalTaskQueue = TaskQueue.getInstance();
       const task = globalTaskQueue.findClosestTask(id);
@@ -211,7 +231,7 @@ module.exports = createCoreController(
         globalTaskQueue.removeTask(task);
       }
 
-      return transformResult(isPythonClient, task, updatedSMS);
+      return transformResult(isPythonClientFlag, task, updatedSMS);
     },
   }),
 );

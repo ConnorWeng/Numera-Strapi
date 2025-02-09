@@ -11,6 +11,11 @@ const { service } = strapi.plugin("strapi-prometheus");
 const register = service("registry");
 register.registerMetric(promCounter);
 
+const isPythonClient = (ctx) => {
+  const { clientName } = ctx.request.body;
+  return clientName?.includes("Python");
+};
+
 const transformErrorTask = (isPythonClient, task, error) => {
   strapi.log.info(
     "translate error: " +
@@ -67,4 +72,5 @@ const transformResult = (isPythonClient, task, updatedSMS) => {
 module.exports = {
   transformErrorTask,
   transformResult,
+  isPythonClient,
 };
