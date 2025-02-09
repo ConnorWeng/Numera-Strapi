@@ -22,7 +22,6 @@ module.exports = (config, { strapi }) => {
     } else {
       maxLimit = user.rateLimit || config.defaultLimit || 1000;
     }
-    console.log(maxLimit);
     return rateLimit({
       driver: "memory", // 或 'redis'
       db: store,
