@@ -44,4 +44,9 @@ module.exports = {
     errorMessage: "无效的数字签名",
     code: -2,
   },
+  RATE_LIMITED: {
+    errorCode: 1010,
+    errorMessage: "受到并发数控制",
+    code: -3,
+  },
 };

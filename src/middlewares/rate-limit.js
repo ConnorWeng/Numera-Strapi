@@ -29,7 +29,6 @@ module.exports = (config, { strapi }) => {
       max: maxLimit,
       id: (ctx) =>
         ctx.state.user ? `user_${ctx.state.user.id}` : `ip_${ctx.ip}`,
-      errorMessage: `受到并发数控制，你的账号每分钟可请求${maxLimit}次，请稍后再试`,
       headers: {
         remaining: "X-RateLimit-Remaining",
         reset: "X-RateLimit-Reset",

@@ -1,15 +1,22 @@
 const promClient = require("prom-client");
 const strapiUtils = require("@strapi/utils");
 
+let metricRegistered = false;
+
 const promCounter = new promClient.Counter({
   name: "numera_translate_requests_total",
   help: "Total number of translate requests",
   labelNames: ["code", "status", "operator"],
 });
 
-const { service } = strapi.plugin("strapi-prometheus");
-const register = service("registry");
-register.registerMetric(promCounter);
+const registerMetric = () => {
+  if (!metricRegistered) {
+    const { service } = strapi.plugin("strapi-prometheus");
+    const register = service("registry");
+    register.registerMetric(promCounter);
+    metricRegistered = true;
+  }
+};
 
 const isPythonClient = (ctx) => {
   const { clientName } = ctx.request.body;
@@ -23,6 +30,7 @@ const transformErrorTask = (isPythonClient, task, error) => {
       ", task: " +
       JSON.stringify(task),
   );
+  registerMetric();
   promCounter.inc({
     code: error.code,
     status: "error",
@@ -47,6 +55,7 @@ const transformErrorTask = (isPythonClient, task, error) => {
 
 const transformResult = (isPythonClient, task, updatedSMS) => {
   let result = task;
+  registerMetric();
   promCounter.inc({
     code: task.code,
     status: task.code === 0 || task.code === 999 ? "success" : "error",
@@ -73,4 +82,5 @@ module.exports = {
   transformErrorTask,
   transformResult,
   isPythonClient,
+  registerMetric,
 };
