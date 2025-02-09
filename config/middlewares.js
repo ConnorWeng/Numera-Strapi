@@ -18,4 +18,8 @@ module.exports = [
       production: false, // 是否使用 Redis
     },
   },
+  {
+    name: "global::custom-errors",
+    config: {},
+  },
 ];

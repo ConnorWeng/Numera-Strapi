@@ -35,6 +35,7 @@ module.exports = (config, { strapi }) => {
         reset: "X-RateLimit-Reset",
         total: "X-RateLimit-Limit",
       },
+      throw: true,
     })(ctx, next);
   };
 };
