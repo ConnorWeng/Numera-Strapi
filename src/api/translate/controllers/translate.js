@@ -49,17 +49,17 @@ const recordTranslate = async (strapi, user, mode, IMSI) => {
     const yearMonth = getCurrentYearMonth();
     const recordIMSI = mode === 1 ? IMSI : "";
     const selectResult = await strapi.db.connection.raw(
-      `SELECT * FROM ${tableName} WHERE user_id = ? AND year_month = ? AND mode = ? AND imsi = ?`,
+      `SELECT * FROM ${tableName} WHERE \`user_id\` = ? AND \`year_month\` = ? AND \`mode\` = ? AND \`imsi\` = ?`,
       [user.id, yearMonth, mode, recordIMSI],
     );
     if (selectResult.length > 0) {
       await strapi.db.connection.raw(
-        `UPDATE ${tableName} SET count = count + 1 WHERE id = ?`,
+        `UPDATE ${tableName} SET \`count\` = \`count\` + 1 WHERE \`id\` = ?`,
         [selectResult[0].id],
       );
     } else {
       await strapi.db.connection.raw(
-        `INSERT INTO ${tableName}(user_id, user_name, year_month, mode, imsi, count) VALUES (?, ?, ?, ?, ?, 1)`,
+        `INSERT INTO ${tableName}(\`user_id\`, \`user_name\`, \`year_month\`, \`mode\`, \`imsi\`, \`count\`) VALUES (?, ?, ?, ?, ?, 1)`,
         [user.id, user.username, yearMonth, mode, recordIMSI],
       );
     }
