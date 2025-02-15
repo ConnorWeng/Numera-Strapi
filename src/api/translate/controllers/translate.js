@@ -47,7 +47,7 @@ const recordTranslate = async (strapi, user, mode, IMSI) => {
   try {
     const tableName = "records"; // Adjust according to the actual table name
     const yearMonth = getCurrentYearMonth();
-    const recordIMSI = mode === 1 ? IMSI : "";
+    const recordIMSI = mode === 1 ? IMSI.slice(-8) : ""; // Extract last 8 digits of IMSI
     const selectResult = await trx(tableName)
       .where({
         user_id: user.id,
