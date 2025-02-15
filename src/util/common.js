@@ -18,11 +18,6 @@ const registerMetric = () => {
   }
 };
 
-const isPythonClient = (ctx) => {
-  const { clientName } = ctx.request.body;
-  return clientName?.includes("Python");
-};
-
 const transformErrorTask = (isPythonClient, task, error) => {
   strapi.log.info(
     "translate error: " +
@@ -88,7 +83,6 @@ const getCurrentYearMonth = () => {
 module.exports = {
   transformErrorTask,
   transformResult,
-  isPythonClient,
   registerMetric,
   getCurrentYearMonth,
 };

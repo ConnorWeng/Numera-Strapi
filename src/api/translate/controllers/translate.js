@@ -19,7 +19,6 @@ const {
 const {
   transformErrorTask,
   transformResult,
-  isPythonClient,
   getCurrentYearMonth,
 } = require("../../../util/common");
 
@@ -88,8 +87,8 @@ module.exports = createCoreController(
 
       // @ts-ignore
       const { signature, ...body } = ctx.request.body;
-      const { data } = body;
-      const isPythonClientFlag = isPythonClient(ctx);
+      const { data, clientName } = body;
+      const isPythonClientFlag = clientName?.includes("Python");
       const task = new TranslateTask(null);
       if (!_.isObject(data)) {
         return transformErrorTask(isPythonClientFlag, task, MISSING_DATA);
@@ -252,7 +251,8 @@ module.exports = createCoreController(
       await this.validateQuery(ctx);
       const sanitizedQuery = await this.sanitizeQuery(ctx);
       const { clientName, clientVersion } = sanitizedQuery;
-      const isPythonClientFlag = isPythonClient(ctx);
+      // @ts-ignore
+      const isPythonClientFlag = clientName?.includes("Python");
 
       const globalTaskQueue = TaskQueue.getInstance();
       const task = globalTaskQueue.findClosestTask(id);
