@@ -44,26 +44,38 @@ const isTimestampValid = (decryptedMessage) => {
 };
 
 const recordTranslate = async (strapi, user, mode, IMSI) => {
+  const trx = await strapi.db.connection.transaction();
   try {
-    const tableName = "records"; // 根据实际表名调整
+    const tableName = "records"; // Adjust according to the actual table name
     const yearMonth = getCurrentYearMonth();
     const recordIMSI = mode === 1 ? IMSI : "";
-    const selectResult = await strapi.db.connection.raw(
-      `SELECT * FROM ${tableName} WHERE \`user_id\` = ? AND \`year_month\` = ? AND \`mode\` = ? AND \`imsi\` = ?`,
-      [user.id, yearMonth, mode, recordIMSI],
-    );
+    const selectResult = await trx(tableName)
+      .where({
+        user_id: user.id,
+        year_month: yearMonth,
+        mode: mode,
+        imsi: recordIMSI,
+      })
+      .select("*");
+
     if (selectResult.length > 0) {
-      await strapi.db.connection.raw(
-        `UPDATE ${tableName} SET \`count\` = \`count\` + 1 WHERE \`id\` = ?`,
-        [selectResult[0].id],
-      );
+      await trx(tableName)
+        .where({ id: selectResult[0].id })
+        .update({ count: trx.raw("count + 1") });
     } else {
-      await strapi.db.connection.raw(
-        `INSERT INTO ${tableName}(\`user_id\`, \`user_name\`, \`year_month\`, \`mode\`, \`imsi\`, \`count\`) VALUES (?, ?, ?, ?, ?, 1)`,
-        [user.id, user.username, yearMonth, mode, recordIMSI],
-      );
+      await trx(tableName).insert({
+        user_id: user.id,
+        user_name: user.username,
+        year_month: yearMonth,
+        mode: mode,
+        imsi: recordIMSI,
+        count: 1,
+      });
     }
+
+    await trx.commit();
   } catch (error) {
+    await trx.rollback();
     strapi.log.error("Error recording: ", error);
   }
 };
