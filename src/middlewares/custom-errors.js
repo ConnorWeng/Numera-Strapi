@@ -1,4 +1,4 @@
-const { isPythonClient, transformErrorTask } = require("../util/common");
+const { transformErrorTask } = require("../util/common");
 const { RATE_LIMITED } = require("../util/error-codes");
 const TranslateTask = require("../util/task");
 
@@ -10,13 +10,13 @@ module.exports = () => {
       if (err.status === 429) {
         // @ts-ignore
         const { signature, ...body } = ctx.request.body;
-        const { data } = body;
+        const { data, clientName } = body;
         // @ts-ignore
         const { IMSI } = data;
 
         ctx.status = 200;
         const task = new TranslateTask();
-        const isPythonClientFlag = isPythonClient(ctx);
+        const isPythonClientFlag = clientName?.includes("Python");
         task.setIMSI(IMSI);
         ctx.body = transformErrorTask(isPythonClientFlag, task, RATE_LIMITED);
       } else {
