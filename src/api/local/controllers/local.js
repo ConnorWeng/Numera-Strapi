@@ -33,8 +33,7 @@ module.exports = createCoreController("api::local.local", ({ strapi }) => ({
     const { IMSI, uid, operator, mode, smsc, receiver, boardSN } = data;
     const task = new Task(IMSI, uid, operator, mode, boardSN);
     taskManager.addTask(task);
-    console.log(JSON.stringify(task));
-    console.log(boardSN);
+
     UDPClient.getInstance().send(
       task.isSMSTranslateMode()
         ? makeSMSMessage(IMSI, smsc, receiver)
