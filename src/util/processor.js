@@ -97,7 +97,7 @@ class Processor {
             mode: task.mode,
             smsc: task.smsc,
             receiver: task.receiver,
-            boardSN: task.boardSN,
+            boardSN: this.device.boardSN,
           },
         },
       )
