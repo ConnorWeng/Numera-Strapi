@@ -17,14 +17,14 @@ function makeMessageHeader(msgType, bodyLength) {
   return Buffer.from(data.buffer);
 }
 
-function makeCallMessage(IMSI) {
+function makeCallMessage(IMSI, boardSN) {
   const bodyLength = 57;
   const headerBuffer = makeMessageHeader(MsgType.MSG_SS_UE_CALL, bodyLength);
   const bodyData = new DataView(new ArrayBuffer(bodyLength));
-  const boardSN = "0123456789012345678";
+  const defaultBoardSN = "0123456789012345678";
   const mobileNo = "13636609965";
   let lastOffset = setString(bodyData, 0, IMSI);
-  lastOffset = setString(bodyData, lastOffset + 2, boardSN);
+  lastOffset = setString(bodyData, lastOffset + 2, boardSN || defaultBoardSN);
   lastOffset = setString(bodyData, lastOffset + 2, mobileNo);
   lastOffset = setString(bodyData, lastOffset + 2, "00000000");
   bodyData.setUint8(lastOffset + 1, EndByte);

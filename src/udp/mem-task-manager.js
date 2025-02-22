@@ -11,7 +11,7 @@ function findLastMatch(array, predicate) {
 }
 
 class Task {
-  constructor(IMSI, uid, operator, mode) {
+  constructor(IMSI, uid, operator, mode, boardSN) {
     this.uid = uid;
     this.IMSI = IMSI;
     this.operator = operator;
@@ -23,10 +23,15 @@ class Task {
     this.touched = false;
     this.error = null;
     this.SMS = null;
+    this.boardSN = boardSN;
   }
 
   getIMSI() {
     return this.IMSI;
+  }
+
+  getBoardSN() {
+    return this.boardSN;
   }
 
   getCreatedAt() {
@@ -131,7 +136,10 @@ class MemTaskManager {
         UDPClient.getInstance().send(
           notTouchedTask.isSMSTranslateMode()
             ? makeSMSMessage(notTouchedTask.getIMSI())
-            : makeCallMessage(notTouchedTask.getIMSI()),
+            : makeCallMessage(
+                notTouchedTask.getIMSI(),
+                notTouchedTask.getBoardSN(),
+              ),
           9000,
           "localhost",
         );

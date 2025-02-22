@@ -237,7 +237,7 @@ class UDPServer {
             task.increaseRetry();
             strapi.log.info(`Retry call to IMSI: ${call.IMSI}`);
             UDPClient.getInstance().send(
-              makeCallMessage(call.IMSI),
+              makeCallMessage(call.IMSI, task.getBoardSN()),
               9000,
               "localhost",
             );

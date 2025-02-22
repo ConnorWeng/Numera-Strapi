@@ -894,6 +894,7 @@ export interface ApiDeviceDevice extends Schema.CollectionType {
       "oneToOne",
       "api::device.device"
     >;
+    boardSN: Attribute.String;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;
