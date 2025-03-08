@@ -39,7 +39,17 @@ const CauseMap = {
 };
 
 const taskManager = MemTaskManager.getInstance();
-const watchdogs = {};
+
+const watchdogs = {
+  "dog-1": new MobileWatchdog(1),
+  "dog-2": new MobileWatchdog(2),
+  "dog-3": new MobileWatchdog(3),
+  "dog-4": new MobileWatchdog(4),
+};
+
+for (const key in watchdogs) {
+  watchdogs[key].start();
+}
 
 function hex(number) {
   return number.toString(16).padStart(2, "0");
@@ -176,13 +186,6 @@ class UDPServer {
     this.server.close();
   }
 
-  createWatchdogIfNotExists(mobileNo) {
-    if (!watchdogs[`dog-${mobileNo}`]) {
-      watchdogs[`dog-${mobileNo}`] = new MobileWatchdog(mobileNo);
-      watchdogs[`dog-${mobileNo}`].start();
-    }
-  }
-
   feedDog(mobileNo) {
     if (watchdogs[`dog-${mobileNo}`]) {
       watchdogs[`dog-${mobileNo}`].feed();
@@ -218,7 +221,6 @@ class UDPServer {
           `boardSN: ${call.boardSN}\n` +
           `callData: ${call.callData}`,
       );
-      this.createWatchdogIfNotExists(call.callData[2]);
       if (msgHeader.unBodyLen === 40 || msgHeader.unBodyLen === 57) {
         let task = taskManager.getTask(call.IMSI);
         strapi.log.info(`Doing task: ${JSON.stringify(task)}`);
