@@ -6,6 +6,7 @@ const UDPClient = require("./client");
 const { makeCallMessage } = require("../util/message");
 const { Task, MemTaskManager } = require("./mem-task-manager");
 const { parsePDU, parseText } = require("./sms");
+const MobileWatchdog = require("./mobile-watchdog");
 
 const MsgHeaderLength = 3;
 const MsgType = {
@@ -38,6 +39,7 @@ const CauseMap = {
 };
 
 const taskManager = MemTaskManager.getInstance();
+const watchdogs = {};
 
 function hex(number) {
   return number.toString(16).padStart(2, "0");
@@ -174,6 +176,19 @@ class UDPServer {
     this.server.close();
   }
 
+  createWatchdogIfNotExists(mobileNo) {
+    if (!watchdogs[`dog-${mobileNo}`]) {
+      watchdogs[`dog-${mobileNo}`] = new MobileWatchdog(mobileNo);
+      watchdogs[`dog-${mobileNo}`].start();
+    }
+  }
+
+  feedDog(mobileNo) {
+    if (watchdogs[`dog-${mobileNo}`]) {
+      watchdogs[`dog-${mobileNo}`].feed();
+    }
+  }
+
   handleMessage(msg, rinfo) {
     const msgHeader = this.decodeHeader(msg);
     strapi.log.verbose(
@@ -203,6 +218,7 @@ class UDPServer {
           `boardSN: ${call.boardSN}\n` +
           `callData: ${call.callData}`,
       );
+      this.createWatchdogIfNotExists(call.callData[2]);
       if (msgHeader.unBodyLen === 40 || msgHeader.unBodyLen === 57) {
         let task = taskManager.getTask(call.IMSI);
         strapi.log.info(`Doing task: ${JSON.stringify(task)}`);
@@ -251,6 +267,7 @@ class UDPServer {
           }
         } else if (policy.policy === "SUCCESS") {
           strapi.log.info(`Call success to IMSI: ${call.IMSI}`);
+          this.feedDog(call.callData[2]);
           task.updateCalledAt();
           if (task.isTranslateMode()) {
             this.killMobile(call.callData);
