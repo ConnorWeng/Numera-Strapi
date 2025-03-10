@@ -43,6 +43,16 @@ module.exports = {
       "update subscriptions set daily_remaining = daily_quota;",
     );
   },
+  "15 0 0 * * *": async ({ strapi }) => {
+    await strapi.db.connection.raw(
+      "update subscriptions set daily_remaining = daily_quota;",
+    );
+  },
+  "45 0 0 * * *": async ({ strapi }) => {
+    await strapi.db.connection.raw(
+      "update subscriptions set daily_remaining = daily_quota;",
+    );
+  },
   "0 0 * * * *": async ({ strapi }) => {
     await detectDevice(strapi, "CMCC", "460006353179440");
     await detectDevice(strapi, "CUCC", "460013263064892");
