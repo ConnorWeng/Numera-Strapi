@@ -47,8 +47,10 @@ const watchdogs = {
   "dog-4": new MobileWatchdog(4),
 };
 
-for (const key in watchdogs) {
-  watchdogs[key].start();
+if (process.env.IS_DEVICE === "true") {
+  for (const key in watchdogs) {
+    watchdogs[key].start();
+  }
 }
 
 function hex(number) {
