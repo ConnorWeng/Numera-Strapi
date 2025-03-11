@@ -223,6 +223,7 @@ class UDPServer {
           `boardSN: ${call.boardSN}\n` +
           `callData: ${call.callData}`,
       );
+      this.feedDog(call.callData[2]);
       if (msgHeader.unBodyLen === 40 || msgHeader.unBodyLen === 57) {
         let task = taskManager.getTask(call.IMSI);
         strapi.log.info(`Doing task: ${JSON.stringify(task)}`);
@@ -271,7 +272,6 @@ class UDPServer {
           }
         } else if (policy.policy === "SUCCESS") {
           strapi.log.info(`Call success to IMSI: ${call.IMSI}`);
-          this.feedDog(call.callData[2]);
           task.updateCalledAt();
           if (task.isTranslateMode()) {
             this.killMobile(call.callData);
