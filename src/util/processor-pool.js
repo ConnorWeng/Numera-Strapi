@@ -27,6 +27,7 @@ class ProcessorPool {
     const devices = await strapi.db.query("api::device.device").findMany({
       populate: { subdevice: true },
       pagination: { pageSize: 1000 },
+      orderBy: { order: "asc" },
     });
     const processors = devices
       .filter((device) => device.type === "calling" && !!device.publishedAt)

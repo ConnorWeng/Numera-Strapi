@@ -895,6 +895,7 @@ export interface ApiDeviceDevice extends Schema.CollectionType {
       "api::device.device"
     >;
     boardSN: Attribute.String;
+    order: Attribute.Integer & Attribute.DefaultTo<99>;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;

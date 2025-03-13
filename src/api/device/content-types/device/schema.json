@@ -37,6 +37,10 @@
     },
     "boardSN": {
       "type": "string"
+    },
+    "order": {
+      "type": "integer",
+      "default": 99
     }
   }
 }
