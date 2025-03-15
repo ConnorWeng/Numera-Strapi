@@ -1,7 +1,7 @@
 const { exec } = require("child_process");
 
 class MobileWatchdog {
-  constructor(mobileNo, timeout = 1800000) {
+  constructor(mobileNo, timeout = 300000) {
     this.mobileNo = mobileNo;
     this.timeout = timeout;
     this.lastFeed = Date.now();
