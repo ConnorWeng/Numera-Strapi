@@ -224,3 +224,6 @@ while True:
         time.sleep(0.1)
     except serial.serialutil.SerialException:
         time.sleep(0.1)
+    except Exception as e:
+        logger.error("Error:", e)
+        time.sleep(0.1)
