@@ -67,6 +67,10 @@ class TaskQueue {
     return null;
   }
 
+  getUntakenTasks() {
+    return this.queue.filter((task) => !task.isTaken());
+  }
+
   removeTask(task) {
     const index = this.queue.findIndex((t) => t.createTime === task.createTime);
     if (index > -1) {
