@@ -19,6 +19,10 @@ class Processor {
     return task.getOperator() === this.device.operator;
   }
 
+  take() {
+    this.available = false;
+  }
+
   async process(task) {
     const that = this;
     that.available = false;

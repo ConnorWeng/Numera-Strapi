@@ -30,6 +30,7 @@ class TickConsumer {
       const processor = this.processorPool.findAvaiableProcessor(task);
       if (processor) {
         task.take();
+        processor.take();
         setTimeout(() => {
           processor.process(task);
         }, 0);
