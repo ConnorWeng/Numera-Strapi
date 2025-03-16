@@ -385,6 +385,7 @@ class UDPServer {
   }
 
   killMobile(callData) {
+    if (process.env.OPERATOR === "CUCC") return;
     const findcmd = `pgrep -f "mobile ${callData[2]}"`;
     strapi.log.info(`Find mobile with cmd: ${findcmd}`);
     exec(findcmd, (error, stdout, stderr) => {
