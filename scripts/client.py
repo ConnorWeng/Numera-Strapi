@@ -2,7 +2,7 @@ from usr import common
 from machine import Pin, UART, Timer
 from queue import Queue
 from misc import Power
-import sim, net, dataCall, usocket, ujson, log, utime, checkNet, _thread
+import ujson, utime, checkNet, _thread
 import sys
 import request
 import modem
@@ -82,6 +82,7 @@ class WatchDog:
 
 uart_wdg = WatchDog(10)
 queue_wdg = WatchDog(10)
+heartbeat_wdg = WatchDog(18)
 
 # 下面两个全局变量是必须有的，用户可以根据自己的实际项目修改下面两个全局变量的值，
 # 在执行用户代码前，会先打印这两个变量的值。
@@ -273,6 +274,7 @@ def heartbeat():
             response = request.post(url + '/devices/heartbeat', data=ujson.dumps(request_json), headers=headers, timeout=900)
             response_data = response.json()
             if response.status_code == 200:
+                heartbeat_wdg.feed()
                 net_status = 0
             else:
                 net_status = 1
@@ -315,4 +317,5 @@ def start():
     _thread.start_new_thread(heartbeat, ())
     uart_wdg.start()
     queue_wdg.start()
+    heartbeat_wdg.start()
     logger.info('UART2 initialized.')
