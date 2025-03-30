@@ -99,7 +99,7 @@ heartbeat_wdg = WatchDog(18)
 # 下面两个全局变量是必须有的，用户可以根据自己的实际项目修改下面两个全局变量的值，
 # 在执行用户代码前，会先打印这两个变量的值。
 CLIENT_NAME = "Numera Quec Python Client"
-CLIENT_VERSION = "0.0.6"
+CLIENT_VERSION = "0.0.7"
 checknet = checkNet.CheckNetwork(CLIENT_NAME, CLIENT_VERSION)
 
 q = Queue(1000)
@@ -132,7 +132,7 @@ def handle_login(user, password):
 def handle_request(json_string):
     global jwt_token
     global net_status
-    json = ujson.loads(json_string)
+    json = ujson.loads(json_string.strip())
     if 'password' not in json:
         json['password'] = DEFAULT_PASSWORD
     if jwt_token is None:
@@ -222,7 +222,7 @@ def uart_read():
             uart_wdg.feed()
             msglen = uart.any()  # 返回是否有可读取的数据长度
             # 当有数据时进行读取
-            if msglen:
+            if msglen > 1:
                 msg = uart.read(msglen)
                 # 初始数据是字节类型（bytes）,将字节类型数据进行编码
                 utf8_msg = msg.decode()
