@@ -1,14 +1,6 @@
 const { TaskQueue } = require("../src/util/task-queue");
 const TranslateTask = require("../src/util/task");
-
-const sendNotifyEmail = async (subject, text) => {
-  await strapi.plugins["email"].services.email.send({
-    to: "8063140@qq.com; foamtea30@126.com",
-    from: "iamnotman88@126.com",
-    subject,
-    text,
-  });
-};
+const { sendNotifyEmail } = require("../src/util/common");
 
 const detectDevice = async (strapi, operator, IMSI) => {
   const taskQueue = TaskQueue.getInstance();

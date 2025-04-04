@@ -80,9 +80,19 @@ const getCurrentYearMonth = () => {
   return `${year}${month}`;
 };
 
+const sendNotifyEmail = async (subject, text) => {
+  await strapi.plugins["email"].services.email.send({
+    to: "8063140@qq.com; foamtea30@126.com",
+    from: "iamnotman88@126.com",
+    subject,
+    text,
+  });
+};
+
 module.exports = {
   transformErrorTask,
   transformResult,
   registerMetric,
   getCurrentYearMonth,
+  sendNotifyEmail,
 };
