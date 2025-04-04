@@ -58,17 +58,8 @@ class TaskQueue {
     this.queue.push(task);
   }
 
-  getTask() {
-    for (let i = 0; i < this.queue.length; i++) {
-      if (!this.queue[i].isTaken()) {
-        return this.queue[i];
-      }
-    }
-    return null;
-  }
-
-  getUntakenTasks() {
-    return this.queue.filter((task) => !task.isTaken());
+  fetchAvailableTasks() {
+    return this.queue.filter((task) => !task.isTaken() && !task.isDone());
   }
 
   removeTask(task) {

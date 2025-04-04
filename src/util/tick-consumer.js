@@ -25,7 +25,7 @@ class TickConsumer {
   }
 
   consume() {
-    const tasks = this.taskQueue.getUntakenTasks();
+    const tasks = this.taskQueue.fetchAvailableTasks();
     for (const task of tasks) {
       const processor = this.processorPool.findAvaiableProcessor(task);
       if (processor) {
