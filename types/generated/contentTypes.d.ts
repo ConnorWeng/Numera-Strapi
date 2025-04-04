@@ -896,6 +896,7 @@ export interface ApiDeviceDevice extends Schema.CollectionType {
     >;
     boardSN: Attribute.String;
     order: Attribute.Integer & Attribute.DefaultTo<99>;
+    pgyAccount: Attribute.String;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;

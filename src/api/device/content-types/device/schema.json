@@ -41,6 +41,9 @@
     "order": {
       "type": "integer",
       "default": 99
+    },
+    "pgyAccount": {
+      "type": "string"
     }
   }
 }
