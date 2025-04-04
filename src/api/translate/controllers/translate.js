@@ -104,6 +104,7 @@ module.exports = createCoreController(
       task.setMode(mode);
       task.setSMSC(smsc);
       task.setReceiver(receiver);
+      task.setUser(ctx.state.user.username);
 
       const self = await strapi.db
         .query("plugin::users-permissions.user")

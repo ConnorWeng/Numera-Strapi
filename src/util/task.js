@@ -44,6 +44,7 @@ class TranslateTask {
     this.lastSMSIndex = 0;
 
     this.device = null;
+    this.user = null;
 
     if (IMSI) {
       this.operator = parseOperator(IMSI);
@@ -116,6 +117,10 @@ class TranslateTask {
 
   setDevice(device) {
     this.device = device;
+  }
+
+  setUser(user) {
+    this.user = user;
   }
 
   addSMS(SMS) {
