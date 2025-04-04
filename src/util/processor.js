@@ -108,11 +108,11 @@ class Processor {
       )
       .then((res) => {
         strapi.log.info(
-          `Call device ${this.device.ipAddress} success: ${res.status}`,
+          `Call device ${this.device.apiPath} success: ${res.status}`,
         );
       })
       .catch(async (err) => {
-        const errorMsg = `Call device ${this.device.ipAddress} failed: ${err}`;
+        const errorMsg = `Call device ${this.device.apiPath} failed: ${err}`;
         strapi.log.error(errorMsg);
         await sendNotifyEmail("Device Call Error", errorMsg);
       });
