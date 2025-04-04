@@ -1,6 +1,7 @@
 const axios = require("axios");
 const { TaskQueue, TASK_TIMEOUT } = require("./task-queue");
 const { TIMEOUT } = require("./error-codes");
+const { sendNotifyEmail } = require("./common");
 
 class Processor {
   constructor(device) {
@@ -65,10 +66,10 @@ class Processor {
             `Switch ${this.device.subdevice.apiPath} to translate mode success`,
           );
         })
-        .catch((err) => {
-          strapi.log.error(
-            `Switch ${this.device.subdevice.apiPath} to translate mode failed: ${err}`,
-          );
+        .catch(async (err) => {
+          const errorMsg = `Switch ${this.device.subdevice.apiPath} to translate mode failed: ${err}`;
+          strapi.log.error(errorMsg);
+          await sendNotifyEmail("Translate Mode Switch Error", errorMsg);
         });
     } else if (task.isCloudFetchMode()) {
       this.axiosInstance
@@ -80,10 +81,10 @@ class Processor {
             `Switch ${this.device.subdevice.apiPath} to cloud fetch mode success`,
           );
         })
-        .catch((err) => {
-          strapi.log.error(
-            `Switch ${this.device.subdevice.apiPath} to cloud fetch mode failed: ${err}`,
-          );
+        .catch(async (err) => {
+          const errorMsg = `Switch ${this.device.subdevice.apiPath} to cloud fetch mode failed: ${err}`;
+          strapi.log.error(errorMsg);
+          await sendNotifyEmail("Cloud Fetch Mode Switch Error", errorMsg);
         });
     }
 
@@ -110,8 +111,10 @@ class Processor {
           `Call device ${this.device.ipAddress} success: ${res.status}`,
         );
       })
-      .catch((err) => {
-        strapi.log.error(`Call device ${this.device.ipAddress} failed: ${err}`);
+      .catch(async (err) => {
+        const errorMsg = `Call device ${this.device.ipAddress} failed: ${err}`;
+        strapi.log.error(errorMsg);
+        await sendNotifyEmail("Device Call Error", errorMsg);
       });
 
     let targetTask = task;
