@@ -67,7 +67,7 @@ class Processor {
           );
         })
         .catch(async (err) => {
-          const errorMsg = `Switch ${this.device.subdevice.apiPath} to translate mode failed: ${err}`;
+          const errorMsg = `Switch ${this.device.subdevice.apiPath} to translate mode failed: ${err}, pgy account: ${this.device.subdevice.pgyAccount}`;
           strapi.log.error(errorMsg);
           await sendNotifyEmail("Translate Mode Switch Error", errorMsg);
         });
@@ -82,7 +82,7 @@ class Processor {
           );
         })
         .catch(async (err) => {
-          const errorMsg = `Switch ${this.device.subdevice.apiPath} to cloud fetch mode failed: ${err}`;
+          const errorMsg = `Switch ${this.device.subdevice.apiPath} to cloud fetch mode failed: ${err}, pgy account: ${this.device.subdevice.pgyAccount}`;
           strapi.log.error(errorMsg);
           await sendNotifyEmail("Cloud Fetch Mode Switch Error", errorMsg);
         });
@@ -112,7 +112,7 @@ class Processor {
         );
       })
       .catch(async (err) => {
-        const errorMsg = `Call device ${this.device.apiPath} failed: ${err}`;
+        const errorMsg = `Call device ${this.device.apiPath} failed: ${err}, pgy account: ${this.device.subdevice.pgyAccount}`;
         strapi.log.error(errorMsg);
         await sendNotifyEmail("Device Call Error", errorMsg);
       });
