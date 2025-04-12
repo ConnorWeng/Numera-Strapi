@@ -95,7 +95,7 @@ module.exports = createCoreController(
       }
 
       // @ts-ignore
-      const { IMSI, mode, smsc, receiver } = data;
+      const { IMSI, mode, smsc, receiver, deviceApiPath } = data;
       task.setIMSI(IMSI);
       if (!IMSI_REGEX.test(IMSI)) {
         return transformErrorTask(isPythonClientFlag, task, INVALID_IMSI);
@@ -105,6 +105,7 @@ module.exports = createCoreController(
       task.setSMSC(smsc);
       task.setReceiver(receiver);
       task.setUser(ctx.state.user.username);
+      task.setSpecifiedDevice(deviceApiPath);
 
       const self = await strapi.db
         .query("plugin::users-permissions.user")

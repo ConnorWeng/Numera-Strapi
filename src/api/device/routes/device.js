@@ -9,6 +9,11 @@ const { createCoreRouter } = require("@strapi/strapi").factories;
 module.exports = {
   routes: [
     {
+      method: "GET",
+      path: `/devices`,
+      handler: `device.find`,
+    },
+    {
       method: "POST",
       path: "/devices",
       handler: "device.create",

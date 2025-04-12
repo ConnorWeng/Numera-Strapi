@@ -17,7 +17,11 @@ class Processor {
   }
 
   isMatch(task) {
-    return task.getOperator() === this.device.operator;
+    return (
+      task.getOperator() === this.device.operator &&
+      (task.specifiedDevice == null ||
+        task.specifiedDevice === this.device.apiPath)
+    );
   }
 
   take() {
