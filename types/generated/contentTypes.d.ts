@@ -811,6 +811,41 @@ export interface ApiCallCall extends Schema.CollectionType {
   };
 }
 
+export interface ApiCloudFetchRecordCloudFetchRecord
+  extends Schema.CollectionType {
+  collectionName: "cloud_fetch_records";
+  info: {
+    singularName: "cloud-fetch-record";
+    pluralName: "cloud-fetch-records";
+    displayName: "CloudFetchRecord";
+    description: "";
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    IMSI: Attribute.String;
+    userId: Attribute.Integer;
+    userName: Attribute.String;
+    date: Attribute.String;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      "api::cloud-fetch-record.cloud-fetch-record",
+      "oneToOne",
+      "admin::user"
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      "api::cloud-fetch-record.cloud-fetch-record",
+      "oneToOne",
+      "admin::user"
+    > &
+      Attribute.Private;
+  };
+}
+
 export interface ApiConfigConfig extends Schema.SingleType {
   collectionName: "configs";
   info: {
@@ -1094,6 +1129,7 @@ declare module "@strapi/types" {
       "plugin::users-permissions.role": PluginUsersPermissionsRole;
       "plugin::users-permissions.user": PluginUsersPermissionsUser;
       "api::call.call": ApiCallCall;
+      "api::cloud-fetch-record.cloud-fetch-record": ApiCloudFetchRecordCloudFetchRecord;
       "api::config.config": ApiConfigConfig;
       "api::detect.detect": ApiDetectDetect;
       "api::device.device": ApiDeviceDevice;

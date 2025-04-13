@@ -80,6 +80,14 @@ const getCurrentYearMonth = () => {
   return `${year}${month}`;
 };
 
+const getDate = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = (now.getMonth() + 1).toString().padStart(2, "0");
+  const day = now.getDate().toString().padStart(2, "0");
+  return `${year}${month}${day}`;
+};
+
 // 添加邮件记录存储
 const emailHistory = new Map();
 const DUPLICATE_TIME_WINDOW = 30 * 60 * 1000; // 30分钟，单位毫秒
@@ -132,5 +140,6 @@ module.exports = {
   transformResult,
   registerMetric,
   getCurrentYearMonth,
+  getDate,
   sendNotifyEmail,
 };

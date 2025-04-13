@@ -20,6 +20,7 @@ const {
   transformErrorTask,
   transformResult,
   getCurrentYearMonth,
+  getDate,
 } = require("../../../util/common");
 
 /**
@@ -69,6 +70,38 @@ const recordTranslate = async (strapi, user, mode, IMSI) => {
         mode: mode,
         imsi: recordIMSI,
         count: 1,
+      });
+    }
+
+    await trx.commit();
+  } catch (error) {
+    await trx.rollback();
+    strapi.log.error("Error recording: ", error);
+  }
+};
+
+const recordCloudFetch = async (strapi, user, IMSI) => {
+  const trx = await strapi.db.connection.transaction();
+  try {
+    const tableName = "cloud_fetch_records"; // Adjust according to the actual table name
+    const date = getDate();
+    const recordIMSI = IMSI.slice(-8); // Extract last 8 digits of IMSI
+    const selectResult = await trx(tableName)
+      .where({
+        user_id: user.id,
+        date: date,
+        imsi: recordIMSI,
+      })
+      .select("*");
+
+    if (selectResult.length > 0) {
+      // Do nothing
+    } else {
+      await trx(tableName).insert({
+        user_id: user.id,
+        user_name: user.username,
+        date: date,
+        imsi: recordIMSI,
       });
     }
 
@@ -245,6 +278,10 @@ module.exports = createCoreController(
       task.setLastQueryTime(new Date().getTime());
       task.setLastSMSIndex(task.SMSData.length);
 
+      if (task.SMSData.length > 0) {
+        recordCloudFetch(strapi, ctx.state.user, IMSI);
+      }
+
       return transformResult(isPythonClientFlag, task);
     },
 
@@ -267,6 +304,10 @@ module.exports = createCoreController(
       task.setLastQueryTime(new Date().getTime());
       const updatedSMS = task.SMSData.slice(task.lastSMSIndex);
       task.setLastSMSIndex(task.SMSData.length);
+
+      if (task.SMSData.length > 0) {
+        recordCloudFetch(strapi, ctx.state.user, task.IMSI);
+      }
 
       if (task.isDone()) {
         globalTaskQueue.removeTask(task);

@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "cloud_fetch_records",
+  "info": {
+    "singularName": "cloud-fetch-record",
+    "pluralName": "cloud-fetch-records",
+    "displayName": "CloudFetchRecord",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "IMSI": {
+      "type": "string"
+    },
+    "userId": {
+      "type": "integer"
+    },
+    "userName": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string"
+    }
+  }
+}
