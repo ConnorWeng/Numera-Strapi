@@ -99,7 +99,7 @@ heartbeat_wdg = WatchDog(18)
 # 下面两个全局变量是必须有的，用户可以根据自己的实际项目修改下面两个全局变量的值，
 # 在执行用户代码前，会先打印这两个变量的值。
 CLIENT_NAME = "Numera Quec Python Client"
-CLIENT_VERSION = "0.0.7"
+CLIENT_VERSION = "0.0.8"
 checknet = checkNet.CheckNetwork(CLIENT_NAME, CLIENT_VERSION)
 
 q = Queue(1000)
@@ -241,7 +241,10 @@ def process_queue():
             if not q.empty():
                 task = q.get()
                 logger.info('Processing task: {}, remain {} tasks'.format(task, q.size()))
-                handle_request(task)
+                try:
+                    handle_request(task)
+                except Exception as e:
+                    logger.error(mask_ip('Handle Request Exception, skip task: {}'.format(e)))
             else:
                 if utime.time() - last_check_upgrade_time > 3600:
                     check_upgrade()

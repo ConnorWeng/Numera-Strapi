@@ -17,7 +17,7 @@ const promCounter = new promClient.Counter({
 
 let metricsRegistered = false;
 
-const LATEST_VERSION = "0.0.7";
+const LATEST_VERSION = "0.0.8";
 
 module.exports = createCoreController("api::device.device", ({ strapi }) => ({
   async upgrade(ctx) {
