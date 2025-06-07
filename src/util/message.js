@@ -32,11 +32,11 @@ function makeCallMessage(IMSI, boardSN) {
   return buffer;
 }
 
-function makeSMSMessage(IMSI, smsc, receiver) {
+function makeSMSMessage(IMSI, smsc, receiver, boardSN) {
   const bodyData = new DataView(new ArrayBuffer(150));
-  const boardSN = "0123456789012345678";
+  const defaultBoardSN = "0123456789012345678";
   let lastOffset = setString(bodyData, 0, IMSI);
-  lastOffset = setString(bodyData, lastOffset + 2, boardSN);
+  lastOffset = setString(bodyData, lastOffset + 2, boardSN || defaultBoardSN);
   lastOffset = setString(bodyData, lastOffset + 2, smsc || "8613800210500");
   lastOffset = setString(bodyData, lastOffset + 3, receiver || "13816310024");
 

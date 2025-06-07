@@ -36,7 +36,7 @@ module.exports = createCoreController("api::local.local", ({ strapi }) => ({
 
     UDPClient.getInstance().send(
       task.isSMSTranslateMode()
-        ? makeSMSMessage(IMSI, smsc, receiver)
+        ? makeSMSMessage(IMSI, smsc, receiver, boardSN)
         : makeCallMessage(IMSI, boardSN),
       9000,
       "localhost",
