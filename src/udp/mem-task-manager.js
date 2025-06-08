@@ -11,7 +11,15 @@ function findLastMatch(array, predicate) {
 }
 
 class Task {
-  constructor(IMSI, uid, operator, mode, boardSN) {
+  constructor(
+    IMSI,
+    uid,
+    operator,
+    mode,
+    boardSN,
+    smsc = null,
+    receiver = null,
+  ) {
     this.uid = uid;
     this.IMSI = IMSI;
     this.operator = operator;
@@ -24,6 +32,8 @@ class Task {
     this.error = null;
     this.SMS = null;
     this.boardSN = boardSN;
+    this.smsc = smsc;
+    this.receiver = receiver;
   }
 
   getIMSI() {
@@ -60,6 +70,14 @@ class Task {
 
   getTouched() {
     return this.touched;
+  }
+
+  getSMSC() {
+    return this.smsc;
+  }
+
+  getReceiver() {
+    return this.receiver;
   }
 
   increaseRetry() {

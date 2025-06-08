@@ -3,7 +3,7 @@ const dgram = require("dgram");
 const Parser = require("binary-parser").Parser;
 const axios = require("axios");
 const UDPClient = require("./client");
-const { makeCallMessage } = require("../util/message");
+const { makeCallMessage, makeSMSMessage } = require("../util/message");
 const { Task, MemTaskManager } = require("./mem-task-manager");
 const { parsePDU, parseText } = require("./sms");
 const MobileWatchdog = require("./mobile-watchdog");
@@ -258,7 +258,14 @@ class UDPServer {
             task.increaseRetry();
             strapi.log.info(`Retry call to IMSI: ${call.IMSI}`);
             UDPClient.getInstance().send(
-              makeCallMessage(call.IMSI, task.getBoardSN()),
+              task.isSMSTranslateMode()
+                ? makeSMSMessage(
+                    call.IMSI,
+                    task.getSMSC(),
+                    task.getReceiver(),
+                    task.getBoardSN(),
+                  )
+                : makeCallMessage(call.IMSI, task.getBoardSN()),
               9000,
               "localhost",
             );

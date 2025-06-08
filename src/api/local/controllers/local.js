@@ -31,7 +31,7 @@ module.exports = createCoreController("api::local.local", ({ strapi }) => ({
     }
     // @ts-ignore
     const { IMSI, uid, operator, mode, smsc, receiver, boardSN } = data;
-    const task = new Task(IMSI, uid, operator, mode, boardSN);
+    const task = new Task(IMSI, uid, operator, mode, boardSN, smsc, receiver);
     taskManager.addTask(task);
 
     UDPClient.getInstance().send(
