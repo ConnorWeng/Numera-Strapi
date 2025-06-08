@@ -153,7 +153,12 @@ class MemTaskManager {
         notTouchedTask.increaseRetry();
         UDPClient.getInstance().send(
           notTouchedTask.isSMSTranslateMode()
-            ? makeSMSMessage(notTouchedTask.getIMSI())
+            ? makeSMSMessage(
+                notTouchedTask.getIMSI(),
+                notTouchedTask.getSMSC(),
+                notTouchedTask.getReceiver(),
+                notTouchedTask.getBoardSN(),
+              )
             : makeCallMessage(
                 notTouchedTask.getIMSI(),
                 notTouchedTask.getBoardSN(),
