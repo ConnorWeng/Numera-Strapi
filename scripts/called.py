@@ -13,6 +13,7 @@ import multiprocessing
 from dotenv import load_dotenv
 from enum import Enum
 import logging
+import subprocess
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -143,6 +144,19 @@ def start_http_server():
     httpd = HTTPServer(server_address, RequestHandler)
     logger.info('Starting HTTP server...')
     httpd.serve_forever()
+
+def check_device_exists():
+    """Check if /dev/ttyUSB2 exists every 5 minutes"""
+    while True:
+        if not os.path.exists("/dev/ttyUSB2"):
+            logger.error("/dev/ttyUSB2 not found, system will reboot...")
+            subprocess.run(["sudo", "reboot"])
+        time.sleep(300)  # 5分钟检查一次
+
+# Start the device check watchdog in another thread
+device_check_thread = threading.Thread(target=check_device_exists)
+device_check_thread.daemon = True  # 设置为守护线程，这样主程序退出时，这个线程也会退出
+device_check_thread.start()
 
 # Start the HTTP server in another thread
 http_thread = threading.Thread(target=start_http_server)
