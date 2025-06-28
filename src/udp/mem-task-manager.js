@@ -35,7 +35,7 @@ class Task {
     this.boardSN = boardSN;
     this.smsc = smsc;
     this.receiver = receiver;
-    this.SMSContent = null;
+    this.SMSContent = SMSContent;
   }
 
   getIMSI() {
