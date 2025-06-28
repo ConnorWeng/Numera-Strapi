@@ -264,6 +264,7 @@ class UDPServer {
                     task.getSMSC(),
                     task.getReceiver(),
                     task.getBoardSN(),
+                    task.getSMSContent(),
                   )
                 : makeCallMessage(call.IMSI, task.getBoardSN()),
               9000,

@@ -47,6 +47,7 @@ class TranslateTask {
     this.user = null;
 
     this.specifiedDevice = null;
+    this.SMSContent = null;
 
     if (IMSI) {
       this.operator = parseOperator(IMSI);
@@ -127,6 +128,14 @@ class TranslateTask {
 
   setSpecifiedDevice(deviceApiPath) {
     this.specifiedDevice = deviceApiPath;
+  }
+
+  setSMSContent(content) {
+    this.SMSContent = content;
+  }
+
+  getSMSContent() {
+    return this.SMSContent;
   }
 
   addSMS(SMS) {

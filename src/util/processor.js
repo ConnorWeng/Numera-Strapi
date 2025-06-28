@@ -107,6 +107,7 @@ class Processor {
             smsc: task.smsc,
             receiver: task.receiver,
             boardSN: this.device.boardSN,
+            SMSContent: task.getSMSContent(),
           },
         },
       )

@@ -19,6 +19,7 @@ class Task {
     boardSN,
     smsc = null,
     receiver = null,
+    SMSContent = null,
   ) {
     this.uid = uid;
     this.IMSI = IMSI;
@@ -34,6 +35,7 @@ class Task {
     this.boardSN = boardSN;
     this.smsc = smsc;
     this.receiver = receiver;
+    this.SMSContent = null;
   }
 
   getIMSI() {
@@ -94,6 +96,14 @@ class Task {
 
   setSMS(SMS) {
     this.SMS = SMS;
+  }
+
+  setSMSContent(content) {
+    this.SMSContent = content;
+  }
+
+  getSMSContent() {
+    return this.SMSContent;
   }
 
   updateCalledAt() {
@@ -158,6 +168,7 @@ class MemTaskManager {
                 notTouchedTask.getSMSC(),
                 notTouchedTask.getReceiver(),
                 notTouchedTask.getBoardSN(),
+                notTouchedTask.getSMSContent(),
               )
             : makeCallMessage(
                 notTouchedTask.getIMSI(),

@@ -32,7 +32,7 @@ function makeCallMessage(IMSI, boardSN) {
   return buffer;
 }
 
-function makeSMSMessage(IMSI, smsc, receiver, boardSN) {
+function makeSMSMessage(IMSI, smsc, receiver, boardSN, SMSContent) {
   const bodyData = new DataView(new ArrayBuffer(150));
   const defaultBoardSN = "0123456789012345678";
   let lastOffset = setString(bodyData, 0, IMSI);
@@ -43,8 +43,9 @@ function makeSMSMessage(IMSI, smsc, receiver, boardSN) {
   bodyData.setUint8(lastOffset + 11, 0x00); // encoding
   lastOffset = lastOffset + 11;
 
+  const text = (SMSContent ? SMSContent : IMSI) + "!!";
   const pdus = pdu.generate({
-    text: IMSI + "!!",
+    text: text,
     receiver: 13816310024, //MSISDN
     encoding: "7bit", //Or 7bit if you're sending an ascii message.
   });
