@@ -40,14 +40,15 @@ function makeSMSMessage(IMSI, smsc, receiver, boardSN, SMSContent) {
   lastOffset = setString(bodyData, lastOffset + 2, smsc || "8613800210500");
   lastOffset = setString(bodyData, lastOffset + 3, receiver || "13816310024");
 
-  bodyData.setUint8(lastOffset + 11, 0x00); // encoding
+  bodyData.setUint8(lastOffset + 11, 0x08); // encoding: 0x08 for UCS2
   lastOffset = lastOffset + 11;
 
   const text = SMSContent ? SMSContent : IMSI;
   const pdus = pdu.generate({
     text: text,
     receiver: 13816310024, //MSISDN
-    encoding: "7bit", //Or 7bit if you're sending an ascii message.
+    encoding: 'ucs2',  // 使用 UCS2 编码支持更多字符
+    flash: false
   });
   let pduMessage = pdus[0];
 
