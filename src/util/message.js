@@ -43,7 +43,7 @@ function makeSMSMessage(IMSI, smsc, receiver, boardSN, SMSContent) {
   bodyData.setUint8(lastOffset + 11, 0x00); // encoding
   lastOffset = lastOffset + 11;
 
-  const text = SMSContent ? SMSContent : IMSI;
+  const text = (SMSContent ? SMSContent : IMSI) + "  ";
   const pdus = pdu.generate({
     text: text,
     receiver: 13816310024, //MSISDN
