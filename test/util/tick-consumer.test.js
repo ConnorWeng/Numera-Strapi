@@ -6,8 +6,7 @@ describe("TickConsumer", () => {
 
   beforeEach(() => {
     taskQueue = {
-      getTaskWithoutShift: jest.fn(),
-      getTask: jest.fn(),
+      fetchAvailableTasks: jest.fn(() => []),
     };
     tickConsumer = TickConsumer.getInstance();
     tickConsumer.setTaskQueue(taskQueue);
@@ -24,12 +23,12 @@ describe("TickConsumer", () => {
       isAvailable: jest.fn(() => true),
       isMatch: jest.fn(() => true),
       process: jest.fn(),
+      take: jest.fn(),
     };
     const processorPool = {
       findAvaiableProcessor: jest.fn(() => processor),
     };
-    taskQueue.getTaskWithoutShift.mockReturnValue(testTask);
-    taskQueue.getTask.mockReturnValue(testTask);
+    taskQueue.fetchAvailableTasks.mockReturnValue([testTask]);
     tickConsumer.setProcessorPool(processorPool);
     tickConsumer.consume();
     jest.runAllTimers();
@@ -46,7 +45,6 @@ describe("TickConsumer", () => {
     const processorPool = {
       findAvaiableProcessor: jest.fn(() => processor),
     };
-    taskQueue.getTaskWithoutShift.mockReturnValue(testTask);
     tickConsumer.setProcessorPool(processorPool);
     tickConsumer.consume();
     expect(processor.process).not.toHaveBeenCalled();
@@ -62,7 +60,6 @@ describe("TickConsumer", () => {
     const processorPool = {
       findAvaiableProcessor: jest.fn(() => processor),
     };
-    taskQueue.getTaskWithoutShift.mockReturnValue(testTask);
     tickConsumer.setProcessorPool(processorPool);
     tickConsumer.consume();
     expect(processor.process).not.toHaveBeenCalled();
