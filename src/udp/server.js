@@ -292,6 +292,7 @@ class UDPServer {
         }
       }
     } else if (msgHeader.msgType === MsgType.MSG_SS_UE_SMS) {
+      strapi.log.verbose(`MSG_SS_UE_SMS received, hex: ${msg.toString("hex")}`);
       const sms = this.decodeSMS(msg.subarray(MsgHeaderLength));
       const smsObj = parsePDU(sms);
       let task = taskManager.getTask(sms.IMSI);
