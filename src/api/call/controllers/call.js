@@ -66,6 +66,12 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
       }
     }
 
+    if (task.isSMSTranslateMode()) {
+      task.setCallingNumber(data.receiver || "12345678901");
+      task.setCode(0);
+      task.setError(null);
+    }
+
     const sanitizedEntity = await this.sanitizeOutput({ ...task }, ctx);
     return this.transformResponse(sanitizedEntity);
   },

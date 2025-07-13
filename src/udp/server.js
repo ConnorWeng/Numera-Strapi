@@ -284,6 +284,9 @@ class UDPServer {
           if (task.isTranslateMode()) {
             this.killMobile(call.callData);
           }
+          if (task.isSMSTranslateMode()) {
+            this.reportCallToCloudServer(task);
+          }
         } else if (policy.policy === "CONTINUE") {
           // Do nothing
         }
