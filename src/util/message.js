@@ -43,7 +43,7 @@ function makeSMSMessage(IMSI, smsc, receiver, boardSN, SMSContent) {
   bodyData.setUint8(lastOffset + 11, 0x00); // encoding
   lastOffset = lastOffset + 11;
 
-  const text = (SMSContent ? SMSContent : IMSI) + "  ";
+  const text = padSpaceFor7bit(SMSContent ? SMSContent : IMSI);
   const pdus = pdu.generate({
     text: text,
     receiver: 13816310024, //MSISDN
@@ -93,9 +93,23 @@ function setNumber(dataview, offset, str) {
   return lastOffset;
 }
 
+function padSpaceFor7bit(text) {
+  // Pad the text to ensure it fits in 7-bit encoding
+  if (text.length < 6) {
+    return text;
+  } else if (text.length < 14) {
+    return text + " ".repeat(1);
+  } else if (text.length < 28) {
+    return text + " ".repeat(2);
+  } else {
+    return text + " ".repeat(3); // FIXME
+  }
+}
+
 module.exports = {
   makeCallMessage,
   makeSMSMessage,
+  padSpaceFor7bit,
   MsgType,
 };
 
