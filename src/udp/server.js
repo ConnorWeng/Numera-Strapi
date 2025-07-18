@@ -7,6 +7,12 @@ const { makeCallMessage, makeSMSMessage } = require("../util/message");
 const { Task, MemTaskManager } = require("./mem-task-manager");
 const { parsePDU, parseText } = require("./sms");
 const MobileWatchdog = require("./mobile-watchdog");
+const {
+  decodeHeader,
+  decodeHeartbeat,
+  decodeCall,
+  decodeSMS,
+} = require("../util/udp");
 
 const MsgHeaderLength = 3;
 const MsgType = {
@@ -195,7 +201,7 @@ class UDPServer {
   }
 
   handleMessage(msg, rinfo) {
-    const msgHeader = this.decodeHeader(msg);
+    const msgHeader = decodeHeader(msg);
     strapi.log.verbose(
       `server got ${msg.byteLength} bytes from ${rinfo.address}:${rinfo.port}, message header:\n` +
         `unCode: 0x${msgHeader.unCode.toString(16)}\n` +
@@ -203,7 +209,7 @@ class UDPServer {
         `msgType: 0x${msgHeader.msgType.toString(16)}`,
     );
     if (msgHeader.msgType === MsgType.MSG_SS_UE_INFO) {
-      const heartbeat = this.decodeHeartbeat(msg.subarray(MsgHeaderLength));
+      const heartbeat = decodeHeartbeat(msg.subarray(MsgHeaderLength));
       /* strapi.log.verbose(
         `server got heartbeat:\n` +
           `IMSI: ${heartbeat.IMSI}\n` +
@@ -216,7 +222,7 @@ class UDPServer {
       ); */
       this.saveHeartbeat(heartbeat);
     } else if (msgHeader.msgType === MsgType.MSG_SS_UE_CALL) {
-      const call = this.decodeCall(msg.subarray(MsgHeaderLength));
+      const call = decodeCall(msg.subarray(MsgHeaderLength));
       strapi.log.info(
         `server got call data:\n` +
           `IMSI: ${call.IMSI}\n` +
@@ -293,7 +299,7 @@ class UDPServer {
       }
     } else if (msgHeader.msgType === MsgType.MSG_SS_UE_SMS) {
       strapi.log.verbose(`MSG_SS_UE_SMS received, hex: ${msg.toString("hex")}`);
-      const sms = this.decodeSMS(msg.subarray(MsgHeaderLength));
+      const sms = decodeSMS(msg.subarray(MsgHeaderLength));
       const smsObj = parsePDU(sms);
       let task = taskManager.getTask(sms.IMSI);
       strapi.log.info(`Doing task: ${JSON.stringify(task)}`);
@@ -329,72 +335,7 @@ class UDPServer {
     // TODO: maybe report to cloud server use device api later
   }
 
-  decodeHeader(buffer) {
-    const parser = new Parser()
-      .endianness("big")
-      .uint8("unCode")
-      .uint8("unBodyLen")
-      .uint8("msgType");
-    return parser.parse(buffer);
-  }
-
-  decodeHeartbeat(buffer) {
-    const parser = new Parser()
-      .endianness("big")
-      .string("IMSI", { length: 15, encoding: "utf8" })
-      .bit8("IMSIEnd")
-      .string("boardSN", { length: 19, encoding: "utf8" })
-      .bit8("boardSNEnd")
-      .array("mobStates", {
-        type: "uint8",
-        length: 4,
-      })
-      .array("selArfcns", {
-        type: "uint16be",
-        length: 4,
-      })
-      .array("selLacs", {
-        type: "uint16be",
-        length: 4,
-      })
-      .array("selIds", {
-        type: "uint16be",
-        length: 4,
-      })
-      .array("rlaCDbms", {
-        type: "uint8",
-        length: 4,
-      });
-    return parser.parse(buffer);
-  }
-
-  decodeCall(buffer) {
-    const parser = new Parser()
-      .endianness("big")
-      .string("IMSI", { length: 15, encoding: "utf8" })
-      .bit8("IMSIEnd")
-      .string("boardSN", { length: 19, encoding: "utf8" })
-      .bit8("boardSNEnd")
-      .array("callData", {
-        type: "uint8",
-        length: 4,
-      });
-    return parser.parse(buffer);
-  }
-
-  decodeSMS(buffer) {
-    const parser = new Parser()
-      .endianness("big")
-      .string("IMSI", { length: 15, encoding: "utf8" })
-      .bit8("IMSIEnd")
-      .string("boardSN", { length: 19, encoding: "utf8" })
-      .bit8("boardSNEnd")
-      .array("SMSData", {
-        type: "uint8",
-        length: buffer.byteLength - 36,
-      });
-    return parser.parse(buffer);
-  }
+  
 
   killMobile(callData) {
     if (process.env.OPERATOR === "CUCC") return;
