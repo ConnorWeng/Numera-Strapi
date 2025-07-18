@@ -71,24 +71,22 @@ describe("UDP Decoders", () => {
   });
 
   describe("decodeSMS", () => {
-    it("should decode an SMS buffer correctly", () => {
-      const imsi = "123456789012345";
-      const boardSN = "SN-1234567890123456";
-      const smsData = [0x01, 0x02, 0x03, 0x04, 0x05];
-      const buffer = Buffer.concat([
-        Buffer.from(imsi, "utf8"),
-        Buffer.from([0x00]),
-        Buffer.from(boardSN, "utf8"),
-        Buffer.from([0x00]),
-        Buffer.from(smsData),
-      ]);
-      const result = decodeSMS(buffer);
+    it("should decode an SMS buffer correctly and extract cause", () => {
+      const imsi = "460013263064892";
+      const boardSN =
+        "17821341985\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000";
+      const buffer = Buffer.from(
+        "e527b43436303031333236333036343839320031373832313334313938350000000000000000000326ea",
+        "hex",
+      );
+      const result = decodeSMS(buffer.subarray(3));
       expect(result).toEqual({
-        IMSI: imsi,
+        IMSI: "460013263064892",
         IMSIEnd: 0,
-        boardSN: boardSN,
+        boardSN: "17821341985\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
         boardSNEnd: 0,
-        SMSData: smsData,
+        SMSData: [3, 38, 234],
+        cause: 0x26,
       });
     });
   });

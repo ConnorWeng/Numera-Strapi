@@ -335,8 +335,6 @@ class UDPServer {
     // TODO: maybe report to cloud server use device api later
   }
 
-  
-
   killMobile(callData) {
     if (process.env.OPERATOR === "CUCC") return;
     const findcmd = `pgrep -f "mobile ${callData[2]}"`;

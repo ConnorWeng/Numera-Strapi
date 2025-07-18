@@ -54,6 +54,11 @@ function decodeCall(buffer) {
 }
 
 function decodeSMS(buffer) {
+  const smsDataLength = buffer.byteLength - 36;
+  const mainSmsDataLength =
+    smsDataLength >= 2 ? smsDataLength - 2 : smsDataLength;
+  const hasCause = smsDataLength >= 2;
+
   const parser = new Parser()
     .endianness("big")
     .string("IMSI", { length: 15, encoding: "utf8" })
@@ -62,9 +67,21 @@ function decodeSMS(buffer) {
     .bit8("boardSNEnd")
     .array("SMSData", {
       type: "uint8",
-      length: buffer.byteLength - 36,
+      length: mainSmsDataLength,
     });
-  return parser.parse(buffer);
+
+  if (hasCause) {
+    parser.uint8("cause").uint8("lastByte");
+  }
+
+  const result = parser.parse(buffer);
+
+  if (hasCause) {
+    result.SMSData.push(result.cause, result.lastByte);
+    delete result.lastByte;
+  }
+
+  return result;
 }
 
 module.exports = {
