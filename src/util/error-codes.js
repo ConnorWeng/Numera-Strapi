@@ -49,4 +49,8 @@ module.exports = {
     errorMessage: "受到并发数控制",
     code: -3,
   },
+  SMS_FAILED: {
+    errorCode: 1011,
+    errorMessage: "SMS发送失败",
+  },
 };

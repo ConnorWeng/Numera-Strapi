@@ -290,9 +290,6 @@ class UDPServer {
           if (task.isTranslateMode()) {
             this.killMobile(call.callData);
           }
-          if (task.isSMSTranslateMode()) {
-            this.reportCallToCloudServer(task);
-          }
         } else if (policy.policy === "CONTINUE") {
           // Do nothing
         }
@@ -304,9 +301,12 @@ class UDPServer {
       let task = taskManager.getTask(sms.IMSI);
       strapi.log.info(`Doing task: ${JSON.stringify(task)}`);
 
-      if (smsObj && task) {
+      if (task) {
+        task.setCause(sms.cause);
         task.setSMS(Object.assign({}, smsObj));
-        this.reportCallToCloudServer(task);
+        if (smsObj || task.isSMSTranslateMode()) {
+          this.reportCallToCloudServer(task);
+        }
       }
     }
   }

@@ -36,6 +36,7 @@ class Task {
     this.smsc = smsc;
     this.receiver = receiver;
     this.SMSContent = SMSContent;
+    this.cause = null;
   }
 
   getIMSI() {
@@ -104,6 +105,10 @@ class Task {
 
   getSMSContent() {
     return this.SMSContent;
+  }
+
+  setCause(cause) {
+    this.cause = cause;
   }
 
   updateCalledAt() {

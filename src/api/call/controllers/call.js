@@ -2,6 +2,7 @@
 
 const strapiUtils = require("@strapi/utils");
 const { TaskQueue } = require("../../../util/task-queue");
+const { SMS_FAILED } = require("../../../util/error-codes");
 
 /**
  * call controller
@@ -67,9 +68,13 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
     }
 
     if (task.isSMSTranslateMode()) {
-      task.setCallingNumber(data.receiver || "12345678901");
-      task.setCode(0);
-      task.setError(null);
+      task.setCallingNumber(data.receiver);
+      task.setCode(data.cause == 0 ? 0 : data.cause);
+      task.setError(
+        data.cause == 0
+          ? null
+          : Object.assign({ code: data.cause }, SMS_FAILED),
+      );
     }
 
     const sanitizedEntity = await this.sanitizeOutput({ ...task }, ctx);
