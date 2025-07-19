@@ -4,6 +4,7 @@ const { TaskQueue } = require("./util/task-queue");
 const TickConsumer = require("./util/tick-consumer");
 const ProcessorPool = require("./util/processor-pool");
 const UDPServer = require("./udp/server");
+const { startEmailCleanup } = require("./util/common");
 
 module.exports = {
   /**
@@ -26,6 +27,8 @@ module.exports = {
    * run jobs, or perform some special logic.
    */
   async bootstrap({ strapi }) {
+    startEmailCleanup();
+
     const globalTickConsumer = TickConsumer.getInstance();
 
     const globalTaskQueue = TaskQueue.getInstance();

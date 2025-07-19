@@ -105,7 +105,14 @@ const cleanupEmailHistory = () => {
 };
 
 // 设置定时清理
-setInterval(cleanupEmailHistory, CLEANUP_INTERVAL);
+let cleanupIntervalId = null;
+const startEmailCleanup = () => {
+  if (cleanupIntervalId) {
+    return;
+  }
+  cleanupIntervalId = setInterval(cleanupEmailHistory, CLEANUP_INTERVAL);
+  strapi.log.info("Started email history cleanup service.");
+};
 
 const sendNotifyEmail = async (subject, text) => {
   const key = `${subject}:${text}`;
@@ -142,4 +149,5 @@ module.exports = {
   getCurrentYearMonth,
   getDate,
   sendNotifyEmail,
+  startEmailCleanup,
 };
