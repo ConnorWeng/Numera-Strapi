@@ -67,7 +67,7 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
       }
     }
 
-    if (task.isSMSTranslateMode()) {
+    if (task.isSMSTranslateMode() && data.cause !== undefined) {
       task.setCallingNumber(data.receiver);
       task.setCode(data.cause);
       task.setError(
