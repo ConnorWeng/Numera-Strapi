@@ -227,7 +227,11 @@ module.exports = createCoreController(
           );
         }
       }
-      if (activeSubscription.operator && BORDER_REGEX.test(IMSI)) {
+
+      if (
+        activeSubscription.operator &&
+        (BORDER_REGEX.test(IMSI) || deviceApiPath.includes("border"))
+      ) {
         task.setOperator(activeSubscription.operator);
       }
 
