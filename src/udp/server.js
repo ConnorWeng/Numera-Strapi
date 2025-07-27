@@ -231,7 +231,7 @@ class UDPServer {
       );
       this.feedDog(call.callData[2]);
       if (msgHeader.unBodyLen === 40 || msgHeader.unBodyLen === 57) {
-        let task = taskManager.getTask(call.IMSI);
+        let task = taskManager.getTask(call.IMSI, call.boardSN);
         strapi.log.info(`Doing task: ${JSON.stringify(task)}`);
         if (!task) {
           return;
@@ -298,7 +298,7 @@ class UDPServer {
       strapi.log.verbose(`MSG_SS_UE_SMS received, hex: ${msg.toString("hex")}`);
       const sms = decodeSMS(msg.subarray(MsgHeaderLength));
       const smsObj = parsePDU(sms);
-      let task = taskManager.getTask(sms.IMSI);
+      let task = taskManager.getTask(sms.IMSI, sms.boardSN);
       strapi.log.info(`Doing task: ${JSON.stringify(task)}`);
 
       if (task) {

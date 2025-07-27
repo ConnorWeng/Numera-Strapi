@@ -199,8 +199,13 @@ class MemTaskManager {
     }
   }
 
-  getTask(IMSI) {
-    return findLastMatch(this.tasks, (task) => task.getIMSI() === IMSI);
+  getTask(IMSI, boardSN) {
+    return findLastMatch(
+      this.tasks,
+      (task) =>
+        task.getIMSI() === IMSI &&
+        task.getBoardSN().replace(/0+$/, "") === boardSN.trim(),
+    );
   }
 
   static getInstance() {
