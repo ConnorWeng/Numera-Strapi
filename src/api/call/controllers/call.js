@@ -43,38 +43,38 @@ module.exports = createCoreController("api::call.call", ({ strapi }) => ({
     ) {
       task.setCode(data.error.code);
       task.setError(data.error);
-    }
-
-    if (data.callingNumber) {
-      task.setCode(0);
-      task.setError(null);
-      if (!task.callingNumber) {
-        task.setCallingNumber(data.callingNumber);
-        TaskQueue.getInstance()
-          .getCache()
-          .set(`${task.getIMSI()}:callingNumber`, data.callingNumber);
+    } else if (task.isSMSTranslateMode()) {
+      if (data.cause !== undefined) {
+        task.setCallingNumber(data.receiver);
+        task.setCode(data.cause);
+        task.setError(
+          data.cause == 0
+            ? null
+            : Object.assign({ code: data.cause }, SMS_FAILED),
+        );
       }
-    }
-
-    if (data.SMS) {
-      task.setCode(0);
-      task.setError(null);
-      const duplicated = task.SMSData.filter((sms) => {
-        return sms.time === data.SMS.time && sms.text === data.SMS.text;
-      });
-      if (duplicated.length === 0) {
-        task.addSMS(data.SMS);
+    } else {
+      if (data.callingNumber) {
+        task.setCode(0);
+        task.setError(null);
+        if (!task.callingNumber) {
+          task.setCallingNumber(data.callingNumber);
+          TaskQueue.getInstance()
+            .getCache()
+            .set(`${task.getIMSI()}:callingNumber`, data.callingNumber);
+        }
       }
-    }
 
-    if (task.isSMSTranslateMode() && data.cause !== undefined) {
-      task.setCallingNumber(data.receiver);
-      task.setCode(data.cause);
-      task.setError(
-        data.cause == 0
-          ? null
-          : Object.assign({ code: data.cause }, SMS_FAILED),
-      );
+      if (data.SMS) {
+        task.setCode(0);
+        task.setError(null);
+        const duplicated = task.SMSData.filter((sms) => {
+          return sms.time === data.SMS.time && sms.text === data.SMS.text;
+        });
+        if (duplicated.length === 0) {
+          task.addSMS(data.SMS);
+        }
+      }
     }
 
     const sanitizedEntity = await this.sanitizeOutput({ ...task }, ctx);
