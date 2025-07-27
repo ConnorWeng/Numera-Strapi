@@ -200,12 +200,15 @@ class MemTaskManager {
   }
 
   getTask(IMSI, boardSN) {
-    return findLastMatch(
-      this.tasks,
-      (task) =>
+    return findLastMatch(this.tasks, (task) => {
+      strapi.log.verbose(
+        `Searching for task with task boardSN: ${task.getBoardSN().replace(/0+$/, "")}, boardSN: ${boardSN.trim()}`,
+      );
+      return (
         task.getIMSI() === IMSI &&
-        task.getBoardSN().replace(/0+$/, "") === boardSN.trim(),
-    );
+        task.getBoardSN().replace(/0+$/, "") === boardSN.trim()
+      );
+    });
   }
 
   static getInstance() {
