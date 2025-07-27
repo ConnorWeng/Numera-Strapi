@@ -10,6 +10,14 @@ function findLastMatch(array, predicate) {
   }, null);
 }
 
+function normalizeBoardSN(str) {
+  return String(str)
+    .replace(/^\s+|\s+$/g, "")
+    .replace(/[\x00-\x1F\x7F]/g, "")
+    .replace(/0+$/, "")
+    .toLowerCase();
+}
+
 class Task {
   constructor(
     IMSI,
@@ -202,11 +210,11 @@ class MemTaskManager {
   getTask(IMSI, boardSN) {
     return findLastMatch(this.tasks, (task) => {
       strapi.log.verbose(
-        `Searching for task with task boardSN: ${task.getBoardSN().replace(/0+$/, "")}, boardSN: ${boardSN.trim()}, equal1: ${task.getBoardSN().replace(/0+$/, "") === boardSN.trim()}, equal2: ${task.getBoardSN().replace(/0+$/, "") == boardSN.trim()}`,
+        `Searching for task with task boardSN: ${normalizeBoardSN(task.getBoardSN())}, boardSN: ${normalizeBoardSN(boardSN)}, equal1: ${normalizeBoardSN(task.getBoardSN()) === normalizeBoardSN(boardSN)}`,
       );
       return (
         task.getIMSI() === IMSI &&
-        task.getBoardSN().replace(/0+$/, "") === boardSN.trim()
+        normalizeBoardSN(task.getBoardSN()) === normalizeBoardSN(boardSN)
       );
     });
   }
