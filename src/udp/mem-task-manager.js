@@ -202,7 +202,7 @@ class MemTaskManager {
   getTask(IMSI, boardSN) {
     return findLastMatch(this.tasks, (task) => {
       strapi.log.verbose(
-        `Searching for task with task boardSN: ${task.getBoardSN().replace(/0+$/, "")}, boardSN: ${boardSN.trim()}`,
+        `Searching for task with task boardSN: ${task.getBoardSN().replace(/0+$/, "")}, boardSN: ${boardSN.trim()}, equal1: ${task.getBoardSN().replace(/0+$/, "") === boardSN.trim()}, equal2: ${task.getBoardSN().replace(/0+$/, "") == boardSN.trim()}`,
       );
       return (
         task.getIMSI() === IMSI &&
