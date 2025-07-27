@@ -209,9 +209,6 @@ class MemTaskManager {
 
   getTask(IMSI, boardSN) {
     return findLastMatch(this.tasks, (task) => {
-      strapi.log.verbose(
-        `Searching for task with task boardSN: ${normalizeBoardSN(task.getBoardSN())}, boardSN: ${normalizeBoardSN(boardSN)}, equal1: ${normalizeBoardSN(task.getBoardSN()) === normalizeBoardSN(boardSN)}`,
-      );
       return (
         task.getIMSI() === IMSI &&
         normalizeBoardSN(task.getBoardSN()) === normalizeBoardSN(boardSN)
