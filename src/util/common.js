@@ -127,13 +127,17 @@ const sendNotifyEmail = async (subject, text) => {
     return;
   }
 
-  // 发送邮件并记录
-  await strapi.plugins["email"].services.email.send({
-    to: "8063140@qq.com; foamtea30@126.com",
-    from: "iamnotman88@126.com",
-    subject,
-    text,
-  });
+  try {
+    // 发送邮件并记录
+    await strapi.plugins["email"].services.email.send({
+      to: "8063140@qq.com; foamtea30@126.com",
+      from: "iamnotman88@126.com",
+      subject,
+      text,
+    });
+  } catch (err) {
+    strapi.log.error("Failed to send email: ", err);
+  }
 
   // 更新记录
   emailHistory.set(key, {
