@@ -79,6 +79,10 @@ class TranslateTask {
     this.operator = parseOperator(IMSI);
   }
 
+  getMode() {
+    return this.mode;
+  }
+
   setMode(mode) {
     this.mode = mode;
   }
