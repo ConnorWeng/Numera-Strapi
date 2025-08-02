@@ -1058,7 +1058,17 @@ export interface ApiSubscriptionSubscription extends Schema.CollectionType {
       "manyToOne",
       "plugin::users-permissions.user"
     >;
-    mode: Attribute.Enumeration<["translate", "cloud_fetch", "all"]>;
+    mode: Attribute.Enumeration<
+      [
+        "translate",
+        "cloud_fetch",
+        "sms",
+        "translate_cloud_fetch",
+        "translate_sms",
+        "cloud_fetch_sms",
+        "all",
+      ]
+    >;
     IMSIs: Attribute.JSON;
     authSignature: Attribute.Boolean;
     operator: Attribute.String;

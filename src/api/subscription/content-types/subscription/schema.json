@@ -33,7 +33,15 @@
     },
     "mode": {
       "type": "enumeration",
-      "enum": ["translate", "cloud_fetch", "all"]
+      "enum": [
+        "translate",
+        "cloud_fetch",
+        "sms",
+        "translate_cloud_fetch",
+        "translate_sms",
+        "cloud_fetch_sms",
+        "all"
+      ]
     },
     "IMSIs": {
       "type": "json"

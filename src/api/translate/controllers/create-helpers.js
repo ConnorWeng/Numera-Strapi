@@ -89,9 +89,12 @@ const checkSubscription = async (strapi, user, task, isPythonClientFlag) => {
   }
   if (activeSubscription.mode !== "all") {
     if (
-      ((task.isTranslateMode() || task.isSMSTranslateMode()) &&
-        activeSubscription.mode !== "translate") ||
-      (task.isCloudFetchMode() && activeSubscription.mode !== "cloud_fetch")
+      (task.isTranslateMode() &&
+        !activeSubscription.mode?.includes("translate")) ||
+      (task.isSMSTranslateMode() &&
+        !activeSubscription.mode?.includes("sms")) ||
+      (task.isCloudFetchMode() &&
+        !activeSubscription.mode?.includes("cloud_fetch"))
     ) {
       return {
         error: transformErrorTask(isPythonClientFlag, task, MODE_NOT_ALLOWED),
