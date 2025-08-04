@@ -142,6 +142,10 @@ class TranslateTask {
     return this.SMSContent;
   }
 
+  getSpecifiedDevice() {
+    return this.specifiedDevice;
+  }
+
   addSMS(SMS) {
     this.SMSData.push(SMS);
     this.lastUpdateTime = new Date().getTime();
