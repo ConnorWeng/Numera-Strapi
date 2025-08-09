@@ -134,6 +134,12 @@ const verifySignature = (
       )
       .toString();
     const originalMessage = JSON.stringify(body);
+
+    // log details for debugging
+    strapi.log.info(
+      `Verifying signature for task: ${JSON.stringify(task)}, originalMessage: ${originalMessage}, decryptedMessage: ${decryptedMessage}, isTimestampValid: ${isTimestampValid(decryptedMessage)}`,
+    );
+
     if (
       originalMessage === decryptedMessage &&
       isTimestampValid(decryptedMessage)
