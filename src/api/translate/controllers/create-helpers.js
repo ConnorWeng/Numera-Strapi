@@ -26,31 +26,30 @@ const BORDER_REGEX = /^(40101|46003|46005|46011)[0-9]{9,10}$/;
 
 const taskFailureTracker = new Map();
 const FAILURE_THRESHOLD = 15; // Number of failures to trigger alert
-const FAILURE_TIME_WINDOW = 30 * 60 * 1000; // 30 minutes in milliseconds
+const FAILURE_TIME_WINDOW = 60; // minutes
+const FAILURE_TIME_WINDOW_MS = FAILURE_TIME_WINDOW * 60 * 1000; // milliseconds
 
 const handleTaskFailure = (strapi, task) => {
-  if (task.code === 0 || !task.device?.apiPath) {
-    return;
-  }
+  if (task.code === 11 && task.device?.apiPath) {
+    const now = Date.now();
+    const device = task.device;
+    const apiPath = device.apiPath;
+    const failures = taskFailureTracker.get(apiPath) || [];
+    const recentFailures = failures.filter(
+      (timestamp) => now - timestamp < FAILURE_TIME_WINDOW_MS,
+    );
 
-  const now = Date.now();
-  const device = task.device;
-  const apiPath = device.apiPath;
-  const failures = taskFailureTracker.get(apiPath) || [];
-  const recentFailures = failures.filter(
-    (timestamp) => now - timestamp < FAILURE_TIME_WINDOW,
-  );
+    recentFailures.push(now);
+    taskFailureTracker.set(apiPath, recentFailures);
 
-  recentFailures.push(now);
-  taskFailureTracker.set(apiPath, recentFailures);
-
-  if (recentFailures.length > FAILURE_THRESHOLD) {
-    const subject = `High failure rate for device ${apiPath}`;
-    const text = `Device with apiPath ${apiPath} has failed ${recentFailures.length} times in the last 30 minutes. pgy account: ${device.subdevice.pgyAccount}`;
-    strapi.log.warn(`${subject}: ${text}`);
-    // Resetting the count after sending the alert to avoid spamming
-    taskFailureTracker.set(apiPath, []);
-    sendNotifyEmail(subject, text);
+    if (recentFailures.length > FAILURE_THRESHOLD) {
+      const subject = `High failure rate for device ${apiPath}`;
+      const text = `Device with apiPath ${apiPath} has failed ${recentFailures.length} times in the last ${FAILURE_TIME_WINDOW} minutes. pgy account: ${device.subdevice.pgyAccount}`;
+      strapi.log.warn(`${subject}: ${text}`);
+      // Resetting the count after sending the alert to avoid spamming
+      taskFailureTracker.set(apiPath, []);
+      sendNotifyEmail(subject, text);
+    }
   }
 };
 
