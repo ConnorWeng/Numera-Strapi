@@ -10,6 +10,7 @@ const {
   determineOperator,
   processTask,
   recordCloudFetch,
+  handleTaskFailure,
 } = require("../controllers/create-helpers");
 require("../../../util/error-codes");
 const { transformResult } = require("../../../util/common");
@@ -69,6 +70,8 @@ module.exports = createCoreController(
 
       await determineOperator(strapi, task, activeSubscription);
       await processTask(strapi, task, activeSubscription, ctx.state.user);
+
+      handleTaskFailure(strapi, task);
 
       return transformResult(isPythonClientFlag, task);
     },

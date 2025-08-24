@@ -17,11 +17,42 @@ const {
   transformErrorTask,
   getCurrentYearMonth,
   getDate,
+  sendNotifyEmail,
 } = require("../../../util/common");
 const TranslateTask = require("../../../util/task");
 
 const IMSI_REGEX = /^[0-9]{14,15}$/;
 const BORDER_REGEX = /^(40101|46003|46005|46011)[0-9]{9,10}$/;
+
+const taskFailureTracker = new Map();
+const FAILURE_THRESHOLD = 15; // Number of failures to trigger alert
+const FAILURE_TIME_WINDOW = 30 * 60 * 1000; // 30 minutes in milliseconds
+
+const handleTaskFailure = (strapi, task) => {
+  if (task.code === 0 || !task.device?.apiPath) {
+    return;
+  }
+
+  const now = Date.now();
+  const device = task.device;
+  const apiPath = device.apiPath;
+  const failures = taskFailureTracker.get(apiPath) || [];
+  const recentFailures = failures.filter(
+    (timestamp) => now - timestamp < FAILURE_TIME_WINDOW,
+  );
+
+  recentFailures.push(now);
+  taskFailureTracker.set(apiPath, recentFailures);
+
+  if (recentFailures.length > FAILURE_THRESHOLD) {
+    const subject = `High failure rate for device ${apiPath}`;
+    const text = `Device with apiPath ${apiPath} has failed ${recentFailures.length} times in the last 30 minutes. pgy account: ${device.subdevice.pgyAccount}`;
+    strapi.log.warn(`${subject}: ${text}`);
+    // Resetting the count after sending the alert to avoid spamming
+    taskFailureTracker.set(apiPath, []);
+    sendNotifyEmail(subject, text);
+  }
+};
 
 const validateRequest = (ctx, isPythonClientFlag) => {
   const { data } = ctx.request.body;
@@ -137,7 +168,11 @@ const verifySignature = (
 
     // log details for debugging
     strapi.log.info(
-      `Verifying signature for task: ${JSON.stringify(task)}, originalMessage: ${originalMessage}, decryptedMessage: ${decryptedMessage}, isTimestampValid: ${isTimestampValid(decryptedMessage)}`,
+      `Verifying signature for task: ${JSON.stringify(
+        task,
+      )}, originalMessage: ${originalMessage}, decryptedMessage: ${decryptedMessage}, isTimestampValid: ${isTimestampValid(
+        decryptedMessage,
+      )}`,
     );
 
     if (
@@ -303,4 +338,5 @@ module.exports = {
   processTask,
   recordTranslate,
   recordCloudFetch,
+  handleTaskFailure,
 };
