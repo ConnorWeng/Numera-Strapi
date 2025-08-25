@@ -30,6 +30,11 @@ const FAILURE_TIME_WINDOW = 60; // minutes
 const FAILURE_TIME_WINDOW_MS = FAILURE_TIME_WINDOW * 60 * 1000; // milliseconds
 
 const handleTaskFailure = (strapi, task) => {
+  if (task.code === 0 && task.device?.apiPath) {
+    // Reset failure count on success
+    taskFailureTracker.set(task.device.apiPath, []);
+    return;
+  }
   if (task.code === 11 && task.device?.apiPath) {
     const now = Date.now();
     const device = task.device;
