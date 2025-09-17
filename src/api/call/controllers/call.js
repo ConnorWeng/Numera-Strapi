@@ -10,13 +10,61 @@ const { SMS_FAILED } = require("../../../util/error-codes");
 
 const { createCoreController } = require("@strapi/strapi").factories;
 
+const recentRequests = new Map(); // 存储最近的请求
+let cleanupIntervalInitialized = false; // 标记是否已初始化清理定时器
+
 module.exports = createCoreController("api::call.call", ({ strapi }) => ({
   async create(ctx) {
+    // 确保清理定时器只初始化一次
+    if (!cleanupIntervalInitialized) {
+      setInterval(
+        () => {
+          const now = Date.now();
+          for (const [key, timestamp] of recentRequests.entries()) {
+            if (now - timestamp > 10 * 60 * 1000) {
+              // 超过10分钟的记录清理掉
+              recentRequests.delete(key);
+            }
+          }
+          strapi.log.info("Cleaned up expired recentRequests entries.");
+        },
+        10 * 60 * 1000,
+      ); // 每10分钟运行一次
+      cleanupIntervalInitialized = true;
+    }
+
     await this.validateQuery(ctx);
     const sanitizedQuery = await this.sanitizeQuery(ctx);
 
     // @ts-ignore
     const { data } = ctx.request.body || {};
+
+    if (data.callingNumber) {
+      const dataKeys = Object.keys(data).sort();
+      const dataString = JSON.stringify({
+        keys: dataKeys,
+        callingNumber: data.callingNumber,
+        apiPath: data.apiPath,
+      });
+      const now = Date.now();
+
+      // 检查是否在1分钟内收到过相同的Data内容
+      if (recentRequests.has(dataString)) {
+        const lastRequestTime = recentRequests.get(dataString);
+        if (now - lastRequestTime <= 60 * 1000) {
+          strapi.log.info(
+            `Duplicate request received within 1 minute: ${dataString}`,
+          );
+          return this.transformResponse({
+            success: true,
+            message: "Duplicate request ignored.",
+          });
+        }
+      }
+
+      // 更新最近请求记录
+      recentRequests.set(dataString, now);
+    }
 
     const task = TaskQueue.getInstance().findClosestTask(
       data.uid,
