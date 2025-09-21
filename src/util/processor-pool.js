@@ -13,7 +13,6 @@ class ProcessorPool {
   }
 
   findAvaiableProcessor(task) {
-    this.processors.sort(() => Math.random() - 0.5);
     const availableProcessor = this.processors.find(
       (processor) => processor.isAvailable() && processor.isMatch(task),
     );
@@ -21,6 +20,14 @@ class ProcessorPool {
       return availableProcessor;
     } else {
       return null;
+    }
+  }
+
+  moveProcessorToEnd(processor) {
+    const index = this.processors.indexOf(processor);
+    if (index > -1) {
+      this.processors.splice(index, 1);
+      this.processors.push(processor);
     }
   }
 
@@ -44,6 +51,12 @@ class ProcessorPool {
     const pool = new ProcessorPool(processors);
     const forProcessor = new FORProcessor(pool);
     pool.addProcessor(forProcessor);
+
+    processors.forEach((processor) => {
+      processor.setPool(pool);
+    });
+    forProcessor.setPool(pool);
+
     return pool;
   }
 }

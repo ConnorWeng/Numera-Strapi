@@ -7,9 +7,14 @@ class Processor {
   constructor(device) {
     this.available = true;
     this.device = device;
+    this.pool = null;
     this.axiosInstance = axios.create();
     this.axiosInstance.defaults.headers.common["Authorization"] =
       `Bearer ${device.apiToken}`;
+  }
+
+  setPool(pool) {
+    this.pool = pool;
   }
 
   isAvailable() {
@@ -32,10 +37,10 @@ class Processor {
     const that = this;
     that.available = false;
     strapi.log.info(
-      `Device ${this.device.ipAddress} start processing ${that.constructor.name} task: ${JSON.stringify(task)}`,
+      `Device ${that.device.ipAddress} start processing ${that.constructor.name} task: ${JSON.stringify(task)}`,
     );
 
-    task.setDevice(this.device);
+    task.setDevice(that.device);
 
     if (
       new Date().getTime() - task.getCreateTime() >
@@ -48,11 +53,19 @@ class Processor {
         `Too long to be in the queue, timeout task: ${JSON.stringify(task)}`,
       );
     } else {
-      await this.processCall(task);
+      await that.processCall(task);
       strapi.log.info(
-        `Device ${this.device.ipAddress} finish processing ${that.constructor.name} task: ${JSON.stringify(task)}`,
+        `Device ${that.device.ipAddress} finish processing ${that.constructor.name} task: ${JSON.stringify(task)}`,
       );
     }
+
+    if (that.pool) {
+      that.pool.moveProcessorToEnd(that);
+      strapi.log.info(
+        `Moved processor for device ${that.device.apiPath} to the end of the pool: ${JSON.stringify(that.pool.processors.map((p) => p.device.apiPath))}`,
+      );
+    }
+
     that.available = true;
   }
 
