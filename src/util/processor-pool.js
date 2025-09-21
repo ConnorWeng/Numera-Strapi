@@ -13,6 +13,7 @@ class ProcessorPool {
   }
 
   findAvaiableProcessor(task) {
+    this.processors.sort(() => Math.random() - 0.5);
     const availableProcessor = this.processors.find(
       (processor) => processor.isAvailable() && processor.isMatch(task),
     );
