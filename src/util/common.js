@@ -146,6 +146,10 @@ const sendNotifyEmail = async (subject, text) => {
   });
 };
 
+const hex = (number) => {
+  return number.toString(16).padStart(2, "0");
+};
+
 module.exports = {
   transformErrorTask,
   transformResult,
@@ -154,4 +158,5 @@ module.exports = {
   getDate,
   sendNotifyEmail,
   startEmailCleanup,
+  hex,
 };

@@ -3,7 +3,6 @@ const dgram = require("dgram");
 const Parser = require("binary-parser").Parser;
 const axios = require("axios");
 const UDPClient = require("./client");
-const { makeCallMessage, makeSMSMessage } = require("../util/message");
 const { Task, MemTaskManager } = require("./mem-task-manager");
 const { parsePDU, parseText } = require("./sms");
 const MobileWatchdog = require("./mobile-watchdog");
@@ -13,35 +12,16 @@ const {
   decodeCall,
   decodeSMS,
 } = require("../util/udp");
+const {
+  handleRetryPolicy,
+  isLastCallDataMeanSuccess,
+} = require("./retry-policy-handler");
 
 const MsgHeaderLength = 3;
 const MsgType = {
   MSG_SS_UE_INFO: 0xb3,
   MSG_SS_UE_CALL: 0xb1,
   MSG_SS_UE_SMS: 0xb4,
-};
-const CauseMap = {
-  xfe_x01: { message: "空号", code: 1 },
-  xfe_x08: { message: "物联网卡或流量卡", code: 3 },
-  xfe_x15: { message: "物联网卡或流量卡", code: 6 },
-  xfe_x1f: { message: "物联网卡或流量卡", code: 4 },
-  xfe_x26: { message: "不支持的新卡", code: 2 },
-  xfe_x39: { message: "物联网卡或流量卡", code: 5 },
-  xfe_x60: { message: "96", code: 9 },
-  xff_x01: { message: "空号", code: 1 },
-  xff_x08: { message: "物联网卡或流量卡", code: 3 },
-  xff_x15: { message: "物联网卡或流量卡", code: 6 },
-  xff_x1f: { message: "物联网卡或流量卡", code: 4 },
-  xff_x26: { message: "不支持的新卡", code: 2 },
-  xff_x39: { message: "物联网卡或流量卡", code: 5 },
-  xff_x60: { message: "96", code: 9 },
-  x03_x00: { message: "RELEASE", code: 7 },
-  x04_x00: { message: "AUTHENTICATION REJECT", code: 7 },
-  x05_x00: { message: "LOCATION REJECT", code: 7 },
-  x06_x00: { message: "ASSIGNMENT FAILURE", code: 7 },
-  x0a_x00: { message: "3126", code: 7 },
-  x31_x33: { message: "NO RESPONSE", code: 7 },
-  x09_x00: { message: "SUCCESS", code: 0 },
 };
 
 const taskManager = MemTaskManager.getInstance();
@@ -57,79 +37,6 @@ if (process.env.IS_DEVICE === "true") {
   for (const key in watchdogs) {
     watchdogs[key].start();
   }
-}
-
-function hex(number) {
-  return number.toString(16).padStart(2, "0");
-}
-
-function isLastCallDataMeanSuccess(task) {
-  const logs = task.getLogs();
-  if (logs.length === 0) {
-    return false;
-  }
-  const lastCallData = logs[logs.length - 1];
-  const policy = getCausePolicy(lastCallData);
-  if (policy.policy === "SUCCESS") {
-    return true;
-  }
-  return false;
-}
-
-function getCausePolicy(callData) {
-  const cause = CauseMap[`x${hex(callData[0])}_x${hex(callData[1])}`];
-  if (callData[0] === 0xfe || callData[0] === 0xff) {
-    if ([0x01, 0x08, 0x15, 0x1f, 0x26, 0x39].includes(callData[1])) {
-      return {
-        policy: "REJECT",
-        cause: callData[1],
-        ...cause,
-      };
-    } else if ([0x60].includes(callData[1])) {
-      return {
-        policy: "RETRY",
-        cause: callData[1],
-        ...cause,
-      };
-    } else {
-      return {
-        policy: "RETRY",
-        cause: callData[1],
-        message: "UNKNOWN CAUSE",
-        code: 7,
-      };
-    }
-  }
-  if (
-    [0x03, 0x04, 0x05, 0x06, 0x0a].includes(callData[0]) &&
-    callData[1] === 0x00
-  ) {
-    return {
-      policy: "RETRY",
-      cause: callData[0],
-      ...cause,
-    };
-  }
-  if (callData[0] === 0x31 && callData[1] === 0x33) {
-    return {
-      policy: "RETRY",
-      cause: callData[0],
-      ...cause,
-    };
-  }
-  if ([0x09].includes(callData[0]) && callData[1] === 0x00) {
-    return {
-      policy: "SUCCESS",
-      cause: callData[0],
-      ...cause,
-    };
-  }
-  return {
-    policy: "CONTINUE",
-    cause: -1,
-    message: "UNKNOWN CAUSE",
-    code: 0,
-  };
 }
 
 class UDPServer {
@@ -210,16 +117,6 @@ class UDPServer {
     );
     if (msgHeader.msgType === MsgType.MSG_SS_UE_INFO) {
       const heartbeat = decodeHeartbeat(msg.subarray(MsgHeaderLength));
-      /* strapi.log.verbose(
-        `server got heartbeat:\n` +
-          `IMSI: ${heartbeat.IMSI}\n` +
-          `boardSN: ${heartbeat.boardSN}\n` +
-          `mobStates: ${heartbeat.mobStates}\n` +
-          `selArfcns: ${heartbeat.selArfcns}\n` +
-          `selLacs: ${heartbeat.selLacs}\n` +
-          `selIds: ${heartbeat.selIds}\n` +
-          `rlaCDbms: ${heartbeat.rlaCDbms}`,
-      ); */
       this.saveHeartbeat(heartbeat);
     } else if (msgHeader.msgType === MsgType.MSG_SS_UE_CALL) {
       const call = decodeCall(msg.subarray(MsgHeaderLength));
@@ -246,53 +143,7 @@ class UDPServer {
 
         task.setTouched();
         task.appendLog(call.callData);
-        const policy = getCausePolicy(call.callData);
-        strapi.log.info(
-          `Policy for IMSI: ${call.IMSI} is ${JSON.stringify(policy)}`,
-        );
-
-        if (policy.policy === "REJECT") {
-          task.setError({
-            errorCode: policy.cause,
-            errorMessage: policy.message + ":\n" + task.getLog(),
-            code: policy.code,
-          });
-          this.reportCallToCloudServer(task);
-        } else if (policy.policy === "RETRY") {
-          this.killMobile(call.callData);
-          if (task.getRetriedTimes() < 3) {
-            task.increaseRetry();
-            strapi.log.info(`Retry call to IMSI: ${call.IMSI}`);
-            UDPClient.getInstance().send(
-              task.isSMSTranslateMode()
-                ? makeSMSMessage(
-                    call.IMSI,
-                    task.getSMSC(),
-                    task.getReceiver(),
-                    task.getBoardSN(),
-                    task.getSMSContent(),
-                  )
-                : makeCallMessage(call.IMSI, task.getBoardSN()),
-              9000,
-              "localhost",
-            );
-          } else {
-            task.setError({
-              errorCode: policy.cause,
-              errorMessage: policy.message + ":\n" + task.getLog(),
-              code: policy.code,
-            });
-            this.reportCallToCloudServer(task);
-          }
-        } else if (policy.policy === "SUCCESS") {
-          strapi.log.info(`Call success to IMSI: ${call.IMSI}`);
-          task.updateCalledAt();
-          if (task.isTranslateMode()) {
-            this.killMobile(call.callData);
-          }
-        } else if (policy.policy === "CONTINUE") {
-          // Do nothing
-        }
+        handleRetryPolicy(call, task, UDPClient.getInstance(), this);
       }
     } else if (msgHeader.msgType === MsgType.MSG_SS_UE_SMS) {
       strapi.log.verbose(`MSG_SS_UE_SMS received, hex: ${msg.toString("hex")}`);
