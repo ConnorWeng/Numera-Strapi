@@ -123,7 +123,7 @@ class UDPServer {
     } else if (msgHeader.msgType === MsgType.MSG_SS_UE_CALL) {
       let call;
       if (process.env.SUPPORT_GSM === "true") {
-        call = decodeGSM(msg.subarray(MsgHeaderLength));
+        call = decodeGSM(msg.subarray(MsgHeaderLength), msgHeader.unBodyLen);
         strapi.log.info(
           `server got call data:\n` +
             `IMSI: ${call.IMSI}\n` +

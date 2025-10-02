@@ -53,7 +53,7 @@ function decodeCall(buffer) {
   return parser.parse(buffer);
 }
 
-function decodeGSM(buffer) {
+function decodeGSM(buffer, bodyLength) {
   const parser = new Parser()
     .endianness("big")
     .string("IMSI", { length: 15, encoding: "utf8" })
@@ -62,7 +62,7 @@ function decodeGSM(buffer) {
     .bit8("boardSNEnd")
     .array("callData", {
       type: "uint8",
-      length: 37,
+      length: bodyLength - 36,
     });
   return parser.parse(buffer);
 }
