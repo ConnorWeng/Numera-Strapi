@@ -130,10 +130,7 @@ class UDPServer {
             `boardSN: ${call.boardSN}\n` +
             `callData: ${call.callData}`,
         );
-        let task = taskManager.getTask(
-          call.IMSI,
-          /^\d{11,}$/.test(call.boardSN) ? call.boardSN : null,
-        );
+        let task = taskManager.getTask(call.IMSI, null);
         strapi.log.info(`Doing task: ${JSON.stringify(task)}`);
         if (!task) {
           return;

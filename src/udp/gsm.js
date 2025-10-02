@@ -34,7 +34,7 @@ function writeDataToWavFile(calls, taskKey) {
     try {
       if (!call.callData || call.callData.length < 37) {
         strapi.log.warn(
-          `Skipping call with invalid callData for task ${taskKey}: ${JSON.stringify(
+          `Skipping call with invalid callData for task ${JSON.stringify(taskKey)}: ${JSON.stringify(
             call,
           )}`,
         );
@@ -44,7 +44,7 @@ function writeDataToWavFile(calls, taskKey) {
       pcmData.push(...decodedPCM);
     } catch (error) {
       strapi.log.error(
-        `Failed to decode callData for task ${taskKey}: ${error.message}`,
+        `Failed to decode callData for task ${JSON.stringify(taskKey)}: ${error.message}`,
       );
     }
   }
@@ -62,7 +62,7 @@ function startTaskCleanupInterval() {
       if (now - value.lastUpdated > 5000) {
         // 5 seconds
         strapi.log.info(
-          `Task ${JSON.stringify(key)} has not been updated for over 5 seconds. Cleaning up.`,
+          `Task ${JSON.stringify(key)} has not been updated for over 5 seconds. Cleaning up. Calls: ${JSON.stringify(value.calls)}`,
         );
 
         try {
@@ -74,14 +74,14 @@ function startTaskCleanupInterval() {
           });
 
           strapi.log.info(
-            `Sorted calls for task ${key} by frame number. ${JSON.stringify(sortedCalls)}`,
+            `Sorted calls for task ${JSON.stringify(key)} by frame number. ${JSON.stringify(sortedCalls)}`,
           );
 
           // Write sorted PCM data to a WAV file
           writeDataToWavFile(sortedCalls, key);
         } catch (error) {
           strapi.log.error(
-            `Failed to process calls for task ${key}: ${error.message}`,
+            `Failed to process calls for task ${JSON.stringify(key)}: ${error.message}`,
           );
         }
 
