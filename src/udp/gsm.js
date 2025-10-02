@@ -32,6 +32,14 @@ function writeDataToWavFile(calls, taskKey) {
 
   for (const call of calls) {
     try {
+      if (!call.callData || call.callData.length < 37) {
+        strapi.log.warn(
+          `Skipping call with invalid callData for task ${taskKey}: ${JSON.stringify(
+            call,
+          )}`,
+        );
+        continue;
+      }
       const decodedPCM = decodeGSM(call.callData.slice(0, 33)); // Decode callData[0]-callData[32]
       pcmData.push(...decodedPCM);
     } catch (error) {
@@ -54,7 +62,7 @@ function startTaskCleanupInterval() {
       if (now - value.lastUpdated > 5000) {
         // 5 seconds
         strapi.log.info(
-          `Task ${key} has not been updated for over 5 seconds. Cleaning up.`,
+          `Task ${JSON.stringify(key)} has not been updated for over 5 seconds. Cleaning up.`,
         );
 
         try {
