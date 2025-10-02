@@ -10,12 +10,14 @@ const {
   decodeHeader,
   decodeHeartbeat,
   decodeCall,
+  decodeGSM,
   decodeSMS,
 } = require("../util/udp");
 const {
   handleRetryPolicy,
   isLastCallDataMeanSuccess,
 } = require("./retry-policy-handler");
+const { handleGSM } = require("./gsm");
 
 const MsgHeaderLength = 3;
 const MsgType = {
@@ -119,31 +121,49 @@ class UDPServer {
       const heartbeat = decodeHeartbeat(msg.subarray(MsgHeaderLength));
       this.saveHeartbeat(heartbeat);
     } else if (msgHeader.msgType === MsgType.MSG_SS_UE_CALL) {
-      const call = decodeCall(msg.subarray(MsgHeaderLength));
-      strapi.log.info(
-        `server got call data:\n` +
-          `IMSI: ${call.IMSI}\n` +
-          `boardSN: ${call.boardSN}\n` +
-          `callData: ${call.callData}`,
-      );
-      this.feedDog(call.callData[2]);
-      if (msgHeader.unBodyLen === 40 || msgHeader.unBodyLen === 57) {
+      let call;
+      if (process.env.SUPPORT_GSM === "true") {
+        call = decodeGSM(msg.subarray(MsgHeaderLength));
+        strapi.log.info(
+          `server got call data:\n` +
+            `IMSI: ${call.IMSI}\n` +
+            `boardSN: ${call.boardSN}\n` +
+            `callData: ${call.callData}`,
+        );
         let task = taskManager.getTask(call.IMSI, call.boardSN);
         strapi.log.info(`Doing task: ${JSON.stringify(task)}`);
         if (!task) {
           return;
         }
 
-        if (isLastCallDataMeanSuccess(task)) {
-          strapi.log.info(
-            `Last call data already mean success, ignore this call data: ${JSON.stringify(task)}`,
-          );
-          return;
-        }
+        handleGSM(call, task, UDPClient.getInstance(), this);
+      } else {
+        call = decodeCall(msg.subarray(MsgHeaderLength));
+        strapi.log.info(
+          `server got call data:\n` +
+            `IMSI: ${call.IMSI}\n` +
+            `boardSN: ${call.boardSN}\n` +
+            `callData: ${call.callData}`,
+        );
+        this.feedDog(call.callData[2]);
+        if (msgHeader.unBodyLen === 40 || msgHeader.unBodyLen === 57) {
+          let task = taskManager.getTask(call.IMSI, call.boardSN);
+          strapi.log.info(`Doing task: ${JSON.stringify(task)}`);
+          if (!task) {
+            return;
+          }
 
-        task.setTouched();
-        task.appendLog(call.callData);
-        handleRetryPolicy(call, task, UDPClient.getInstance(), this);
+          if (isLastCallDataMeanSuccess(task)) {
+            strapi.log.info(
+              `Last call data already mean success, ignore this call data: ${JSON.stringify(task)}`,
+            );
+            return;
+          }
+
+          task.setTouched();
+          task.appendLog(call.callData);
+          handleRetryPolicy(call, task, UDPClient.getInstance(), this);
+        }
       }
     } else if (msgHeader.msgType === MsgType.MSG_SS_UE_SMS) {
       strapi.log.verbose(`MSG_SS_UE_SMS received, hex: ${msg.toString("hex")}`);

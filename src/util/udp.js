@@ -53,6 +53,20 @@ function decodeCall(buffer) {
   return parser.parse(buffer);
 }
 
+function decodeGSM(buffer) {
+  const parser = new Parser()
+    .endianness("big")
+    .string("IMSI", { length: 15, encoding: "utf8" })
+    .bit8("IMSIEnd")
+    .string("boardSN", { length: 19, encoding: "utf8" })
+    .bit8("boardSNEnd")
+    .array("callData", {
+      type: "uint8",
+      length: 37,
+    });
+  return parser.parse(buffer);
+}
+
 function decodeSMS(buffer) {
   const smsDataLength = buffer.byteLength - 36;
   const mainSmsDataLength =
@@ -88,5 +102,6 @@ module.exports = {
   decodeHeader,
   decodeHeartbeat,
   decodeCall,
+  decodeGSM,
   decodeSMS,
 };
