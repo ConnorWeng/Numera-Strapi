@@ -67,11 +67,15 @@ function startTaskCleanupInterval() {
 
         try {
           // Sort calls by frameNumber
-          const sortedCalls = value.calls.sort((a, b) => {
-            const frameA = parseFrameNumber(a.callData);
-            const frameB = parseFrameNumber(b.callData);
-            return frameA - frameB;
-          });
+          const sortedCalls = value.calls
+            .filter((call) => {
+              return call.callData && call.callData.length >= 37;
+            })
+            .sort((a, b) => {
+              const frameA = parseFrameNumber(a.callData);
+              const frameB = parseFrameNumber(b.callData);
+              return frameA - frameB;
+            });
 
           strapi.log.info(
             `Sorted calls for task ${JSON.stringify(key)} by frame number. ${JSON.stringify(sortedCalls)}`,
