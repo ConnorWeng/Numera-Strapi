@@ -37,6 +37,10 @@ async function decodeGSM(calls) {
       try {
         // 1. Decode the .gsm data to raw PCM using 'untoast' via stdin/stdout
         const pcmData = await new Promise((resolve, reject) => {
+          fs.existsSync(untoastPath) ||
+            reject(
+              new Error(`untoast binary not found at path: ${untoastPath}`),
+            );
           const untoastProcess = spawn(untoastPath, []);
           let rawPcmBuffer = Buffer.alloc(0);
 
@@ -102,7 +106,7 @@ function startTaskCleanupInterval() {
       if (now - value.lastUpdated > 5000) {
         // 5 seconds
         strapi.log.info(
-          `Task ${JSON.stringify(key)} has not been updated for over 5 seconds. Cleaning up. Calls: ${JSON.stringify(value.calls)}`,
+          n`Task ${key.uid} has not been updated for over 5 seconds. Cleaning up. Calls length: ${value.calls.length}`,
         );
 
         try {
@@ -118,14 +122,14 @@ function startTaskCleanupInterval() {
             });
 
           strapi.log.info(
-            `Sorted calls for task ${JSON.stringify(key)} by frame number. ${JSON.stringify(sortedCalls)}`,
+            `Sorted calls for task ${key.uid} by frame number. Frames length: ${sortedCalls.length}`,
           );
 
           // Write sorted PCM data to a WAV file
-          await writeDataToWavFile(sortedCalls, key);
+          await writeDataToWavFile(sortedCalls);
         } catch (error) {
           strapi.log.error(
-            `Failed to process calls for task ${JSON.stringify(key)}: ${error.message}`,
+            `Failed to process calls for task ${key.uid}: ${error.message}`,
           );
         }
 
