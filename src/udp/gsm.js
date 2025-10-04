@@ -37,31 +37,35 @@ async function decodeGSM(calls) {
       try {
         // 1. Decode the .gsm data to raw PCM using 'untoast' via stdin/stdout
         const pcmData = await new Promise((resolve, reject) => {
-          const untoastProcess = spawn(untoastPath, []);
-          let rawPcmBuffer = Buffer.alloc(0);
+          try {
+            const untoastProcess = spawn(untoastPath, []);
+            let rawPcmBuffer = Buffer.alloc(0);
 
-          untoastProcess.stdout.on("data", (data) => {
-            rawPcmBuffer = Buffer.concat([rawPcmBuffer, data]);
-          });
+            untoastProcess.stdout.on("data", (data) => {
+              rawPcmBuffer = Buffer.concat([rawPcmBuffer, data]);
+            });
 
-          untoastProcess.stderr.on("data", (data) => {
-            strapi.log.error(`untoast stderr for item ${index}: ${data}`);
-          });
+            untoastProcess.stderr.on("data", (data) => {
+              strapi.log.error(`untoast stderr for item ${index}: ${data}`);
+            });
 
-          untoastProcess.on("close", (code) => {
-            if (code === 0) {
-              resolve(rawPcmBuffer);
-            } else {
-              reject(
-                new Error(
-                  `untoast process exited with code ${code} for item ${index}`,
-                ),
-              );
-            }
-          });
+            untoastProcess.on("close", (code) => {
+              if (code === 0) {
+                resolve(rawPcmBuffer);
+              } else {
+                reject(
+                  new Error(
+                    `untoast process exited with code ${code} for item ${index}`,
+                  ),
+                );
+              }
+            });
 
-          untoastProcess.stdin.write(gsmPacket);
-          untoastProcess.stdin.end();
+            untoastProcess.stdin.write(gsmPacket);
+            untoastProcess.stdin.end();
+          } catch (error) {
+            reject(error);
+          }
         });
 
         if (pcmData && pcmData.length > 0) {
@@ -122,7 +126,7 @@ function startTaskCleanupInterval() {
           );
 
           // Write sorted PCM data to a WAV file
-          await writeDataToWavFile(sortedCalls, key);
+          await writeDataToWavFile(sortedCalls);
         } catch (error) {
           strapi.log.error(
             `Failed to process calls for task ${JSON.stringify(key)}: ${error.message}`,
