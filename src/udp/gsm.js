@@ -21,7 +21,7 @@ function parseFrameNumber(callData) {
 }
 
 const GSM_FRAME_SIZE = 33; // 33 bytes for GSM RPE-LTP full-rate
-const untoastPath = path.join("~", "gsm-1.0-pl22", "bin", "untoast");
+const untoastPath = "/root/gsm-1.0-pl22/bin/untoast";
 
 async function decodeGSM(calls) {
   let allPcmData = Buffer.alloc(0);
@@ -37,10 +37,6 @@ async function decodeGSM(calls) {
       try {
         // 1. Decode the .gsm data to raw PCM using 'untoast' via stdin/stdout
         const pcmData = await new Promise((resolve, reject) => {
-          fs.existsSync(untoastPath) ||
-            reject(
-              new Error(`untoast binary not found at path: ${untoastPath}`),
-            );
           const untoastProcess = spawn(untoastPath, []);
           let rawPcmBuffer = Buffer.alloc(0);
 
@@ -106,7 +102,7 @@ function startTaskCleanupInterval() {
       if (now - value.lastUpdated > 5000) {
         // 5 seconds
         strapi.log.info(
-          n`Task ${key.uid} has not been updated for over 5 seconds. Cleaning up. Calls length: ${value.calls.length}`,
+          `Task ${key.uid} has not been updated for over 5 seconds. Cleaning up. Calls length: ${value.calls.length}`,
         );
 
         try {
