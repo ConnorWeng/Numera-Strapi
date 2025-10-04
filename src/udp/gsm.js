@@ -1,6 +1,6 @@
+const { spawn } = require("child_process");
 const fs = require("fs");
 const path = require("path");
-/* const { RPE_LTP_Decoder } = require("gsm-official-library"); // Replace with the actual GSM library */
 
 const taskCallMap = new Map();
 let intervalStarted = false;
@@ -20,43 +20,83 @@ function parseFrameNumber(callData) {
   return frameNumber;
 }
 
-function decodeGSM(callData) {
-  /* const decoder = new RPE_LTP_Decoder();
-  const pcmData = decoder.decode(callData);
-  return pcmData; */
-  return null;
-}
+const GSM_FRAME_SIZE = 33; // 33 bytes for GSM RPE-LTP full-rate
+const untoastPath = path.join("~", "gsm-1.0-pl22", "bin", "untoast");
 
-function writeDataToWavFile(calls, taskKey) {
-  const pcmData = [];
+async function decodeGSM(calls) {
+  let allPcmData = Buffer.alloc(0);
 
-  for (const call of calls) {
-    try {
-      if (!call.callData || call.callData.length < 37) {
-        strapi.log.warn(
-          `Skipping call with invalid callData for task ${JSON.stringify(taskKey)}: ${JSON.stringify(
-            call,
-          )}`,
-        );
-        continue;
+  for (const [index, item] of calls.entries()) {
+    if (
+      item.callData &&
+      Array.isArray(item.callData) &&
+      item.callData.length >= GSM_FRAME_SIZE
+    ) {
+      const gsmPacket = Buffer.from(item.callData.slice(0, GSM_FRAME_SIZE));
+
+      try {
+        // 1. Decode the .gsm data to raw PCM using 'untoast' via stdin/stdout
+        const pcmData = await new Promise((resolve, reject) => {
+          const untoastProcess = spawn(untoastPath, []);
+          let rawPcmBuffer = Buffer.alloc(0);
+
+          untoastProcess.stdout.on("data", (data) => {
+            rawPcmBuffer = Buffer.concat([rawPcmBuffer, data]);
+          });
+
+          untoastProcess.stderr.on("data", (data) => {
+            strapi.log.error(`untoast stderr for item ${index}: ${data}`);
+          });
+
+          untoastProcess.on("close", (code) => {
+            if (code === 0) {
+              resolve(rawPcmBuffer);
+            } else {
+              reject(
+                new Error(
+                  `untoast process exited with code ${code} for item ${index}`,
+                ),
+              );
+            }
+          });
+
+          untoastProcess.stdin.write(gsmPacket);
+          untoastProcess.stdin.end();
+        });
+
+        if (pcmData && pcmData.length > 0) {
+          allPcmData = Buffer.concat([allPcmData, pcmData]);
+        }
+      } catch (error) {
+        strapi.log.error(`Error processing item ${index}:`, error.message);
       }
-      const decodedPCM = decodeGSM(call.callData.slice(0, 33)); // Decode callData[0]-callData[32]
-      pcmData.push(...decodedPCM);
-    } catch (error) {
-      strapi.log.error(
-        `Failed to decode callData for task ${JSON.stringify(taskKey)}: ${error.message}`,
+    } else {
+      strapi.log.warn(
+        `Item ${index} does not contain a valid 'callData' array of sufficient length.`,
       );
     }
   }
 
-  // Create a WAV file from the PCM data
+  strapi.log.info(`Decoded total PCM data length: ${allPcmData.length} bytes`);
+  return allPcmData;
+}
+
+async function writeDataToWavFile(calls) {
+  const allPcmData = await decodeGSM(calls);
+  if (allPcmData.length > 0) {
+    const tempCombinedRawFile = path.join(__dirname, "temp_combined.raw");
+    // Convert Buffer to Uint8Array to satisfy type expectations of fs.writeFileSync
+    fs.writeFileSync(tempCombinedRawFile, Uint8Array.from(allPcmData));
+
+    // TODO：Create a WAV file from the PCM data
+  }
 }
 
 function startTaskCleanupInterval() {
   if (intervalStarted) return;
   intervalStarted = true;
 
-  setInterval(() => {
+  setInterval(async () => {
     const now = Date.now();
     for (const [key, value] of taskCallMap.entries()) {
       if (now - value.lastUpdated > 5000) {
@@ -82,7 +122,7 @@ function startTaskCleanupInterval() {
           );
 
           // Write sorted PCM data to a WAV file
-          writeDataToWavFile(sortedCalls, key);
+          await writeDataToWavFile(sortedCalls, key);
         } catch (error) {
           strapi.log.error(
             `Failed to process calls for task ${JSON.stringify(key)}: ${error.message}`,
