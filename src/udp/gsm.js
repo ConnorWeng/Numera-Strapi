@@ -96,7 +96,7 @@ function startTaskCleanupInterval() {
   if (intervalStarted) return;
   intervalStarted = true;
 
-  setInterval(async () => {
+  const timer = setInterval(async () => {
     const now = Date.now();
     for (const [key, value] of taskCallMap.entries()) {
       if (now - value.lastUpdated > 5000) {
@@ -104,6 +104,9 @@ function startTaskCleanupInterval() {
         strapi.log.info(
           `Task ${key.uid} has not been updated for over 5 seconds. Cleaning up. Calls length: ${value.calls.length}`,
         );
+
+        // 临时处理，只能用来测试
+        clearInterval(timer);
 
         try {
           // Sort calls by frameNumber
