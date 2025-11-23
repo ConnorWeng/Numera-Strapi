@@ -1,3 +1,4 @@
+const { exec } = require("child_process");
 const { makeCallMessage, makeSMSMessage } = require("../util/message");
 const { hex } = require("../util/common");
 
@@ -93,7 +94,7 @@ function handleRetryPolicy(call, task, udpClient, serverInstance) {
     });
     serverInstance.reportCallToCloudServer(task);
   } else if (policy.policy === "RETRY") {
-    serverInstance.killMobile(call.callData);
+    killMobile(call.callData);
     if (task.getRetriedTimes() < 3) {
       task.increaseRetry();
       strapi.log.info(`Retry call to IMSI: ${call.IMSI}`);
@@ -122,7 +123,7 @@ function handleRetryPolicy(call, task, udpClient, serverInstance) {
     strapi.log.info(`Call success to IMSI: ${call.IMSI}`);
     task.updateCalledAt();
     if (task.isTranslateMode()) {
-      serverInstance.killMobile(call.callData);
+      killMobile(call.callData);
     }
   } else if (policy.policy === "CONTINUE") {
     // Do nothing
@@ -140,6 +141,32 @@ function isLastCallDataMeanSuccess(task) {
     return true;
   }
   return false;
+}
+
+function killMobile(callData) {
+  const findcmd = `pgrep -f "mobile ${callData[2]}"`;
+  strapi.log.info(`Find mobile with cmd: ${findcmd}`);
+  exec(findcmd, (error, stdout, stderr) => {
+    if (error) {
+      strapi.log.error(`Error when exec shell: ${error}`);
+      return;
+    }
+    if (stdout) {
+      strapi.log.info(`Find mobile stdout: ${stdout}`);
+      const parts = stdout.split("\n");
+      if (parts.length > 1) {
+        const killcmd = `kill -9 ${parts[0]}; kill -9 ${parts[1]}`;
+        strapi.log.info(`Kill with cmd: ${killcmd}`);
+        exec(killcmd, (error, stdout, stderr) => {
+          if (error) {
+            strapi.log.error(`Error when kill: ${error}`);
+            return;
+          }
+          strapi.log.info(`Kill process ${stdout}`);
+        });
+      }
+    }
+  });
 }
 
 module.exports = {
