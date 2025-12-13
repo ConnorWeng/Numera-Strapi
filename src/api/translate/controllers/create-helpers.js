@@ -240,10 +240,9 @@ const processTask = async (strapi, task, activeSubscription, user) => {
 
   let dailyRemaining = activeSubscription.dailyRemaining;
   if (task.code === 0) {
-    await strapi.db.query("api::subscription.subscription").update({
-      where: { id: activeSubscription.id },
-      data: { dailyRemaining: activeSubscription.dailyRemaining - 1 },
-    });
+    await strapi.db.connection.raw(
+      `update subscriptions set daily_remaining = daily_remaining - 1 where id = ${activeSubscription.id};`,
+    );
     dailyRemaining = activeSubscription.dailyRemaining - 1;
     recordTranslate(strapi, user, task.getMode(), task.getIMSI());
   }
