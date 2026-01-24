@@ -30,6 +30,7 @@
     "react-dom": "^18.0.0",
     "react-router-dom": "5.3.4",
     "short-uuid": "^5.2.0",
+    "strapi-plugin-excel-export-2024": "^1.0.7",
     "strapi-prometheus": "^1.8.1",
     "styled-components": "5.3.3"
   },
