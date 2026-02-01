@@ -2,10 +2,10 @@ const NodeCache = require("node-cache");
 const { TIMEOUT } = require("./error-codes");
 
 const TASK_TIMEOUT = {
-  CMCC: 68 * 1000,
-  CUCC: 78 * 1000,
-  FOR: 78 * 1000,
-  BORDER: 68 * 1000,
+  CMCC: 60 * 1000,
+  CUCC: 60 * 1000,
+  FOR: 60 * 1000,
+  BORDER: 60 * 1000,
 };
 const INVALID_TASK_TIME = 5 * 1000;
 const CLOUD_FETCH_ADVANCE_TIME = 10 * 1000;
